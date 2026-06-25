@@ -9,15 +9,9 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface UserDaService {
-    default ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllUserDaTempList() throws ApiRequestException {
-        return findAllUserDaTempList(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllUserDaTempList(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllUserDaTempList() throws ApiRequestException;
     ResponseEntity<StandardResponse<UserDaDTO>> findUserDaTempByID(Integer userDaID) throws ApiRequestException;
-    default ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllApprovedUserDa() throws ApiRequestException {
-        return findAllApprovedUserDa(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllApprovedUserDa(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllApprovedUserDa() throws ApiRequestException;
     ResponseEntity<StandardResponse<UserDaDTO>> findApprovedUserDaById(Integer userDaID) throws ApiRequestException;
     ResponseEntity<StandardResponse<UserDaDTO>> saveUserDaTemp(UserDaDTO userDaDTO) throws ApiRequestException;
     ResponseEntity<StandardResponse<UserDaDTO>> approveRejectUserDa(ApproveRejectRQ approveRejectRQ) throws ApiRequestException;

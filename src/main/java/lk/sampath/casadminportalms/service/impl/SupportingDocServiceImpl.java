@@ -16,7 +16,6 @@ import lk.sampath.casadminportalms.service.SupportingDocService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -49,8 +48,8 @@ public class SupportingDocServiceImpl implements SupportingDocService {
     private SupportingDocTempAudRepository supportingDocTempAudRepository;
 
     @Override
-    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> findAllSupportingDocTempList(int page, int size) throws ApiRequestException {
-        List<SupportingDocTemp> supportingDocTempList = supportingDocTempRepository.findAll(PageRequest.of(page, size)).getContent();
+    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> findAllSupportingDocTempList() throws ApiRequestException {
+        List<SupportingDocTemp> supportingDocTempList = supportingDocTempRepository.findAll();
          StandardResponse<List<SupportingDocDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), supportingDocTempList);
          return ResponseEntity.ok().body(response);
     }
@@ -64,8 +63,8 @@ public class SupportingDocServiceImpl implements SupportingDocService {
     }
 
     @Override
-    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> searchSupportingDocGroups(int page, int size) throws ApiRequestException{
-        List<SupportingDoc> supportingDocList = supportingDocRepository.findAll(PageRequest.of(page, size)).getContent();
+    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> searchSupportingDocGroups() throws ApiRequestException{
+        List<SupportingDoc> supportingDocList = supportingDocRepository.findAll();
         StandardResponse<List<SupportingDocDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), supportingDocList);
 
         return ResponseEntity.ok().body(response);

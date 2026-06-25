@@ -16,7 +16,6 @@ import lk.sampath.casadminportalms.service.RoleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -59,9 +58,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories(int page, int size) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories() throws ApiRequestException {
 
-        List<PrivilegeCategory> privilegeCategoryList = privilegeCategoryRepository.findAll(PageRequest.of(page, size)).getContent();
+        List<PrivilegeCategory> privilegeCategoryList = privilegeCategoryRepository.findAll();
 
         Map<String, List<Privilege>> privilegeCategoryMap = new LinkedHashMap<>();
 
@@ -116,8 +115,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllRolesTempList(int page, int size) throws ApiRequestException {
-        List<RoleTemp> roleTempList = roleTempRepository.findAll(PageRequest.of(page, size)).getContent();
+    public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllRolesTempList() throws ApiRequestException {
+        List<RoleTemp> roleTempList = roleTempRepository.findAll();
         List<RoleDTO> roleDTOList = new ArrayList<>();
 
         for(RoleTemp roleTemp : roleTempList){
@@ -140,8 +139,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllApprovedRoles(int page, int size) throws ApiRequestException {
-        List<Role> roleList = roleRepository.findAll(PageRequest.of(page, size)).getContent();
+    public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllApprovedRoles() throws ApiRequestException {
+        List<Role> roleList = roleRepository.findAll();
         List<RoleDTO> roleDTOList = new ArrayList<>();
 
         for(Role role : roleList){
@@ -473,8 +472,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<List<Privilege>>> findAllPrivileges(int page, int size) throws ApiRequestException {
-        List<Privilege> privileges = privilegeRepository.findAll(PageRequest.of(page, size)).getContent();
+    public ResponseEntity<StandardResponse<List<Privilege>>> findAllPrivileges() throws ApiRequestException {
+        List<Privilege> privileges = privilegeRepository.findAll();
 
         StandardResponse<List<Privilege>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), privileges);
         return ResponseEntity.ok().body(response);

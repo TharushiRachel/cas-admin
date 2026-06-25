@@ -11,17 +11,11 @@ import java.util.List;
 
 public interface CreditFacilityTemplateService {
 
-    default ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp() throws ApiRequestException {
-        return getAllCreditFacilityTemplatesTemp(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> getCreditFacilityTemplateTempByID(Integer creditFacilityTemplateID) throws ApiRequestException;
 
-    default ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplates() throws ApiRequestException {
-        return getAllCreditFacilityTemplates(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplates(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplates() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> getCreditFacilityTemplateByID(Integer creditFacilityTemplateID) throws ApiRequestException;
 

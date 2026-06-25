@@ -21,14 +21,8 @@ public class UpcSectionController {
 
 
     @GetMapping("/upcSectionTemp")
-    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> viewAllUpcSectionTemp(
-            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
-            @RequestParam(name = "size", required = false, defaultValue = "10") int size,
-            @RequestParam(name = "pageNo", required = false) Integer pageNo,
-            @RequestParam(name = "pageSize", required = false) Integer pageSize) throws ApiRequestException {
-        int effectivePage = pageNo != null ? pageNo : page;
-        int effectiveSize = pageSize != null ? pageSize : size;
-        ResponseEntity<StandardResponse<List<UpcSectionDTO>>> upcSectionTempList = upcSectionService.findAllUpcSectionTempList(effectivePage, effectiveSize);
+    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> viewAllUpcSectionTemp() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<UpcSectionDTO>>> upcSectionTempList = upcSectionService.findAllUpcSectionTempList();
         return ResponseEntity.ok().body(upcSectionTempList.getBody());
     }
 
@@ -39,18 +33,9 @@ public class UpcSectionController {
     }
 
     @GetMapping("/upcSectionList")
-    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> getPagedUpcSectionData(
-            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
-            @RequestParam(name = "size", required = false, defaultValue = "10") int size,
-            @RequestHeader(name = "page", required = false) Integer headerPage,
-            @RequestHeader(name = "size", required = false) Integer headerSize
-    ) throws ApiRequestException {
-
-        int effectivePage = headerPage != null ? headerPage : page;
-        int effectiveSize = headerSize != null ? headerSize : size;
-
+    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> getPagedUpcSectionData() throws ApiRequestException {
         ResponseEntity<StandardResponse<List<UpcSectionDTO>>> pageDataResult =
-            upcSectionService.findAllApprovedUpcSection(effectivePage, effectiveSize);
+            upcSectionService.findAllApprovedUpcSection();
 
         return ResponseEntity.ok().body(pageDataResult.getBody());
     }

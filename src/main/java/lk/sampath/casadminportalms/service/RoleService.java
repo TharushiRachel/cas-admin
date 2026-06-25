@@ -13,22 +13,13 @@ import java.util.List;
 
 public interface RoleService {
 
-    default ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories() throws ApiRequestException {
-        return findAllPrivilegeCategories(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<Object>> findRolesTempByID(Integer roleID) throws ApiRequestException;
 
-    default ResponseEntity<StandardResponse<List<RoleDTO>>> findAllRolesTempList() throws ApiRequestException {
-        return findAllRolesTempList(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<RoleDTO>>> findAllRolesTempList(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<RoleDTO>>> findAllRolesTempList() throws ApiRequestException;
 
-    default ResponseEntity<StandardResponse<List<RoleDTO>>> findAllApprovedRoles() throws ApiRequestException {
-        return findAllApprovedRoles(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<RoleDTO>>> findAllApprovedRoles(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<RoleDTO>>> findAllApprovedRoles() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<Object>> findApprovedRoleById(int roleID) throws ApiRequestException;
 
@@ -40,10 +31,7 @@ public interface RoleService {
 
     ResponseEntity<StandardResponse<Object>> updateApprovedRole(Integer roleID, RoleDTO roleDTO) throws ApiRequestException;
 
-    default ResponseEntity<StandardResponse<List<Privilege>>> findAllPrivileges() throws ApiRequestException {
-        return findAllPrivileges(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<Privilege>>> findAllPrivileges(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<Privilege>>> findAllPrivileges() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<Void>> deleteRoleTempById(int roleID) throws ApiRequestException;
 }

@@ -11,17 +11,11 @@ import java.util.List;
 
 public interface UpcTemplateService {
 
-    default ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList() throws ApiRequestException {
-        return findAllUpcTemplateTempList(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<Object>> findUpcTemplateTempById(Integer upcTemplateID) throws ApiRequestException;
 
-    default ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplates() throws ApiRequestException {
-        return findAllApprovedUpcTemplates(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplates(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplates() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<Object>> saveUpcTemplate(UpcTemplateDTO upcTemplateDTO) throws ApiRequestException;
 

@@ -20,10 +20,8 @@ public class RoleController {
     private RoleService roleService;
 
     @GetMapping("${app.endpoint.privilegeList}")
-    public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws  ApiRequestException{
-        ResponseEntity<StandardResponse<List<PrivilegeCategory>>> privilegeCategories = roleService.findAllPrivilegeCategories(page, size);
+    public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories() throws  ApiRequestException{
+        ResponseEntity<StandardResponse<List<PrivilegeCategory>>> privilegeCategories = roleService.findAllPrivilegeCategories();
         return ResponseEntity.ok().body(privilegeCategories.getBody());
     }
 
@@ -34,18 +32,14 @@ public class RoleController {
     }
 
     @GetMapping("${app.endpoint.roleTempList}")
-    public ResponseEntity<StandardResponse<List<RoleDTO>>> viewTempRoleList(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<RoleDTO>>> role = roleService.findAllRolesTempList(page, size);
+    public ResponseEntity<StandardResponse<List<RoleDTO>>> viewTempRoleList() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<RoleDTO>>> role = roleService.findAllRolesTempList();
         return ResponseEntity.ok().body(role.getBody());
     }
 
     @GetMapping("${app.endpoint.roleList}")
-    public ResponseEntity<StandardResponse<List<RoleDTO>>> listRole(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws  ApiRequestException{
-        ResponseEntity<StandardResponse<List<RoleDTO>>> roles = roleService.findAllApprovedRoles(page, size);
+    public ResponseEntity<StandardResponse<List<RoleDTO>>> listRole() throws  ApiRequestException{
+        ResponseEntity<StandardResponse<List<RoleDTO>>> roles = roleService.findAllApprovedRoles();
         return ResponseEntity.ok().body(roles.getBody());
     }
 

@@ -17,7 +17,6 @@ import org.apache.juli.logging.Log;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -46,10 +45,10 @@ public class CommitteePoolServiceImpl implements CommitteePoolService {
     }
 
     @Override
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getTempCommitteePool(int page, int size) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getTempCommitteePool() throws ApiRequestException {
         StandardResponse<List<CommitteePoolDTO>> response;
         try {
-            List<CommitteePoolTemp> committeePoolTemps = committeePoolTempRepository.findAll(PageRequest.of(page, size)).getContent();
+            List<CommitteePoolTemp> committeePoolTemps = committeePoolTempRepository.findAll();
             response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), committeePoolTemps);
         } catch(Exception e){
             LOG.error("ERROR : Get All Temp Pool Users: ",e);
@@ -60,10 +59,10 @@ public class CommitteePoolServiceImpl implements CommitteePoolService {
     }
 
     @Override
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getCommitteePool(int page, int size) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getCommitteePool() throws ApiRequestException {
         StandardResponse<List<CommitteePoolDTO>> response;
         try {
-            List<CommitteePool> committeePools = committeePoolRepository.findAll(PageRequest.of(page, size)).getContent();
+            List<CommitteePool> committeePools = committeePoolRepository.findAll();
             response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), committeePools);
         } catch (Exception e){
             LOG.error("ERROR : Get All Pool Users: ",e);
@@ -73,7 +72,7 @@ public class CommitteePoolServiceImpl implements CommitteePoolService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> saveCommitteePoolUsers(List<CommitteePoolDTO> committeePoolUsers, int page, int size)throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> saveCommitteePoolUsers(List<CommitteePoolDTO> committeePoolUsers)throws ApiRequestException {
         StandardResponse<List<CommitteePoolDTO>> response;
         try {
             Date date = new Date();
@@ -100,9 +99,7 @@ public class CommitteePoolServiceImpl implements CommitteePoolService {
                 saveCommitteePoolHistory(new CommitteePoolDTO(committeePool));
             }
 
-            int fromIndex = Math.min(page * size, prevUsers.size());
-            int toIndex = Math.min(fromIndex + size, prevUsers.size());
-            response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), prevUsers.subList(fromIndex, toIndex));
+            response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), prevUsers);
         } catch (Exception e){
             LOG.error("ERROR : Save Pool Users: ",e);
             throw new ApiRequestException("Pool user(s) adding has been failed.");
@@ -111,7 +108,7 @@ public class CommitteePoolServiceImpl implements CommitteePoolService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> saveTempCommitteePoolUser(CommitteePoolDTO committeePoolUser, int page, int size)throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> saveTempCommitteePoolUser(CommitteePoolDTO committeePoolUser)throws ApiRequestException {
 
         StandardResponse<List<CommitteePoolDTO>> response;
         try {
@@ -134,9 +131,7 @@ public class CommitteePoolServiceImpl implements CommitteePoolService {
 
             List<CommitteePoolDTO> payload = new ArrayList<>();
             payload.add(new CommitteePoolDTO(committeePool));
-            int fromIndex = Math.min(page * size, payload.size());
-            int toIndex = Math.min(fromIndex + size, payload.size());
-            response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), payload.subList(fromIndex, toIndex));
+            response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), payload);
         } catch(Exception e){
             LOG.error("ERROR : Save Temp Pool Users: ",e);
             throw new ApiRequestException("Pool user adding has been failed.");

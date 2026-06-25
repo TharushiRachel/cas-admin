@@ -20,10 +20,8 @@ public class UserDaController {
 
 
     @GetMapping("${app.endpoint.viewUserDaTempList}")
-        public ResponseEntity<StandardResponse<List<UserDaDTO>>> viewAllUserDaTemp(
-                        @RequestParam(defaultValue = "0") int page,
-                        @RequestParam(defaultValue = "10") int size) throws  ApiRequestException {
-        ResponseEntity<StandardResponse<List<UserDaDTO>>> userDaTempList = userDaService.findAllUserDaTempList(page, size);
+        public ResponseEntity<StandardResponse<List<UserDaDTO>>> viewAllUserDaTemp() throws  ApiRequestException {
+        ResponseEntity<StandardResponse<List<UserDaDTO>>> userDaTempList = userDaService.findAllUserDaTempList();
                 return ResponseEntity.ok().body(userDaTempList.getBody());
     }
 
@@ -34,10 +32,8 @@ public class UserDaController {
     }
 
     @PostMapping("${app.endpoint.viewUserDaList}")
-    public ResponseEntity<StandardResponse<List<UserDaDTO>>> getPagedUserDaData (
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<UserDaDTO>>> userDaList = userDaService.findAllApprovedUserDa(page, size);
+    public ResponseEntity<StandardResponse<List<UserDaDTO>>> getPagedUserDaData() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<UserDaDTO>>> userDaList = userDaService.findAllApprovedUserDa();
         return ResponseEntity.ok().body(userDaList.getBody());
     }
 

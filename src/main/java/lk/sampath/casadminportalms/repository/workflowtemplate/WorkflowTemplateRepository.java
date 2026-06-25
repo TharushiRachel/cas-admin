@@ -1,11 +1,11 @@
 package lk.sampath.casadminportalms.repository.workflowtemplate;
 
 import lk.sampath.casadminportalms.entity.workflowtemplate.WorkflowTemplate;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface WorkflowTemplateRepository extends JpaRepository<WorkflowTemplate, Integer> {
@@ -14,5 +14,5 @@ public interface WorkflowTemplateRepository extends JpaRepository<WorkflowTempla
     Integer getNextSequenceValue();
 
     @Query(value ="SELECT * FROM T_WORK_FLOW_TEMPLATE w WHERE w.APPROVE_STATUS IN ('APPROVED')", nativeQuery = true)
-    Page<WorkflowTemplate> findAllWorkflowTemplate(Pageable pageable);
+    List<WorkflowTemplate> findAllWorkflowTemplate();
 }

@@ -33,10 +33,8 @@ public class CommitteeTypeController {
      * @return ResponseEntity<StandardResponse<List<CommitteeType>>>
      */
     @GetMapping(value = "${app.endpoint.getCommitteeType}")
-    public ResponseEntity<StandardResponse<List<CommitteeType>>> getCommitteeTypes(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        StandardResponse<List<CommitteeType>> response = committeeTypeService.getCommitteeTypes(page, size);
+    public ResponseEntity<StandardResponse<List<CommitteeType>>> getCommitteeTypes() throws ApiRequestException {
+        StandardResponse<List<CommitteeType>> response = committeeTypeService.getCommitteeTypes();
         return ResponseEntity.ok().body(response);
     }
 

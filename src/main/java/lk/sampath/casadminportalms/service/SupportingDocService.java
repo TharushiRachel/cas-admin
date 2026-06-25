@@ -10,15 +10,9 @@ import java.util.List;
 
 public interface SupportingDocService {
 
-    default ResponseEntity<StandardResponse<List<SupportingDocDTO>>> findAllSupportingDocTempList() throws ApiRequestException {
-        return findAllSupportingDocTempList(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<SupportingDocDTO>>> findAllSupportingDocTempList(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<SupportingDocDTO>>> findAllSupportingDocTempList() throws ApiRequestException;
 
-    default ResponseEntity<StandardResponse<List<SupportingDocDTO>>> searchSupportingDocGroups() throws ApiRequestException {
-        return searchSupportingDocGroups(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<SupportingDocDTO>>> searchSupportingDocGroups(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<SupportingDocDTO>>> searchSupportingDocGroups() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<SupportingDocDTO>> findSupportingDocTempById(Integer supportingDocID) throws ApiRequestException;
 

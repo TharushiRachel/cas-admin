@@ -27,17 +27,11 @@ public interface CreditFacilityTypeService {
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> updateApprovedCreditFacilityType(Integer creditFacilityTypeID,CreditFacilityTypeDTO creditFacilityTypeDTO) throws ApiRequestException;
 
-    default ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> searchCreditFacilityTypes() throws ApiRequestException {
-        return searchCreditFacilityTypes(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> searchCreditFacilityTypes(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> searchCreditFacilityTypes() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> findCreditFacilityTypeByID(Integer creditFacilityTypeID) throws ApiRequestException;
 
-    default ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> findAllCreditFacilityTypeTempList() throws ApiRequestException {
-        return findAllCreditFacilityTypeTempList(0, 10);
-    }
-    ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> findAllCreditFacilityTypeTempList(int page, int size) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> findAllCreditFacilityTypeTempList() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<Integer>> deleteCreditFacilityTypeTemp( CreditFacilityTypeDTO creditFacilityTypeTempDTO) throws ApiRequestException;
 

@@ -21,36 +21,28 @@ public class CommitteePoolController {
     }
 
     @GetMapping("${app.endpoint.getTempCommitteePool}")
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getTempCommitteePool(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> response = committeePoolService.getTempCommitteePool(page, size);
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getTempCommitteePool() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> response = committeePoolService.getTempCommitteePool();
         return ResponseEntity.ok().body(response.getBody());
     }
 
     @GetMapping("${app.endpoint.getCommitteePool}")
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getCommitteePool(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> response = committeePoolService.getCommitteePool(page, size);
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getCommitteePool() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> response = committeePoolService.getCommitteePool();
         return ResponseEntity.ok().body(response.getBody());
     }
 
     @PostMapping(value = "${app.endpoint.savePoolUsers}",headers = "Accept=application/json")
     public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  savePoolUsers(
-            @RequestBody List<CommitteePoolDTO> committeePoolUsers,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  response = committeePoolService.saveCommitteePoolUsers(committeePoolUsers, page, size);
+            @RequestBody List<CommitteePoolDTO> committeePoolUsers) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  response = committeePoolService.saveCommitteePoolUsers(committeePoolUsers);
         return ResponseEntity.ok().body(response.getBody());
     }
 
     @PostMapping("${app.endpoint.saveTempPoolUser}")
     public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  saveTempPoolUser(
-            @RequestBody CommitteePoolDTO committeePoolDTO,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  response = committeePoolService.saveTempCommitteePoolUser(committeePoolDTO, page, size);
+            @RequestBody CommitteePoolDTO committeePoolDTO) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  response = committeePoolService.saveTempCommitteePoolUser(committeePoolDTO);
         return ResponseEntity.ok().body(response.getBody());
     }
 

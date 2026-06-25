@@ -39,9 +39,6 @@ class WorkflowTemplateControllerTest {
 
     private WorkflowTemplateDTO workflowTemplateDTO;
 
-    private int pageNo;
-    private int pageSize;
-
     @BeforeEach
     public void setUp() {
         workflowTemplateDTO = WorkflowTemplateDTO.builder()
@@ -50,8 +47,6 @@ class WorkflowTemplateControllerTest {
                 .code("")
                 .description("")
                 .build();
-        pageNo = 0;
-        pageSize = 5;
     }
 
     @Test
@@ -86,26 +81,22 @@ class WorkflowTemplateControllerTest {
         workflowTemplateResponse.setCount(2);
         StandardResponse<WorkflowTemplateResponse> response = new StandardResponse<>(true, "Success", workflowTemplateResponse);
 
-        when(workflowTemplateService.getTempWorkflowTemplate(pageNo,pageSize)).thenReturn(response);
+        when(workflowTemplateService.getTempWorkflowTemplate()).thenReturn(response);
 
-        mockMvc.perform(get("/api/workflowTemplate/getTempWorkflowTemplate")
-                .param("pageNo", "0")
-                .param("pageSize", "5"))
+        mockMvc.perform(get("/api/workflowTemplate/getTempWorkflowTemplate"))
                 .andExpect(status().isOk());
-        verify(workflowTemplateService, times(1)).getTempWorkflowTemplate(pageNo,pageSize);
+        verify(workflowTemplateService, times(1)).getTempWorkflowTemplate();
     }
 
     @Test
     void testGetWorkflowTemplate() throws Exception {
         List<WorkflowTemplateDTO> mockList = List.of(workflowTemplateDTO, workflowTemplateDTO);
         StandardResponse<List<WorkflowTemplateDTO>> response = new StandardResponse<>(true, "Success", mockList);
-        when(workflowTemplateService.getWorkflowTemplate(pageNo,pageSize)).thenReturn(response);
+        when(workflowTemplateService.getWorkflowTemplate()).thenReturn(response);
 
-        mockMvc.perform(get("/api/workflowTemplate/getWorkflowTemplate")
-                        .param("pageNo", "0")
-                        .param("pageSize", "5"))
+        mockMvc.perform(get("/api/workflowTemplate/getWorkflowTemplate"))
                 .andExpect(status().isOk());
-        verify(workflowTemplateService, times(1)).getWorkflowTemplate(pageNo,pageSize);
+        verify(workflowTemplateService, times(1)).getWorkflowTemplate();
     }
 
     @Test

@@ -10,16 +10,13 @@ import java.util.List;
 
 public interface WorkflowTemplateService  {
 
-    default StandardResponse<List<UpmGroupDTO>> getAllApprovedUPMGroups() throws ApiRequestException {
-        return getAllApprovedUPMGroups(0, 10);
-    }
-    StandardResponse<List<UpmGroupDTO>> getAllApprovedUPMGroups(int page, int size) throws ApiRequestException;
+    StandardResponse<List<UpmGroupDTO>> getAllApprovedUPMGroups() throws ApiRequestException;
 
     StandardResponse<String> saveOrUpdateTempWorkflowTemplate(WorkflowTemplateDTO workflowTemplateCreateRequest) throws ApiRequestException;
 
-    StandardResponse<WorkflowTemplateResponse> getTempWorkflowTemplate(int pageNo, int pageSize) throws ApiRequestException;
+    StandardResponse<WorkflowTemplateResponse> getTempWorkflowTemplate() throws ApiRequestException;
 
-    StandardResponse<List<WorkflowTemplateDTO>> getWorkflowTemplate(int pageNo,int pageSize)throws ApiRequestException;
+    StandardResponse<List<WorkflowTemplateDTO>> getWorkflowTemplate()throws ApiRequestException;
 
     StandardResponse<Boolean>  authorizeWorkflowTemplateTemp(ApproveRejectRQ approveRejectRQ)throws ApiRequestException;
 }

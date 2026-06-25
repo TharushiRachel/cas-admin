@@ -18,7 +18,6 @@ import lk.sampath.casadminportalms.service.UpcTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -62,10 +61,10 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(int page, int size) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList() throws ApiRequestException {
 
         LOG.info("START: Find All Upc Template Temp List ");
-        List<UpcTemplateTemp> upcTemplateTempList = upcTemplateTempRepository.findAll(PageRequest.of(page, size)).getContent();
+        List<UpcTemplateTemp> upcTemplateTempList = upcTemplateTempRepository.findAll();
         LOG.info(" Fetched All Upc Template Temp List : {} ",upcTemplateTempList);
         List<UpcTemplateDTO> upcTemplateDTOList =  upcTemplateTempList.stream()
                 .map(UpcTemplateDTO::new)
@@ -93,9 +92,9 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplates(int page, int size) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplates() throws ApiRequestException {
         LOG.info("START: Find All Approved Upc Templates");
-        List<UpcTemplate> upcTemplateList = upcTemplateRepository.findAll(PageRequest.of(page, size)).getContent();
+        List<UpcTemplate> upcTemplateList = upcTemplateRepository.findAll();
 
         List<UpcTemplateDTO> upcTemplateDTOList = upcTemplateList.stream()
                 .map(UpcTemplateDTO::new)

@@ -21,10 +21,8 @@ public class SupportingDocController {
 
 
     @GetMapping("${app.endpoint.viewSupportingDocTempList}")
-    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> viewAllSupportingDocsTemp(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<SupportingDocDTO>>> supportingDocTempList = supportingDocService.findAllSupportingDocTempList(page, size);
+    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> viewAllSupportingDocsTemp() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<SupportingDocDTO>>> supportingDocTempList = supportingDocService.findAllSupportingDocTempList();
         return ResponseEntity.ok().body(supportingDocTempList.getBody());
     }
 
@@ -34,10 +32,8 @@ public class SupportingDocController {
         return ResponseEntity.ok().body(supportingDocDTO.getBody());
     }
     @GetMapping("${app.endpoint.viewSupportingDocList}")
-    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> getApprovedSupportingDocData(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<SupportingDocDTO>>> supportingDocs = supportingDocService.searchSupportingDocGroups(page, size);
+    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> getApprovedSupportingDocData() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<SupportingDocDTO>>> supportingDocs = supportingDocService.searchSupportingDocGroups();
         return ResponseEntity.ok().body(supportingDocs.getBody());
     }
 

@@ -15,7 +15,6 @@ import lk.sampath.casadminportalms.service.UserDaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -48,8 +47,8 @@ public class UserDaServiceImpl implements UserDaService {
     private UserDaAudRepository userDaAudRepository;
 
     @Override
-    public ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllUserDaTempList(int page, int size) throws ApiRequestException {
-        List<UserDaTemp> userDaTempList = userDaTempRepository.findAll(PageRequest.of(page, size)).getContent();
+    public ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllUserDaTempList() throws ApiRequestException {
+        List<UserDaTemp> userDaTempList = userDaTempRepository.findAll();
         StandardResponse<List<UserDaDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), userDaTempList);
         return ResponseEntity.ok().body(response);
     }
@@ -64,8 +63,8 @@ public class UserDaServiceImpl implements UserDaService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllApprovedUserDa(int page, int size) {
-        List<UserDa> userDaList = userDaRepository.findAll(PageRequest.of(page, size)).getContent();
+    public ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllApprovedUserDa() {
+        List<UserDa> userDaList = userDaRepository.findAll();
         StandardResponse<List<UserDaDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), userDaList);
         return  ResponseEntity.ok().body(response);
     }

@@ -24,10 +24,8 @@ public class CreditFacilityTemplateController {
     private CreditFacilityTemplateService creditFacilityTemplateService;
 
     @GetMapping("${app.endpoint.getAllCftTemp}")
-    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplatesTemp(page, size);
+    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplatesTemp();
         return ResponseEntity.ok().body(pagedCreditFacilityTemplates.getBody());
     }
 
@@ -38,10 +36,8 @@ public class CreditFacilityTemplateController {
     }
 
     @GetMapping("${app.endpoint.getAllCftMaster}")
-    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getCreditFacilityTemplates(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplates(page, size);
+    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getCreditFacilityTemplates() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplates();
         return ResponseEntity.ok().body(pagedCreditFacilityTemplates.getBody());
     }
 

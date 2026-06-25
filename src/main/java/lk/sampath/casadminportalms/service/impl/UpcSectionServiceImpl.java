@@ -17,9 +17,6 @@ import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -61,8 +58,8 @@ public class UpcSectionServiceImpl implements UpcSectionService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> findAllUpcSectionTempList(int page, int size) throws ApiRequestException {
-        List<UpcSectionTemp> upcSectionList = upcSectionTempRepository.findAll(PageRequest.of(page, size)).getContent();
+    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> findAllUpcSectionTempList() throws ApiRequestException {
+        List<UpcSectionTemp> upcSectionList = upcSectionTempRepository.findAll();
         StandardResponse<List<UpcSectionDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcSectionList);
         return ResponseEntity.ok().body(response);
     }
@@ -78,9 +75,9 @@ public class UpcSectionServiceImpl implements UpcSectionService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<Page<UpcSectionDTO>>> findAllApprovedUpcSection(Pageable pageable) {
-        Page<UpcSection> upcSectionList = upcSectionRepository.findAll(pageable);
-        StandardResponse<Page<UpcSectionDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcSectionList);
+    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> findAllApprovedUpcSection() {
+        List<UpcSection> upcSectionList = upcSectionRepository.findAll();
+        StandardResponse<List<UpcSectionDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcSectionList);
         return ResponseEntity.ok().body(response);
     }
 

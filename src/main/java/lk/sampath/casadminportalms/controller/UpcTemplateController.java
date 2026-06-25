@@ -21,10 +21,8 @@ public class UpcTemplateController {
     private UpcTemplateService upcTemplateService;
 
     @GetMapping("${app.endpoint.upcTemplateTempList}")
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> spcTemplates = upcTemplateService.findAllUpcTemplateTempList(page, size);
+    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> spcTemplates = upcTemplateService.findAllUpcTemplateTempList();
         return ResponseEntity.ok().body(spcTemplates.getBody());
     }
 
@@ -35,10 +33,8 @@ public class UpcTemplateController {
     }
 
     @GetMapping("${app.endpoint.findAllApprovedUpcTemplateList}")
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplateList(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> upcTemplates = upcTemplateService.findAllApprovedUpcTemplates(page, size);
+    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplateList() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> upcTemplates = upcTemplateService.findAllApprovedUpcTemplates();
         return ResponseEntity.ok().body(upcTemplates.getBody());
     }
 

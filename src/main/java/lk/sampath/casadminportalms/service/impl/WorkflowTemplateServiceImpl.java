@@ -18,9 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -105,9 +102,9 @@ public class WorkflowTemplateServiceImpl implements WorkflowTemplateService {
     }
 
     @Override
-    public StandardResponse<List<UpmGroupDTO>> getAllApprovedUPMGroups(int page, int size) {
+    public StandardResponse<List<UpmGroupDTO>> getAllApprovedUPMGroups() {
         List<UpmGroupDTO> result = new ArrayList<>();
-        List<UpmGroup> approvedUPMGroup = upmGroupRepository.findAllApprovedUpmGroups(PageRequest.of(page, size)).getContent();
+        List<UpmGroup> approvedUPMGroup = upmGroupRepository.findAllApprovedUpmGroups();
         if (!approvedUPMGroup.isEmpty()) {
             approvedUPMGroup.forEach(rec -> {
                 UpmGroupDTO upmGroupDTO = new UpmGroupDTO();
@@ -196,14 +193,13 @@ public class WorkflowTemplateServiceImpl implements WorkflowTemplateService {
     }
 
     @Override
-    public StandardResponse<WorkflowTemplateResponse> getTempWorkflowTemplate(int pageNo, int pageSize) throws ApiRequestException {
+    public StandardResponse<WorkflowTemplateResponse> getTempWorkflowTemplate() throws ApiRequestException {
         WorkflowTemplateResponse result = new WorkflowTemplateResponse();
         List<WorkflowTemplateDTO> workflowTemplateTempList = new ArrayList<>();
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
-        Page<WorkflowTemplateTemp> pageDetails = this.workflowTemplateTempRepository.findAllWorkflowTemplateTemp(pageable);
+        List<WorkflowTemplateTemp> workflowTemplates = this.workflowTemplateTempRepository.findAllWorkflowTemplateTemp();
 
-        if (pageDetails.hasContent()) {
-            pageDetails.getContent().forEach(rec -> {
+        if (!workflowTemplates.isEmpty()) {
+            workflowTemplates.forEach(rec -> {
                 List<WorkFlowTemplateDataDTO> childArray = new ArrayList<>();
                 List<WorkflowTemplateDataTemp> workflowTemplateTempDataList =
                         this.workflowTemplateDataTempRepository.findAllTempWorkflowTemplateData(rec.getWorkFlowTemplateId());
@@ -238,20 +234,19 @@ public class WorkflowTemplateServiceImpl implements WorkflowTemplateService {
         }
 
         result.setDataList(workflowTemplateTempList);
-        result.setCount(pageDetails.getTotalElements());
+        result.setCount((long) workflowTemplateTempList.size());
         return new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), result);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public StandardResponse<List<WorkflowTemplateDTO>> getWorkflowTemplate(int pageNo,int pageSize) throws ApiRequestException {
+    public StandardResponse<List<WorkflowTemplateDTO>> getWorkflowTemplate() throws ApiRequestException {
         WorkflowTemplateResponse result = new WorkflowTemplateResponse();
         List<WorkflowTemplateDTO> workflowTemplateTempList = new ArrayList<>();
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
-        Page<WorkflowTemplate> pageDetails = this.workflowTemplateRepository.findAllWorkflowTemplate(pageable);
+        List<WorkflowTemplate> workflowTemplates = this.workflowTemplateRepository.findAllWorkflowTemplate();
 
-        if (!pageDetails.hasContent()) {
-            pageDetails.getContent().forEach(rec -> {
+        if (!workflowTemplates.isEmpty()) {
+            workflowTemplates.forEach(rec -> {
                 List<WorkFlowTemplateDataDTO> childArray = new ArrayList<>();
                 List<WorkflowTemplateData> workflowTemplateTempDataList =
                         this.workflowTemplateDataRepository.findAllWorkflowTemplateData(rec.getWorkFlowTemplateId());
@@ -284,7 +279,7 @@ public class WorkflowTemplateServiceImpl implements WorkflowTemplateService {
             });
         }
         result.setDataList(workflowTemplateTempList);
-        result.setCount(pageDetails.getTotalElements());
+        result.setCount((long) workflowTemplateTempList.size());
         return new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), result);
     }
 

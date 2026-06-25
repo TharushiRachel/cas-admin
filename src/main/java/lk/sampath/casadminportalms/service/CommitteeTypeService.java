@@ -13,10 +13,7 @@ public interface CommitteeTypeService {
      * @return List<CommitteeTypeViewResponse>
      * @throws ApiRequestException
      */
-    default StandardResponse<List<CommitteeType>> getCommitteeTypes() throws ApiRequestException {
-        return getCommitteeTypes(0, 10);
-    }
-    StandardResponse<List<CommitteeType>> getCommitteeTypes(int page, int size) throws ApiRequestException;
+    StandardResponse<List<CommitteeType>> getCommitteeTypes() throws ApiRequestException;
 
     /**
      * save Committee Types service

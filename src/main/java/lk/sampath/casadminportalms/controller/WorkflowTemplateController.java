@@ -23,11 +23,9 @@ public class WorkflowTemplateController {
     }
 
     @GetMapping("${app.endpoint.getAllApprovedUPMGroups}")
-    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> getAllApprovedUPMGroups(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
+    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> getAllApprovedUPMGroups()
             throws ApiRequestException {
-        StandardResponse<List<UpmGroupDTO>> response = workflowTemplateService.getAllApprovedUPMGroups(page, size);
+        StandardResponse<List<UpmGroupDTO>> response = workflowTemplateService.getAllApprovedUPMGroups();
         return ResponseEntity.ok().body(response);
     }
 
@@ -39,16 +37,14 @@ public class WorkflowTemplateController {
     }
 
     @GetMapping("${app.endpoint.getTempWorkflowTemplate}")
-    public ResponseEntity<StandardResponse<WorkflowTemplateResponse>> getTempWorkflowTemplate(
-            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        StandardResponse<WorkflowTemplateResponse> response = workflowTemplateService.getTempWorkflowTemplate(page, size);
+    public ResponseEntity<StandardResponse<WorkflowTemplateResponse>> getTempWorkflowTemplate() throws ApiRequestException {
+        StandardResponse<WorkflowTemplateResponse> response = workflowTemplateService.getTempWorkflowTemplate();
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("${app.endpoint.getWorkflowTemplate}")
-    public ResponseEntity<StandardResponse<List<WorkflowTemplateDTO>>> getWorkflowTemplate(
-            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        StandardResponse<List<WorkflowTemplateDTO>> response = workflowTemplateService.getWorkflowTemplate(page, size);
+    public ResponseEntity<StandardResponse<List<WorkflowTemplateDTO>>> getWorkflowTemplate() throws ApiRequestException {
+        StandardResponse<List<WorkflowTemplateDTO>> response = workflowTemplateService.getWorkflowTemplate();
         return ResponseEntity.ok().body(response);
     }
 

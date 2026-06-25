@@ -27,10 +27,8 @@ public class UpmGroupController {
     }
 
     @GetMapping("${app.endpoint.upmGroupTempList}")
-    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> listUpmGroupTemp(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException{
-        ResponseEntity<StandardResponse<List<UpmGroupDTO>>> upmGroupTempList = masterDataService.findAllUpmGroupTempList(page, size);
+    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> listUpmGroupTemp() throws ApiRequestException{
+        ResponseEntity<StandardResponse<List<UpmGroupDTO>>> upmGroupTempList = masterDataService.findAllUpmGroupTempList();
         return ResponseEntity.ok().body(upmGroupTempList.getBody());
     }
 
@@ -41,10 +39,8 @@ public class UpmGroupController {
     }
 
     @GetMapping("${app.endpoint.upmGroupList}")
-    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> getPagedUpmGroupData(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<UpmGroupDTO>>> upmGroupList = masterDataService.searchUpmGroups(page, size);
+    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> getPagedUpmGroupData() throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<UpmGroupDTO>>> upmGroupList = masterDataService.searchUpmGroups();
         return ResponseEntity.ok().body(upmGroupList.getBody());
     }
 

@@ -1,6 +1,5 @@
 package lk.sampath.casadminportalms.dto.creditfacilitytemplate;
 
-import lk.sampath.casadminportalms.dto.common.PagedParamDTO;
 import lk.sampath.casadminportalms.enums.AppsConstants;
 import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
 import lombok.Getter;
@@ -15,7 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class CreditFacilityTemplateSearchRQ extends PagedParamDTO implements Serializable {
+public class CreditFacilityTemplateSearchRQ implements Serializable {
 
     private Integer creditFacilityTemplateID;
 
