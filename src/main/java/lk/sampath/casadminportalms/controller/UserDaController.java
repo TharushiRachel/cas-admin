@@ -1,0 +1,80 @@
+package lk.sampath.casadminportalms.controller;
+
+import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
+import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
+import lk.sampath.casadminportalms.dto.userda.UserDaDTO;
+import lk.sampath.casadminportalms.exception.ApiRequestException;
+import lk.sampath.casadminportalms.service.UserDaService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+public class UserDaController {
+
+    @Autowired
+    private UserDaService userDaService;
+
+
+    @GetMapping("${app.endpoint.viewUserDaTempList}")
+        public ResponseEntity<StandardResponse<List<UserDaDTO>>> viewAllUserDaTemp(
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "10") int size) throws  ApiRequestException {
+        ResponseEntity<StandardResponse<List<UserDaDTO>>> userDaTempList = userDaService.findAllUserDaTempList(page, size);
+                return ResponseEntity.ok().body(userDaTempList.getBody());
+    }
+
+    @GetMapping("${app.endpoint.viewUserDaTempById}")
+    public ResponseEntity<StandardResponse<UserDaDTO>> viewUserDaTempById(@PathVariable Integer userDaID) throws ApiRequestException{
+        ResponseEntity<StandardResponse<UserDaDTO>> userDaTempDTO = userDaService.findUserDaTempByID(userDaID);
+        return ResponseEntity.ok().body(userDaTempDTO.getBody());
+    }
+
+    @PostMapping("${app.endpoint.viewUserDaList}")
+    public ResponseEntity<StandardResponse<List<UserDaDTO>>> getPagedUserDaData (
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<UserDaDTO>>> userDaList = userDaService.findAllApprovedUserDa(page, size);
+        return ResponseEntity.ok().body(userDaList.getBody());
+    }
+
+    @GetMapping("${app.endpoint.viewUserDaById}")
+    public ResponseEntity<StandardResponse<UserDaDTO>> viewUserDaById(@PathVariable Integer userDaID) throws ApiRequestException{
+        ResponseEntity<StandardResponse<UserDaDTO>> userDa = userDaService.findApprovedUserDaById(userDaID);
+        return ResponseEntity.ok().body(userDa.getBody());
+    }
+    @PostMapping("${app.endpoint.saveUserDa}")
+    public ResponseEntity<StandardResponse<UserDaDTO>> saveUserDa(@Validated @RequestBody UserDaDTO request) throws  ApiRequestException{
+        ResponseEntity<StandardResponse<UserDaDTO>> userDaTemp = userDaService.saveUserDaTemp(request);
+        return ResponseEntity.ok().body(userDaTemp.getBody());
+    }
+
+    @PostMapping("${app.endpoint.userDaApproveReject}")
+    public ResponseEntity<StandardResponse<UserDaDTO>> approveRejectUserDa(@Validated @RequestBody ApproveRejectRQ request) throws  ApiRequestException {
+        ResponseEntity<StandardResponse<UserDaDTO>> userDa = userDaService.approveRejectUserDa(request);
+        return ResponseEntity.ok().body(userDa.getBody());
+    }
+
+    @PostMapping("${app.endpoint.updateUserDaTemp}")
+    public ResponseEntity<StandardResponse<UserDaDTO>> updateUserDaTemp(@PathVariable Integer userDaID, @Validated @RequestBody UserDaDTO request) throws  ApiRequestException{
+        ResponseEntity<StandardResponse<UserDaDTO>> userDa = userDaService.updateUserDaTemp(userDaID, request);
+        return ResponseEntity.ok().body(userDa.getBody());
+    }
+
+    @PostMapping("${app.endpoint.updateUserDaMaster}")
+    public ResponseEntity<StandardResponse<UserDaDTO>> updateApprovedUserDa(@PathVariable Integer userDaID, @Validated @RequestBody UserDaDTO userDaDTO) throws ApiRequestException {
+        ResponseEntity<StandardResponse<UserDaDTO>> userDa = userDaService.updateApprovedUserDa(userDaID, userDaDTO);
+        return ResponseEntity.ok().body(userDa.getBody());
+    }
+
+    @PostMapping("${app.endpoint.deleteUserDaTemp}")
+    public ResponseEntity<StandardResponse<Void>> deleteUserDaTemp(@Validated @RequestBody UserDaDTO request) throws ApiRequestException{
+        ResponseEntity<StandardResponse<Void>> userDa = userDaService.deleteUserDaFromTemp(request.getUserDaID());
+        return ResponseEntity.ok().body(userDa.getBody());
+    }
+
+
+}

@@ -1,0 +1,212 @@
+package lk.sampath.casadminportalms.service.impl;
+
+import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
+import lk.sampath.casadminportalms.dto.committeePool.CommitteePoolDTO;
+import lk.sampath.casadminportalms.entity.committeepool.CommitteePool;
+import lk.sampath.casadminportalms.entity.committeepool.CommitteePoolHistory;
+import lk.sampath.casadminportalms.entity.committeepool.CommitteePoolTemp;
+import lk.sampath.casadminportalms.enums.ErrorEnums;
+import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
+import lk.sampath.casadminportalms.enums.Status;
+import lk.sampath.casadminportalms.exception.ApiRequestException;
+import lk.sampath.casadminportalms.repository.CommitteePoolHistoryRepository;
+import lk.sampath.casadminportalms.repository.CommitteePoolRepository;
+import lk.sampath.casadminportalms.repository.CommitteePoolTempRepository;
+import lk.sampath.casadminportalms.service.CommitteePoolService;
+import org.apache.juli.logging.Log;
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+@Service
+public class CommitteePoolServiceImpl implements CommitteePoolService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CommitteePoolServiceImpl.class);
+
+    private final CommitteePoolRepository committeePoolRepository;
+    private final CommitteePoolTempRepository committeePoolTempRepository;
+    private final CommitteePoolHistoryRepository committeePoolHistoryRepository;
+    private final ModelMapper modelMapper;
+
+    public CommitteePoolServiceImpl(CommitteePoolRepository committeePoolRepository, CommitteePoolTempRepository committeePoolTempRepository,
+                                    CommitteePoolHistoryRepository committeePoolHistoryRepository,ModelMapper modelMapper) {
+        this.committeePoolRepository = committeePoolRepository;
+        this.committeePoolTempRepository = committeePoolTempRepository;
+        this.committeePoolHistoryRepository = committeePoolHistoryRepository;
+        this.modelMapper = modelMapper;
+    }
+
+    @Override
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getTempCommitteePool(int page, int size) throws ApiRequestException {
+        StandardResponse<List<CommitteePoolDTO>> response;
+        try {
+            List<CommitteePoolTemp> committeePoolTemps = committeePoolTempRepository.findAll(PageRequest.of(page, size)).getContent();
+            response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), committeePoolTemps);
+        } catch(Exception e){
+            LOG.error("ERROR : Get All Temp Pool Users: ",e);
+            throw new ApiRequestException("An error occurred.");
+        }
+
+        return ResponseEntity.ok().body(response);
+    }
+
+    @Override
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getCommitteePool(int page, int size) throws ApiRequestException {
+        StandardResponse<List<CommitteePoolDTO>> response;
+        try {
+            List<CommitteePool> committeePools = committeePoolRepository.findAll(PageRequest.of(page, size)).getContent();
+            response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), committeePools);
+        } catch (Exception e){
+            LOG.error("ERROR : Get All Pool Users: ",e);
+            throw new ApiRequestException("An error occurred.");
+        }
+        return ResponseEntity.ok().body(response);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> saveCommitteePoolUsers(List<CommitteePoolDTO> committeePoolUsers, int page, int size)throws ApiRequestException {
+        StandardResponse<List<CommitteePoolDTO>> response;
+        try {
+            Date date = new Date();
+            List<CommitteePoolDTO> prevUsers = new ArrayList<>(committeePoolRepository.findAll().stream().map(pool -> modelMapper.map(pool, CommitteePoolDTO.class)).toList());
+
+            for (CommitteePoolDTO committeePoolUser : committeePoolUsers) {
+                CommitteePool committeePool = new CommitteePool();
+
+                committeePool.setUserId(committeePoolUser.getUserId());
+                committeePool.setUserName(committeePoolUser.getUserName());
+                committeePool.setDesignation(committeePoolUser.getDesignation());
+                committeePool.setWorkClass(committeePoolUser.getWorkClass());
+                committeePool.setUserDisplayName(committeePoolUser.getUserDisplayName());
+                committeePool.setCreatedDate(date);
+                committeePool.setStatus(Status.ACT);
+                committeePool.setApproveStatus(MasterDataApproveStatus.APPROVED);
+                committeePool.setApprovedDate(date);
+
+                committeePool = committeePoolRepository.save(committeePool);
+
+                prevUsers.add(new CommitteePoolDTO(committeePool));
+
+                //save to history
+                saveCommitteePoolHistory(new CommitteePoolDTO(committeePool));
+            }
+
+            int fromIndex = Math.min(page * size, prevUsers.size());
+            int toIndex = Math.min(fromIndex + size, prevUsers.size());
+            response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), prevUsers.subList(fromIndex, toIndex));
+        } catch (Exception e){
+            LOG.error("ERROR : Save Pool Users: ",e);
+            throw new ApiRequestException("Pool user(s) adding has been failed.");
+        }
+        return ResponseEntity.ok().body(response);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> saveTempCommitteePoolUser(CommitteePoolDTO committeePoolUser, int page, int size)throws ApiRequestException {
+
+        StandardResponse<List<CommitteePoolDTO>> response;
+        try {
+            Date date = new Date();
+            CommitteePoolTemp committeePool = new CommitteePoolTemp();
+
+            committeePool.setCommitteePoolId(committeePoolUser.getCommitteePoolId());
+            committeePool.setUserId(committeePoolUser.getUserId());
+            committeePool.setUserName(committeePoolUser.getUserName());
+            committeePool.setDesignation(committeePoolUser.getDesignation());
+            committeePool.setWorkClass(committeePoolUser.getWorkClass());
+            committeePool.setUserDisplayName(committeePoolUser.getUserDisplayName());
+            committeePool.setCreatedDate(committeePoolUser.getCreatedDate());
+            committeePool.setCreatedBy(committeePoolUser.getCreatedBy());
+            committeePool.setStatus(committeePoolUser.getStatus());
+            committeePool.setLastModifiedDate(date);
+            committeePool.setApproveStatus(MasterDataApproveStatus.PENDING);
+
+            committeePool = committeePoolTempRepository.save(committeePool);
+
+            List<CommitteePoolDTO> payload = new ArrayList<>();
+            payload.add(new CommitteePoolDTO(committeePool));
+            int fromIndex = Math.min(page * size, payload.size());
+            int toIndex = Math.min(fromIndex + size, payload.size());
+            response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), payload.subList(fromIndex, toIndex));
+        } catch(Exception e){
+            LOG.error("ERROR : Save Temp Pool Users: ",e);
+            throw new ApiRequestException("Pool user adding has been failed.");
+        }
+        return ResponseEntity.ok().body(response);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
+    public ResponseEntity<StandardResponse<CommitteePoolDTO>> approveRejectPoolUser(CommitteePoolDTO committeePoolUser) throws ApiRequestException {
+
+        StandardResponse<CommitteePoolDTO> response;
+        try {
+            Date date = new Date();
+            CommitteePool committeePool = null;
+            if (committeePoolRepository.findById(committeePoolUser.getCommitteePoolId()).isPresent()) {
+                committeePool = committeePoolRepository.getReferenceById(committeePoolUser.getCommitteePoolId());
+
+                if (committeePoolUser.getApproveStatus() == MasterDataApproveStatus.APPROVED) {
+                    committeePool.setStatus(committeePoolUser.getStatus());
+                    committeePool.setApproveStatus(committeePoolUser.getApproveStatus());
+                    committeePool.setLastModifiedDate(date);
+                    committeePool.setApprovedDate(date);
+
+                    committeePool = committeePoolRepository.save(committeePool);
+
+                    //save to history
+                    this.saveCommitteePoolHistory(new CommitteePoolDTO(committeePool));
+                } else {
+                    CommitteePoolTemp committeePoolTemp = committeePoolTempRepository.getReferenceById(committeePoolUser.getCommitteePoolId());
+                    committeePoolTemp.setApproveStatus(committeePoolUser.getApproveStatus());
+                    committeePoolTemp.setApprovedDate(date);
+                    committeePoolTemp.setLastModifiedDate(date);
+
+                    //save to history
+                    this.saveCommitteePoolHistory(new CommitteePoolDTO(committeePoolTemp));
+                }
+
+                //remove temp record
+                committeePoolTempRepository.deleteById(committeePoolUser.getCommitteePoolId());
+            } else {
+                throw new ApiRequestException("Committee pool user not found.");
+            }
+            response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), committeePoolUser);
+        } catch(Exception e){
+            LOG.error("ERROR : Approve or Reject Pool Users: ",e);
+            throw new ApiRequestException("Pool user approve/reject has been failed.");
+        }
+        return ResponseEntity.ok().body(response);
+    }
+
+    public void saveCommitteePoolHistory(CommitteePoolDTO committeePoolUser)throws ApiRequestException {
+
+        CommitteePoolHistory committeePool = new CommitteePoolHistory();
+
+        committeePool.setCommitteePoolId(committeePoolUser.getCommitteePoolId());
+        committeePool.setUserId(committeePoolUser.getUserId());
+        committeePool.setUserName(committeePoolUser.getUserName());
+        committeePool.setDesignation(committeePoolUser.getDesignation());
+        committeePool.setWorkClass(committeePoolUser.getWorkClass());
+        committeePool.setUserDisplayName(committeePoolUser.getUserDisplayName());
+        committeePool.setCreatedDate(committeePoolUser.getCreatedDate());
+        committeePool.setCreatedBy(committeePoolUser.getCreatedBy());
+        committeePool.setStatus(committeePoolUser.getStatus());
+        committeePool.setLastModifiedDate(committeePoolUser.getLastModifiedDate());
+        committeePool.setModifiedBy(committeePoolUser.getModifiedBy());
+        committeePool.setApproveStatus(committeePoolUser.getApproveStatus());
+        committeePool.setApprovedBy(committeePoolUser.getApprovedBy());
+        committeePool.setApprovedDate(committeePoolUser.getApprovedDate());
+
+        committeePoolHistoryRepository.save(committeePool);
+    }
+
+}
