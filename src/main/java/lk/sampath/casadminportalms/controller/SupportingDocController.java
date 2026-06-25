@@ -7,6 +7,7 @@ import lk.sampath.casadminportalms.dto.supportingdoc.SupportingDocDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.SupportingDocService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +23,10 @@ public class SupportingDocController {
 
 
     @GetMapping("${app.endpoint.viewSupportingDocTempList}")
-    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> viewAllSupportingDocsTemp(Pageable pageable) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> viewAllSupportingDocsTemp(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
+        Pageable pageable = PageRequest.of(page, size);
         ResponseEntity<StandardResponse<List<SupportingDocDTO>>> supportingDocTempList = supportingDocService.findAllSupportingDocTempList(pageable);
         return ResponseEntity.ok().body(supportingDocTempList.getBody());
     }
@@ -33,7 +37,10 @@ public class SupportingDocController {
         return ResponseEntity.ok().body(supportingDocDTO.getBody());
     }
     @GetMapping("${app.endpoint.viewSupportingDocList}")
-    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> getApprovedSupportingDocData(Pageable pageable) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> getApprovedSupportingDocData(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
+        Pageable pageable = PageRequest.of(page, size);
         ResponseEntity<StandardResponse<List<SupportingDocDTO>>> supportingDocs = supportingDocService.searchSupportingDocGroups(pageable);
         return ResponseEntity.ok().body(supportingDocs.getBody());
     }

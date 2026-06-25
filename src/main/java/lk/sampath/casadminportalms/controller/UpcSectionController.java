@@ -6,6 +6,7 @@ import lk.sampath.casadminportalms.dto.upcsection.UpcSectionDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.UpcSectionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +23,10 @@ public class UpcSectionController {
 
 
     @GetMapping("/upcSectionTemp")
-    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> viewAllUpcSectionTemp(Pageable pageable) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> viewAllUpcSectionTemp(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
+        Pageable pageable = PageRequest.of(page, size);
         ResponseEntity<StandardResponse<List<UpcSectionDTO>>> upcSectionTempList = upcSectionService.findAllUpcSectionTempList(pageable);
         return ResponseEntity.ok().body(upcSectionTempList.getBody());
     }
@@ -34,7 +38,10 @@ public class UpcSectionController {
     }
 
     @GetMapping("/upcSectionList")
-    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> getPagedUpcSectionData(Pageable pageable) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> getPagedUpcSectionData(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
+        Pageable pageable = PageRequest.of(page, size);
         ResponseEntity<StandardResponse<List<UpcSectionDTO>>> pageDataResult =
             upcSectionService.findAllApprovedUpcSection(pageable);
 

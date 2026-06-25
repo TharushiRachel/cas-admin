@@ -7,6 +7,7 @@ import lk.sampath.casadminportalms.dto.upmgroup.UpmGroupDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.UpmGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -28,7 +29,10 @@ public class UpmGroupController {
     }
 
     @GetMapping("${app.endpoint.upmGroupTempList}")
-    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> listUpmGroupTemp(Pageable pageable) throws ApiRequestException{
+    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> listUpmGroupTemp(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws ApiRequestException{
+        Pageable pageable = PageRequest.of(page, size);
         ResponseEntity<StandardResponse<List<UpmGroupDTO>>> upmGroupTempList = masterDataService.findAllUpmGroupTempList(pageable);
         return ResponseEntity.ok().body(upmGroupTempList.getBody());
     }
@@ -40,7 +44,10 @@ public class UpmGroupController {
     }
 
     @GetMapping("${app.endpoint.upmGroupList}")
-    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> getPagedUpmGroupData(Pageable pageable) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> getPagedUpmGroupData(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
+        Pageable pageable = PageRequest.of(page, size);
         ResponseEntity<StandardResponse<List<UpmGroupDTO>>> upmGroupList = masterDataService.searchUpmGroups(pageable);
         return ResponseEntity.ok().body(upmGroupList.getBody());
     }

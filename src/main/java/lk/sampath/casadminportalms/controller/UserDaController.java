@@ -6,6 +6,7 @@ import lk.sampath.casadminportalms.dto.userda.UserDaDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.UserDaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,7 +22,10 @@ public class UserDaController {
 
 
     @GetMapping("${app.endpoint.viewUserDaTempList}")
-        public ResponseEntity<StandardResponse<List<UserDaDTO>>> viewAllUserDaTemp(Pageable pageable) throws  ApiRequestException {
+        public ResponseEntity<StandardResponse<List<UserDaDTO>>> viewAllUserDaTemp(
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "10") int size) throws  ApiRequestException {
+        Pageable pageable = PageRequest.of(page, size);
         ResponseEntity<StandardResponse<List<UserDaDTO>>> userDaTempList = userDaService.findAllUserDaTempList(pageable);
                 return ResponseEntity.ok().body(userDaTempList.getBody());
     }
@@ -33,7 +37,10 @@ public class UserDaController {
     }
 
     @PostMapping("${app.endpoint.viewUserDaList}")
-    public ResponseEntity<StandardResponse<List<UserDaDTO>>> getPagedUserDaData(Pageable pageable) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UserDaDTO>>> getPagedUserDaData(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
+        Pageable pageable = PageRequest.of(page, size);
         ResponseEntity<StandardResponse<List<UserDaDTO>>> userDaList = userDaService.findAllApprovedUserDa(pageable);
         return ResponseEntity.ok().body(userDaList.getBody());
     }

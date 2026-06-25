@@ -7,6 +7,7 @@ import lk.sampath.casadminportalms.dto.upctemplate.UpcTemplateDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.UpcTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,7 +23,10 @@ public class UpcTemplateController {
     private UpcTemplateService upcTemplateService;
 
     @GetMapping("${app.endpoint.upcTemplateTempList}")
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(Pageable pageable) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
+        Pageable pageable = PageRequest.of(page, size);
         ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> spcTemplates = upcTemplateService.findAllUpcTemplateTempList(pageable);
         return ResponseEntity.ok().body(spcTemplates.getBody());
     }
@@ -34,7 +38,10 @@ public class UpcTemplateController {
     }
 
     @GetMapping("${app.endpoint.findAllApprovedUpcTemplateList}")
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplateList(Pageable pageable) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplateList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
+        Pageable pageable = PageRequest.of(page, size);
         ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> upcTemplates = upcTemplateService.findAllApprovedUpcTemplates(pageable);
         return ResponseEntity.ok().body(upcTemplates.getBody());
     }
