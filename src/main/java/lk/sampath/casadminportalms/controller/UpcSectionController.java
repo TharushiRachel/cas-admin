@@ -37,11 +37,15 @@ public class UpcSectionController {
         return ResponseEntity.ok().body(upcSectionTemp.getBody());
     }
 
-    @GetMapping("/upcSectionList")
+    @RequestMapping(value = "/upcSectionList", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> getPagedUpcSectionData(
+            @RequestHeader(name = "page", required = false) Integer headerPage,
+            @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        Pageable pageable = PageRequest.of(page, size);
+        int effectivePage = headerPage != null ? headerPage : page;
+        int effectiveSize = headerSize != null ? headerSize : size;
+        Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
         ResponseEntity<StandardResponse<List<UpcSectionDTO>>> pageDataResult =
             upcSectionService.findAllApprovedUpcSection(pageable);
 
