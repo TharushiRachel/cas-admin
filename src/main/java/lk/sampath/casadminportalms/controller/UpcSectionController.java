@@ -1,12 +1,12 @@
 package lk.sampath.casadminportalms.controller;
 
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
+import lk.sampath.casadminportalms.controller.basecontroller.PaginationUtil;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.upcsection.UpcSectionDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.UpcSectionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,9 +24,11 @@ public class UpcSectionController {
 
     @GetMapping("/upcSectionTemp")
     public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> viewAllUpcSectionTemp(
+            @RequestHeader(name = "page", required = false) Integer headerPage,
+            @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
         ResponseEntity<StandardResponse<List<UpcSectionDTO>>> upcSectionTempList = upcSectionService.findAllUpcSectionTempList(pageable);
         return ResponseEntity.ok().body(upcSectionTempList.getBody());
     }
@@ -43,9 +45,7 @@ public class UpcSectionController {
             @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        int effectivePage = headerPage != null ? headerPage : page;
-        int effectiveSize = headerSize != null ? headerSize : size;
-        Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
+        Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
         ResponseEntity<StandardResponse<List<UpcSectionDTO>>> pageDataResult =
             upcSectionService.findAllApprovedUpcSection(pageable);
 

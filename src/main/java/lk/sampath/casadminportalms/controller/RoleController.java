@@ -1,13 +1,13 @@
 package lk.sampath.casadminportalms.controller;
 
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
+import lk.sampath.casadminportalms.controller.basecontroller.PaginationUtil;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.role.RoleDTO;
 import lk.sampath.casadminportalms.entity.role.PrivilegeCategory;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,9 +23,11 @@ public class RoleController {
 
     @GetMapping("${app.endpoint.privilegeList}")
     public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories(
+            @RequestHeader(name = "page", required = false) Integer headerPage,
+            @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws  ApiRequestException{
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
         ResponseEntity<StandardResponse<List<PrivilegeCategory>>> privilegeCategories = roleService.findAllPrivilegeCategories(pageable);
         return ResponseEntity.ok().body(privilegeCategories.getBody());
     }
@@ -38,18 +40,22 @@ public class RoleController {
 
     @GetMapping("${app.endpoint.roleTempList}")
     public ResponseEntity<StandardResponse<List<RoleDTO>>> viewTempRoleList(
+            @RequestHeader(name = "page", required = false) Integer headerPage,
+            @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
         ResponseEntity<StandardResponse<List<RoleDTO>>> role = roleService.findAllRolesTempList(pageable);
         return ResponseEntity.ok().body(role.getBody());
     }
 
     @GetMapping("${app.endpoint.roleList}")
     public ResponseEntity<StandardResponse<List<RoleDTO>>> listRole(
+            @RequestHeader(name = "page", required = false) Integer headerPage,
+            @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws  ApiRequestException{
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
         ResponseEntity<StandardResponse<List<RoleDTO>>> roles = roleService.findAllApprovedRoles(pageable);
         return ResponseEntity.ok().body(roles.getBody());
     }
