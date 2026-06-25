@@ -15,6 +15,7 @@ import lk.sampath.casadminportalms.service.UserDaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -47,8 +48,8 @@ public class UserDaServiceImpl implements UserDaService {
     private UserDaAudRepository userDaAudRepository;
 
     @Override
-    public ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllUserDaTempList() throws ApiRequestException {
-        List<UserDaTemp> userDaTempList = userDaTempRepository.findAll();
+    public ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllUserDaTempList(Pageable pageable) throws ApiRequestException {
+        List<UserDaTemp> userDaTempList = userDaTempRepository.findAll(pageable).getContent();
         StandardResponse<List<UserDaDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), userDaTempList);
         return ResponseEntity.ok().body(response);
     }
@@ -63,8 +64,8 @@ public class UserDaServiceImpl implements UserDaService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllApprovedUserDa() {
-        List<UserDa> userDaList = userDaRepository.findAll();
+    public ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllApprovedUserDa(Pageable pageable) {
+        List<UserDa> userDaList = userDaRepository.findAll(pageable).getContent();
         StandardResponse<List<UserDaDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), userDaList);
         return  ResponseEntity.ok().body(response);
     }

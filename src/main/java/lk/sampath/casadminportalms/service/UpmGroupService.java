@@ -6,6 +6,7 @@ import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.upmgroup.UpmGroupDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -14,11 +15,11 @@ public interface UpmGroupService {
 
     ResponseEntity<StandardResponse<UpmGroupDTO>> findUpmGroupTempByID(Integer upmGroupID) throws ApiRequestException;
 
-    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> findAllUpmGroupTempList() throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> findAllUpmGroupTempList(Pageable pageable) throws ApiRequestException;
 
     ResponseEntity<StandardResponse<UpmGroupDTO>> findUpmGroupById(int upmGroupID);
 
-    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> searchUpmGroups();
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> searchUpmGroups(Pageable pageable);
 
     ResponseEntity<StandardResponse<UpmGroupDTO>> saveUPMGroupTemp(UpmGroupDTO upmGroupDTO) throws ApiRequestException;
 

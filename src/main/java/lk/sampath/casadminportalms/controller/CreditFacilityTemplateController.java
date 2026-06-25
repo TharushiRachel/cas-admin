@@ -8,6 +8,7 @@ import lk.sampath.casadminportalms.service.CreditFacilityTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +25,8 @@ public class CreditFacilityTemplateController {
     private CreditFacilityTemplateService creditFacilityTemplateService;
 
     @GetMapping("${app.endpoint.getAllCftTemp}")
-    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp() throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplatesTemp();
+    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp(Pageable pageable) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplatesTemp(pageable);
         return ResponseEntity.ok().body(pagedCreditFacilityTemplates.getBody());
     }
 
@@ -36,8 +37,8 @@ public class CreditFacilityTemplateController {
     }
 
     @GetMapping("${app.endpoint.getAllCftMaster}")
-    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getCreditFacilityTemplates() throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplates();
+    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getCreditFacilityTemplates(Pageable pageable) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplates(pageable);
         return ResponseEntity.ok().body(pagedCreditFacilityTemplates.getBody());
     }
 

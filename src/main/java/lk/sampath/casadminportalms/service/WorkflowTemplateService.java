@@ -6,17 +6,18 @@ import lk.sampath.casadminportalms.dto.upmgroup.UpmGroupDTO;
 import lk.sampath.casadminportalms.dto.workflowtemplate.WorkflowTemplateDTO;
 import lk.sampath.casadminportalms.dto.workflowtemplate.WorkflowTemplateResponse;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface WorkflowTemplateService  {
 
-    StandardResponse<List<UpmGroupDTO>> getAllApprovedUPMGroups() throws ApiRequestException;
+    StandardResponse<List<UpmGroupDTO>> getAllApprovedUPMGroups(Pageable pageable) throws ApiRequestException;
 
     StandardResponse<String> saveOrUpdateTempWorkflowTemplate(WorkflowTemplateDTO workflowTemplateCreateRequest) throws ApiRequestException;
 
-    StandardResponse<WorkflowTemplateResponse> getTempWorkflowTemplate() throws ApiRequestException;
+    StandardResponse<WorkflowTemplateResponse> getTempWorkflowTemplate(Pageable pageable) throws ApiRequestException;
 
-    StandardResponse<List<WorkflowTemplateDTO>> getWorkflowTemplate()throws ApiRequestException;
+    StandardResponse<List<WorkflowTemplateDTO>> getWorkflowTemplate(Pageable pageable)throws ApiRequestException;
 
     StandardResponse<Boolean>  authorizeWorkflowTemplateTemp(ApproveRejectRQ approveRejectRQ)throws ApiRequestException;
 }

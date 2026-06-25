@@ -16,6 +16,7 @@ import lk.sampath.casadminportalms.service.RoleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -58,9 +59,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories() throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories(Pageable pageable) throws ApiRequestException {
 
-        List<PrivilegeCategory> privilegeCategoryList = privilegeCategoryRepository.findAll();
+        List<PrivilegeCategory> privilegeCategoryList = privilegeCategoryRepository.findAll(pageable).getContent();
 
         Map<String, List<Privilege>> privilegeCategoryMap = new LinkedHashMap<>();
 
@@ -115,8 +116,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllRolesTempList() throws ApiRequestException {
-        List<RoleTemp> roleTempList = roleTempRepository.findAll();
+    public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllRolesTempList(Pageable pageable) throws ApiRequestException {
+        List<RoleTemp> roleTempList = roleTempRepository.findAll(pageable).getContent();
         List<RoleDTO> roleDTOList = new ArrayList<>();
 
         for(RoleTemp roleTemp : roleTempList){
@@ -139,8 +140,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllApprovedRoles() throws ApiRequestException {
-        List<Role> roleList = roleRepository.findAll();
+    public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllApprovedRoles(Pageable pageable) throws ApiRequestException {
+        List<Role> roleList = roleRepository.findAll(pageable).getContent();
         List<RoleDTO> roleDTOList = new ArrayList<>();
 
         for(Role role : roleList){
@@ -472,8 +473,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<List<Privilege>>> findAllPrivileges() throws ApiRequestException {
-        List<Privilege> privileges = privilegeRepository.findAll();
+    public ResponseEntity<StandardResponse<List<Privilege>>> findAllPrivileges(Pageable pageable) throws ApiRequestException {
+        List<Privilege> privileges = privilegeRepository.findAll(pageable).getContent();
 
         StandardResponse<List<Privilege>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), privileges);
         return ResponseEntity.ok().body(response);

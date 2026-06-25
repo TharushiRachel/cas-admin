@@ -18,6 +18,7 @@ import lk.sampath.casadminportalms.service.UpcTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -61,10 +62,10 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList() throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(Pageable pageable) throws ApiRequestException {
 
         LOG.info("START: Find All Upc Template Temp List ");
-        List<UpcTemplateTemp> upcTemplateTempList = upcTemplateTempRepository.findAll();
+        List<UpcTemplateTemp> upcTemplateTempList = upcTemplateTempRepository.findAll(pageable).getContent();
         LOG.info(" Fetched All Upc Template Temp List : {} ",upcTemplateTempList);
         List<UpcTemplateDTO> upcTemplateDTOList =  upcTemplateTempList.stream()
                 .map(UpcTemplateDTO::new)
@@ -92,9 +93,9 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplates() throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplates(Pageable pageable) throws ApiRequestException {
         LOG.info("START: Find All Approved Upc Templates");
-        List<UpcTemplate> upcTemplateList = upcTemplateRepository.findAll();
+        List<UpcTemplate> upcTemplateList = upcTemplateRepository.findAll(pageable).getContent();
 
         List<UpcTemplateDTO> upcTemplateDTOList = upcTemplateList.stream()
                 .map(UpcTemplateDTO::new)

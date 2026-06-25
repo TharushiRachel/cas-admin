@@ -16,6 +16,7 @@ import lk.sampath.casadminportalms.service.UpmGroupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -53,8 +54,8 @@ public class UpmGroupServiceImpl implements UpmGroupService {
 
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> findAllUpmGroupTempList() throws ApiRequestException {
-        List<UpmGroupTemp> upmGroupTempList = upmGroupTempRepository.findAll();
+    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> findAllUpmGroupTempList(Pageable pageable) throws ApiRequestException {
+        List<UpmGroupTemp> upmGroupTempList = upmGroupTempRepository.findAll(pageable).getContent();
         StandardResponse<List<UpmGroupDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upmGroupTempList);
         return ResponseEntity.ok().body(response);
     }
@@ -72,8 +73,8 @@ public class UpmGroupServiceImpl implements UpmGroupService {
 
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> searchUpmGroups() {
-        List<UpmGroup> upmGroupList = upmGroupRepository.findAll();
+    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> searchUpmGroups(Pageable pageable) {
+        List<UpmGroup> upmGroupList = upmGroupRepository.findAll(pageable).getContent();
 
         StandardResponse<List<UpmGroupDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upmGroupList);
         return ResponseEntity.ok().body(response);

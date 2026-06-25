@@ -7,6 +7,7 @@ import lk.sampath.casadminportalms.entity.role.PrivilegeCategory;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +21,8 @@ public class RoleController {
     private RoleService roleService;
 
     @GetMapping("${app.endpoint.privilegeList}")
-    public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories() throws  ApiRequestException{
-        ResponseEntity<StandardResponse<List<PrivilegeCategory>>> privilegeCategories = roleService.findAllPrivilegeCategories();
+    public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories(Pageable pageable) throws  ApiRequestException{
+        ResponseEntity<StandardResponse<List<PrivilegeCategory>>> privilegeCategories = roleService.findAllPrivilegeCategories(pageable);
         return ResponseEntity.ok().body(privilegeCategories.getBody());
     }
 
@@ -32,14 +33,14 @@ public class RoleController {
     }
 
     @GetMapping("${app.endpoint.roleTempList}")
-    public ResponseEntity<StandardResponse<List<RoleDTO>>> viewTempRoleList() throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<RoleDTO>>> role = roleService.findAllRolesTempList();
+    public ResponseEntity<StandardResponse<List<RoleDTO>>> viewTempRoleList(Pageable pageable) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<RoleDTO>>> role = roleService.findAllRolesTempList(pageable);
         return ResponseEntity.ok().body(role.getBody());
     }
 
     @GetMapping("${app.endpoint.roleList}")
-    public ResponseEntity<StandardResponse<List<RoleDTO>>> listRole() throws  ApiRequestException{
-        ResponseEntity<StandardResponse<List<RoleDTO>>> roles = roleService.findAllApprovedRoles();
+    public ResponseEntity<StandardResponse<List<RoleDTO>>> listRole(Pageable pageable) throws  ApiRequestException{
+        ResponseEntity<StandardResponse<List<RoleDTO>>> roles = roleService.findAllApprovedRoles(pageable);
         return ResponseEntity.ok().body(roles.getBody());
     }
 

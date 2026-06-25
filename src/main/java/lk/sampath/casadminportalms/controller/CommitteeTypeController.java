@@ -7,6 +7,7 @@ import lk.sampath.casadminportalms.entity.committeetype.CommitteeType;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.CommitteeTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -33,8 +34,8 @@ public class CommitteeTypeController {
      * @return ResponseEntity<StandardResponse<List<CommitteeType>>>
      */
     @GetMapping(value = "${app.endpoint.getCommitteeType}")
-    public ResponseEntity<StandardResponse<List<CommitteeType>>> getCommitteeTypes() throws ApiRequestException {
-        StandardResponse<List<CommitteeType>> response = committeeTypeService.getCommitteeTypes();
+    public ResponseEntity<StandardResponse<List<CommitteeType>>> getCommitteeTypes(Pageable pageable) throws ApiRequestException {
+        StandardResponse<List<CommitteeType>> response = committeeTypeService.getCommitteeTypes(pageable);
         return ResponseEntity.ok().body(response);
     }
 

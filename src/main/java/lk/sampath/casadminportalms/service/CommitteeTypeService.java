@@ -4,6 +4,7 @@ import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.committetype.CommitteeTypeDTO;
 import lk.sampath.casadminportalms.entity.committeetype.CommitteeType;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface CommitteeTypeService {
@@ -13,7 +14,7 @@ public interface CommitteeTypeService {
      * @return List<CommitteeTypeViewResponse>
      * @throws ApiRequestException
      */
-    StandardResponse<List<CommitteeType>> getCommitteeTypes() throws ApiRequestException;
+    StandardResponse<List<CommitteeType>> getCommitteeTypes(Pageable pageable) throws ApiRequestException;
 
     /**
      * save Committee Types service

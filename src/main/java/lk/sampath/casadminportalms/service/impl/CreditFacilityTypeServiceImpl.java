@@ -19,6 +19,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -484,13 +485,13 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> searchCreditFacilityTypes() throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> searchCreditFacilityTypes(Pageable pageable) throws ApiRequestException {
         LOG.info("START : Search Credit Facility Type List  in Master ");
         List<CreditFacilityType> creditFacilityTypes = new ArrayList<>();
         List<CreditFacilityTypeDTO> creditFacilityTypeDTOList;
         try {
 
-                creditFacilityTypes = creditFacilityTypeRepository.findAllApprovedCreditFacilityTypes();
+                creditFacilityTypes = creditFacilityTypeRepository.findAllApprovedCreditFacilityTypes(pageable).getContent();
 
             creditFacilityTypeDTOList = creditFacilityTypes.stream().map(creditFacilityType -> modelMapper.map(creditFacilityType, CreditFacilityTypeDTO.class)).toList();
         }
@@ -537,14 +538,14 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> findAllCreditFacilityTypeTempList() throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> findAllCreditFacilityTypeTempList(Pageable pageable) throws ApiRequestException {
         LOG.info("START : GET Credit Facility Types List in Temp ");
         List<CreditFacilityTypeTemp> creditFacilityTypeTempList;
         List<CreditFacilityTypeDTO> creditFacilityTypeTempListDTO = new ArrayList<>();
         try {
 
 
-             creditFacilityTypeTempList = creditFacilityTypeTempRepository.findAll();
+             creditFacilityTypeTempList = creditFacilityTypeTempRepository.findAll(pageable).getContent();
             LOG.info(" Fetched Credit Facility Types List in Temp : {}", creditFacilityTypeTempList);
              if (!creditFacilityTypeTempList.isEmpty()){
                  for(CreditFacilityTypeTemp creditType : creditFacilityTypeTempList){

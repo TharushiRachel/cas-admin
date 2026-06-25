@@ -7,6 +7,7 @@ import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.CreditFacilityTypeService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -59,9 +60,9 @@ public class CreditFacilityTypeController {
 
 
     @GetMapping("${app.endpoint.getCreditFacilityTypeMasterList}")
-        public  ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> getCreditFacilityTypeMasterList() throws ApiRequestException {
+        public  ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> getCreditFacilityTypeMasterList(Pageable pageable) throws ApiRequestException {
 
-        ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>>  creditFacilityTypeDTOList =  creditFacilityTypeService.searchCreditFacilityTypes();
+        ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>>  creditFacilityTypeDTOList =  creditFacilityTypeService.searchCreditFacilityTypes(pageable);
 
         return ResponseEntity.ok().body(creditFacilityTypeDTOList.getBody());
     }
@@ -76,9 +77,9 @@ public class CreditFacilityTypeController {
     }
 
     @GetMapping("${app.endpoint.getCreditFacilityTypeTempList}")
-        public ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> getCreditFacilityTypeTempList() throws ApiRequestException {
+        public ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> getCreditFacilityTypeTempList(Pageable pageable) throws ApiRequestException {
 
-        ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> creditFacilityTypeTempList = creditFacilityTypeService.findAllCreditFacilityTypeTempList();
+        ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> creditFacilityTypeTempList = creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
 
         return ResponseEntity.ok().body(creditFacilityTypeTempList.getBody());
     }

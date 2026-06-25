@@ -1,6 +1,8 @@
 package lk.sampath.casadminportalms.repository.creditfacilitytype;
 
 import lk.sampath.casadminportalms.entity.creditfacility.CreditFacilityType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -19,6 +21,14 @@ public interface CreditFacilityTypeRepository extends JpaRepository<CreditFacili
 
     @Query( value = "SELECT * FROM T_CREDIT_FACILITY_TYPE WHERE approve_status = 'APPROVED'", nativeQuery = true)
     List<CreditFacilityType> findAllApprovedCreditFacilityTypes();
+
+    @Query(
+            value = "SELECT * FROM T_CREDIT_FACILITY_TYPE WHERE approve_status = 'APPROVED'",
+            countQuery = "SELECT COUNT(1) FROM T_CREDIT_FACILITY_TYPE WHERE approve_status = 'APPROVED'",
+            nativeQuery = true
+    )
+    Page<CreditFacilityType> findAllApprovedCreditFacilityTypes(Pageable pageable);
+
     boolean existsByFacilityTypeName(String facilityTypeName);
 
     boolean existsByCreditFacilityTypeID(Integer creditFacilityTypeID);

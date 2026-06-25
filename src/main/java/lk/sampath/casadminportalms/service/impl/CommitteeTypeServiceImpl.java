@@ -9,6 +9,7 @@ import lk.sampath.casadminportalms.repository.committeetype.CommitteeTypeReposit
 import lk.sampath.casadminportalms.service.CommitteeTypeService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +38,8 @@ public class CommitteeTypeServiceImpl implements CommitteeTypeService {
      */
     @Override
     @Transactional(readOnly = true)
-    public  StandardResponse<List<CommitteeType>> getCommitteeTypes() throws ApiRequestException {
-        List<CommitteeType> committeeTypeList = this.committeeTypeRepository.findAll();
+    public  StandardResponse<List<CommitteeType>> getCommitteeTypes(Pageable pageable) throws ApiRequestException {
+        List<CommitteeType> committeeTypeList = this.committeeTypeRepository.findAll(pageable).getContent();
         return new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), committeeTypeList);
     }
 

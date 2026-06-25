@@ -7,6 +7,7 @@ import lk.sampath.casadminportalms.dto.upctemplate.UpcTemplateDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.UpcTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +22,8 @@ public class UpcTemplateController {
     private UpcTemplateService upcTemplateService;
 
     @GetMapping("${app.endpoint.upcTemplateTempList}")
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList() throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> spcTemplates = upcTemplateService.findAllUpcTemplateTempList();
+    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(Pageable pageable) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> spcTemplates = upcTemplateService.findAllUpcTemplateTempList(pageable);
         return ResponseEntity.ok().body(spcTemplates.getBody());
     }
 
@@ -33,8 +34,8 @@ public class UpcTemplateController {
     }
 
     @GetMapping("${app.endpoint.findAllApprovedUpcTemplateList}")
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplateList() throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> upcTemplates = upcTemplateService.findAllApprovedUpcTemplates();
+    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplateList(Pageable pageable) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> upcTemplates = upcTemplateService.findAllApprovedUpcTemplates(pageable);
         return ResponseEntity.ok().body(upcTemplates.getBody());
     }
 

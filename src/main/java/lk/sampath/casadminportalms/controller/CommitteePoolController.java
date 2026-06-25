@@ -5,6 +5,7 @@ import lk.sampath.casadminportalms.dto.committeePool.CommitteePoolDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.CommitteePoolService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,28 +22,30 @@ public class CommitteePoolController {
     }
 
     @GetMapping("${app.endpoint.getTempCommitteePool}")
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getTempCommitteePool() throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> response = committeePoolService.getTempCommitteePool();
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getTempCommitteePool(Pageable pageable) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> response = committeePoolService.getTempCommitteePool(pageable);
         return ResponseEntity.ok().body(response.getBody());
     }
 
     @GetMapping("${app.endpoint.getCommitteePool}")
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getCommitteePool() throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> response = committeePoolService.getCommitteePool();
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getCommitteePool(Pageable pageable) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> response = committeePoolService.getCommitteePool(pageable);
         return ResponseEntity.ok().body(response.getBody());
     }
 
     @PostMapping(value = "${app.endpoint.savePoolUsers}",headers = "Accept=application/json")
     public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  savePoolUsers(
-            @RequestBody List<CommitteePoolDTO> committeePoolUsers) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  response = committeePoolService.saveCommitteePoolUsers(committeePoolUsers);
+            @RequestBody List<CommitteePoolDTO> committeePoolUsers,
+            Pageable pageable) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  response = committeePoolService.saveCommitteePoolUsers(committeePoolUsers, pageable);
         return ResponseEntity.ok().body(response.getBody());
     }
 
     @PostMapping("${app.endpoint.saveTempPoolUser}")
     public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  saveTempPoolUser(
-            @RequestBody CommitteePoolDTO committeePoolDTO) throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  response = committeePoolService.saveTempCommitteePoolUser(committeePoolDTO);
+            @RequestBody CommitteePoolDTO committeePoolDTO,
+            Pageable pageable) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  response = committeePoolService.saveTempCommitteePoolUser(committeePoolDTO, pageable);
         return ResponseEntity.ok().body(response.getBody());
     }
 

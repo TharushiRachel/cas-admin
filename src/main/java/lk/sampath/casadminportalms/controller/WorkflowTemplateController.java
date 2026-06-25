@@ -8,6 +8,7 @@ import lk.sampath.casadminportalms.dto.workflowtemplate.WorkflowTemplateResponse
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.WorkflowTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -23,9 +24,9 @@ public class WorkflowTemplateController {
     }
 
     @GetMapping("${app.endpoint.getAllApprovedUPMGroups}")
-    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> getAllApprovedUPMGroups()
+    public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> getAllApprovedUPMGroups(Pageable pageable)
             throws ApiRequestException {
-        StandardResponse<List<UpmGroupDTO>> response = workflowTemplateService.getAllApprovedUPMGroups();
+        StandardResponse<List<UpmGroupDTO>> response = workflowTemplateService.getAllApprovedUPMGroups(pageable);
         return ResponseEntity.ok().body(response);
     }
 
@@ -37,14 +38,14 @@ public class WorkflowTemplateController {
     }
 
     @GetMapping("${app.endpoint.getTempWorkflowTemplate}")
-    public ResponseEntity<StandardResponse<WorkflowTemplateResponse>> getTempWorkflowTemplate() throws ApiRequestException {
-        StandardResponse<WorkflowTemplateResponse> response = workflowTemplateService.getTempWorkflowTemplate();
+    public ResponseEntity<StandardResponse<WorkflowTemplateResponse>> getTempWorkflowTemplate(Pageable pageable) throws ApiRequestException {
+        StandardResponse<WorkflowTemplateResponse> response = workflowTemplateService.getTempWorkflowTemplate(pageable);
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("${app.endpoint.getWorkflowTemplate}")
-    public ResponseEntity<StandardResponse<List<WorkflowTemplateDTO>>> getWorkflowTemplate() throws ApiRequestException {
-        StandardResponse<List<WorkflowTemplateDTO>> response = workflowTemplateService.getWorkflowTemplate();
+    public ResponseEntity<StandardResponse<List<WorkflowTemplateDTO>>> getWorkflowTemplate(Pageable pageable) throws ApiRequestException {
+        StandardResponse<List<WorkflowTemplateDTO>> response = workflowTemplateService.getWorkflowTemplate(pageable);
         return ResponseEntity.ok().body(response);
     }
 

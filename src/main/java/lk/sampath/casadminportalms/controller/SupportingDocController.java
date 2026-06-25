@@ -7,6 +7,7 @@ import lk.sampath.casadminportalms.dto.supportingdoc.SupportingDocDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.SupportingDocService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +22,8 @@ public class SupportingDocController {
 
 
     @GetMapping("${app.endpoint.viewSupportingDocTempList}")
-    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> viewAllSupportingDocsTemp() throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<SupportingDocDTO>>> supportingDocTempList = supportingDocService.findAllSupportingDocTempList();
+    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> viewAllSupportingDocsTemp(Pageable pageable) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<SupportingDocDTO>>> supportingDocTempList = supportingDocService.findAllSupportingDocTempList(pageable);
         return ResponseEntity.ok().body(supportingDocTempList.getBody());
     }
 
@@ -32,8 +33,8 @@ public class SupportingDocController {
         return ResponseEntity.ok().body(supportingDocDTO.getBody());
     }
     @GetMapping("${app.endpoint.viewSupportingDocList}")
-    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> getApprovedSupportingDocData() throws ApiRequestException {
-        ResponseEntity<StandardResponse<List<SupportingDocDTO>>> supportingDocs = supportingDocService.searchSupportingDocGroups();
+    public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> getApprovedSupportingDocData(Pageable pageable) throws ApiRequestException {
+        ResponseEntity<StandardResponse<List<SupportingDocDTO>>> supportingDocs = supportingDocService.searchSupportingDocGroups(pageable);
         return ResponseEntity.ok().body(supportingDocs.getBody());
     }
 

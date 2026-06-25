@@ -17,6 +17,7 @@ import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -58,8 +59,8 @@ public class UpcSectionServiceImpl implements UpcSectionService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> findAllUpcSectionTempList() throws ApiRequestException {
-        List<UpcSectionTemp> upcSectionList = upcSectionTempRepository.findAll();
+    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> findAllUpcSectionTempList(Pageable pageable) throws ApiRequestException {
+        List<UpcSectionTemp> upcSectionList = upcSectionTempRepository.findAll(pageable).getContent();
         StandardResponse<List<UpcSectionDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcSectionList);
         return ResponseEntity.ok().body(response);
     }
@@ -75,8 +76,8 @@ public class UpcSectionServiceImpl implements UpcSectionService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> findAllApprovedUpcSection() {
-        List<UpcSection> upcSectionList = upcSectionRepository.findAll();
+    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> findAllApprovedUpcSection(Pageable pageable) {
+        List<UpcSection> upcSectionList = upcSectionRepository.findAll(pageable).getContent();
         StandardResponse<List<UpcSectionDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcSectionList);
         return ResponseEntity.ok().body(response);
     }

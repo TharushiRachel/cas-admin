@@ -21,6 +21,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -101,9 +102,9 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp() {
+    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp(Pageable pageable) {
 
-        List<CreditFacilityTemplateTemp> creditFacilityTemplateTempList = creditFacilityTemplateTempRepository.findAll();
+        List<CreditFacilityTemplateTemp> creditFacilityTemplateTempList = creditFacilityTemplateTempRepository.findAll(pageable).getContent();
 
         List<CreditFacilityTemplateDTO> creditFacilityTemplateDTOList = creditFacilityTemplateTempList.stream()
                 .map(CreditFacilityTemplateDTO :: new)
@@ -129,9 +130,9 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplates() {
+    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplates(Pageable pageable) {
 
-        List<CreditFacilityTemplate> creditFacilityTemplateList = creditFacilityTemplateRepository.findAll();
+        List<CreditFacilityTemplate> creditFacilityTemplateList = creditFacilityTemplateRepository.findAll(pageable).getContent();
 
         List<CreditFacilityTemplateDTO> creditFacilityTemplateDTOList = creditFacilityTemplateList.stream()
                 .map(CreditFacilityTemplateDTO::new)
