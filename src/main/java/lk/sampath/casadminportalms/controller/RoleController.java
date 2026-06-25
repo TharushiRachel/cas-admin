@@ -16,12 +16,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/role")
 public class RoleController {
 
     @Autowired
     private RoleService roleService;
 
-    @GetMapping("${app.endpoint.privilegeList}")
+    @GetMapping("/getSystemPrivileges")
     public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -32,13 +33,13 @@ public class RoleController {
         return ResponseEntity.ok().body(privilegeCategories.getBody());
     }
 
-    @GetMapping("${app.endpoint.viewTempRoleById}")
+    @GetMapping("/roleTemp/{roleID}")
     public ResponseEntity<StandardResponse<Object>> viewTempRoleById(@PathVariable Integer roleID) throws  ApiRequestException {
         ResponseEntity<StandardResponse<Object>> role = roleService.findRolesTempByID(roleID);
         return ResponseEntity.ok().body(role.getBody());
     }
 
-    @GetMapping("${app.endpoint.roleTempList}")
+    @GetMapping("/roleTempList")
     public ResponseEntity<StandardResponse<List<RoleDTO>>> viewTempRoleList(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -49,7 +50,7 @@ public class RoleController {
         return ResponseEntity.ok().body(role.getBody());
     }
 
-    @GetMapping("${app.endpoint.roleList}")
+    @GetMapping("/searchRoles")
     public ResponseEntity<StandardResponse<List<RoleDTO>>> listRole(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -60,37 +61,37 @@ public class RoleController {
         return ResponseEntity.ok().body(roles.getBody());
     }
 
-    @GetMapping("${app.endpoint.viewRoleById}")
+    @GetMapping("/{roleID}")
     public ResponseEntity<StandardResponse<Object>> viewRoleById(@PathVariable Integer roleID) throws ApiRequestException {
         ResponseEntity<StandardResponse<Object>> role = roleService.findApprovedRoleById(roleID);
         return ResponseEntity.ok().body(role.getBody());
     }
 
-    @PostMapping("${app.endpoint.roleBasePath}")
+    @PostMapping
     public ResponseEntity<StandardResponse<Object>> saveRole(@Validated @RequestBody RoleDTO request) throws  ApiRequestException{
         ResponseEntity<StandardResponse<Object>> role = roleService.saveRoleTemp(request);
         return ResponseEntity.ok().body(role.getBody());
     }
 
-    @PostMapping("${app.endpoint.updateRole}")
+    @PostMapping("/updateTempRole/{roleID}")
     public ResponseEntity<StandardResponse<Object>> updateRole(@PathVariable  Integer roleID, @Validated @RequestBody RoleDTO request) throws  ApiRequestException{
         ResponseEntity<StandardResponse<Object>> role = roleService.updateRoleTemp(roleID, request);
         return ResponseEntity.ok().body(role.getBody());
     }
 
-    @PostMapping("${app.endpoint.roleApproveReject}")
+    @PostMapping("/approvedRejectRole")
     public ResponseEntity<StandardResponse<Object>> approveRejectRole(@Validated @RequestBody ApproveRejectRQ approveRejectRQ) throws  ApiRequestException{
         ResponseEntity<StandardResponse<Object>> role = roleService.approveRejectRole(approveRejectRQ);
         return ResponseEntity.ok().body(role.getBody());
     }
 
-    @PostMapping("${app.endpoint.updateApprovedRole}")
+    @PostMapping("/updateApprovedRole/{roleID}")
     public ResponseEntity<StandardResponse<Object>> updateApprovedRole(@PathVariable  Integer roleID, @Validated @RequestBody RoleDTO request) throws  ApiRequestException{
         ResponseEntity<StandardResponse<Object>> role = roleService.updateApprovedRole(roleID, request);
         return ResponseEntity.ok().body(role.getBody());
     }
 
-    @PostMapping("${app.endpoint.deleteRoleTemp}")
+    @PostMapping("/deleteRoleTemp")
     public ResponseEntity<StandardResponse<Void>> deleteRoleTempById(@RequestBody  RoleDTO roleDTO) throws  ApiRequestException{
         ResponseEntity<StandardResponse<Void>> role = roleService.deleteRoleTempById(roleDTO.getRoleID());
         return ResponseEntity.ok().body(role.getBody());

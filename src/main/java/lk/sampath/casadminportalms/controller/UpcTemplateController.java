@@ -17,12 +17,13 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
+@RequestMapping("/upcTemplate")
 public class UpcTemplateController {
 
     @Autowired
     private UpcTemplateService upcTemplateService;
 
-    @GetMapping("${app.endpoint.upcTemplateTempList}")
+    @GetMapping("/upcTemplateTemp/UpcTemplateTempList")
     public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -33,13 +34,13 @@ public class UpcTemplateController {
         return ResponseEntity.ok().body(spcTemplates.getBody());
     }
 
-    @GetMapping("${app.endpoint.UpcTemplateTempById}")
+    @GetMapping("/upcTemplateTemp/UpcTemplateTempById/{upcTemplateID}")
     public ResponseEntity<StandardResponse<Object>> upcTemplateTempById(@PathVariable Integer upcTemplateID) throws ApiRequestException {
         ResponseEntity<StandardResponse<Object>> upcTemplate = upcTemplateService.findUpcTemplateTempById(upcTemplateID);
         return ResponseEntity.ok().body(upcTemplate.getBody());
     }
 
-    @GetMapping("${app.endpoint.findAllApprovedUpcTemplateList}")
+    @GetMapping("/upcTemplateTemp/findAllApprovedUpcTemplates")
     public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplateList(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -50,37 +51,37 @@ public class UpcTemplateController {
         return ResponseEntity.ok().body(upcTemplates.getBody());
     }
 
-    @GetMapping("${app.endpoint.findApprovedUpcTemplateById}")
+    @GetMapping("/findApprovedUpcTemplateById/{upcTemplateID}")
     public ResponseEntity<StandardResponse<Object>> findApprovedUpcTemplateById(@PathVariable Integer upcTemplateID) throws ApiRequestException {
         ResponseEntity<StandardResponse<Object>> upcTemplate = upcTemplateService.findApprovedUpcTemplateById(upcTemplateID);
         return ResponseEntity.ok().body(upcTemplate.getBody());
     }
 
-    @PostMapping("${app.endpoint.saveUpcTemplate}")
+    @PostMapping
     public ResponseEntity<StandardResponse<Object>> saveUpcTemplate(@Validated @RequestBody UpcTemplateDTO upcTemplateDTO) throws ApiRequestException {
         ResponseEntity<StandardResponse<Object>> upcTemplate = upcTemplateService.saveUpcTemplate(upcTemplateDTO);
         return ResponseEntity.ok().body(upcTemplate.getBody());
     }
 
-    @PostMapping("${app.endpoint.updateUpcTemplate}")
+    @PostMapping("/updateUpcTemplateTemp/{upcTemplateID}")
     public ResponseEntity<StandardResponse<Object>> updateUpcTemplate(@PathVariable Integer upcTemplateID, @Validated @RequestBody UpcTemplateDTO upcTemplateDTO) throws ApiRequestException {
         ResponseEntity<StandardResponse<Object>> upcTemplate = upcTemplateService.updateUpcTemplateTemp(upcTemplateID, upcTemplateDTO);
         return ResponseEntity.ok().body(upcTemplate.getBody());
     }
 
-    @PostMapping("${app.endpoint.approveRejectUpcTemplate}")
+    @PostMapping("/approveRejectUpcTemplate")
     public ResponseEntity<StandardResponse<Object>> approveRejectUpcTemplate(@RequestBody ApproveRejectRQ approveRejectRQ) throws ApiRequestException {
         ResponseEntity<StandardResponse<Object>> upcTemplate = upcTemplateService.approveRejectUpcTemplate(approveRejectRQ);
         return ResponseEntity.ok().body(upcTemplate.getBody());
     }
 
-    @PostMapping("${app.endpoint.updateUpcTemplateMaster}")
+    @PostMapping("/updateUpcTemplate/{upcTemplateID}")
     public ResponseEntity<StandardResponse<Object>> updateApprovedUpcTemplate(@PathVariable Integer upcTemplateID, @Validated @RequestBody UpcTemplateDTO upcTemplateDTO) throws ApiRequestException {
         ResponseEntity<StandardResponse<Object>> upcTemplate = upcTemplateService.updateApprovedUpcTemplate(upcTemplateID, upcTemplateDTO);
         return ResponseEntity.ok().body(upcTemplate.getBody());
     }
 
-    @PostMapping("${app.endpoint.deleteUpcTemplateFromTemp}")
+    @PostMapping("/upcTemplateTemp/deleteUpcTemplateFromTemp")
     public ResponseEntity<StandardResponse<Void>> deleteUpcTemplateFromTemp(@Validated @RequestBody UpcTemplateDTO upcTemplateDTO) throws ApiRequestException {
         ResponseEntity<StandardResponse<Void>> response = upcTemplateService.deleteUpcTemplateFromTemp(upcTemplateDTO.getUpcTemplateID());
         return ResponseEntity.ok().body(response.getBody());

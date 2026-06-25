@@ -15,13 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/userDa")
 public class UserDaController {
 
     @Autowired
     private UserDaService userDaService;
 
 
-    @GetMapping("${app.endpoint.viewUserDaTempList}")
+    @GetMapping("/userDaTemp")
         public ResponseEntity<StandardResponse<List<UserDaDTO>>> viewAllUserDaTemp(
                         @RequestHeader(name = "page", required = false) Integer headerPage,
                         @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -32,13 +33,13 @@ public class UserDaController {
                 return ResponseEntity.ok().body(userDaTempList.getBody());
     }
 
-    @GetMapping("${app.endpoint.viewUserDaTempById}")
+    @GetMapping("/userDaTemp/{userDaID}")
     public ResponseEntity<StandardResponse<UserDaDTO>> viewUserDaTempById(@PathVariable Integer userDaID) throws ApiRequestException{
         ResponseEntity<StandardResponse<UserDaDTO>> userDaTempDTO = userDaService.findUserDaTempByID(userDaID);
         return ResponseEntity.ok().body(userDaTempDTO.getBody());
     }
 
-    @PostMapping("${app.endpoint.viewUserDaList}")
+    @PostMapping("/userDasList")
     public ResponseEntity<StandardResponse<List<UserDaDTO>>> getPagedUserDaData(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -49,36 +50,36 @@ public class UserDaController {
         return ResponseEntity.ok().body(userDaList.getBody());
     }
 
-    @GetMapping("${app.endpoint.viewUserDaById}")
+    @GetMapping("/{userDaID}")
     public ResponseEntity<StandardResponse<UserDaDTO>> viewUserDaById(@PathVariable Integer userDaID) throws ApiRequestException{
         ResponseEntity<StandardResponse<UserDaDTO>> userDa = userDaService.findApprovedUserDaById(userDaID);
         return ResponseEntity.ok().body(userDa.getBody());
     }
-    @PostMapping("${app.endpoint.saveUserDa}")
+    @PostMapping
     public ResponseEntity<StandardResponse<UserDaDTO>> saveUserDa(@Validated @RequestBody UserDaDTO request) throws  ApiRequestException{
         ResponseEntity<StandardResponse<UserDaDTO>> userDaTemp = userDaService.saveUserDaTemp(request);
         return ResponseEntity.ok().body(userDaTemp.getBody());
     }
 
-    @PostMapping("${app.endpoint.userDaApproveReject}")
+    @PostMapping("/approveRejectUserDa")
     public ResponseEntity<StandardResponse<UserDaDTO>> approveRejectUserDa(@Validated @RequestBody ApproveRejectRQ request) throws  ApiRequestException {
         ResponseEntity<StandardResponse<UserDaDTO>> userDa = userDaService.approveRejectUserDa(request);
         return ResponseEntity.ok().body(userDa.getBody());
     }
 
-    @PostMapping("${app.endpoint.updateUserDaTemp}")
+    @PostMapping("/updateUserDaTemp/{userDaID}")
     public ResponseEntity<StandardResponse<UserDaDTO>> updateUserDaTemp(@PathVariable Integer userDaID, @Validated @RequestBody UserDaDTO request) throws  ApiRequestException{
         ResponseEntity<StandardResponse<UserDaDTO>> userDa = userDaService.updateUserDaTemp(userDaID, request);
         return ResponseEntity.ok().body(userDa.getBody());
     }
 
-    @PostMapping("${app.endpoint.updateUserDaMaster}")
+    @PostMapping("/userDa/{userDaID}")
     public ResponseEntity<StandardResponse<UserDaDTO>> updateApprovedUserDa(@PathVariable Integer userDaID, @Validated @RequestBody UserDaDTO userDaDTO) throws ApiRequestException {
         ResponseEntity<StandardResponse<UserDaDTO>> userDa = userDaService.updateApprovedUserDa(userDaID, userDaDTO);
         return ResponseEntity.ok().body(userDa.getBody());
     }
 
-    @PostMapping("${app.endpoint.deleteUserDaTemp}")
+    @PostMapping("/userDaTemp/deleteUserDaTemp")
     public ResponseEntity<StandardResponse<Void>> deleteUserDaTemp(@Validated @RequestBody UserDaDTO request) throws ApiRequestException{
         ResponseEntity<StandardResponse<Void>> userDa = userDaService.deleteUserDaFromTemp(request.getUserDaID());
         return ResponseEntity.ok().body(userDa.getBody());

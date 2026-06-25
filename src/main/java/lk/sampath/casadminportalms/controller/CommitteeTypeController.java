@@ -21,6 +21,7 @@ import java.util.List;
  * @author SITS-Ushan
  */
 @RestController
+@RequestMapping("/committeeType")
 public class CommitteeTypeController {
 
     private final CommitteeTypeService committeeTypeService;
@@ -34,7 +35,7 @@ public class CommitteeTypeController {
      * Returns all CommitteeTypes
      * @return ResponseEntity<StandardResponse<List<CommitteeType>>>
      */
-    @GetMapping(value = "${app.endpoint.getCommitteeType}")
+    @GetMapping(value = "/getCommitteeType")
     public ResponseEntity<StandardResponse<List<CommitteeType>>> getCommitteeTypes(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -49,7 +50,7 @@ public class CommitteeTypeController {
      * save Committee Type
      * @return  AppResponse<CommitteeTypeCreateResponse>
      */
-    @PostMapping(value = "${app.endpoint.saveCommitteeType}")
+    @PostMapping(value = "/saveCommitteeType")
     public ResponseEntity<StandardResponse<CommitteeTypeDTO>> saveCommitteeType(@Validated @RequestBody CommitteeTypeDTO request)
             throws ApiRequestException {
         StandardResponse<CommitteeTypeDTO> response = committeeTypeService.saveCommitteeType(request);
@@ -62,7 +63,7 @@ public class CommitteeTypeController {
      * @return  AppResponse<CommitteeTypeCreateResponse>
      * @throws ApiRequestException
      */
-    @PostMapping(value = "${app.endpoint.updateCommitteeType}")
+    @PostMapping(value = "/updateCommitteeType/{committeeTypeId}")
     public ResponseEntity<StandardResponse<CommitteeTypeDTO>> updateCommitteeType(@PathVariable int committeeTypeId,
                                                                              @Validated @RequestBody CommitteeTypeDTO request)
             throws ApiRequestException {

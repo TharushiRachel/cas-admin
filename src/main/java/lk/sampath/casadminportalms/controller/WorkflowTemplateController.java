@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/workflowTemplate")
 public class WorkflowTemplateController {
 
     private final WorkflowTemplateService workflowTemplateService;
@@ -24,7 +25,7 @@ public class WorkflowTemplateController {
         this.workflowTemplateService = workflowTemplateService;
     }
 
-    @GetMapping("${app.endpoint.getAllApprovedUPMGroups}")
+    @GetMapping("/getAllApprovedUPMGroups")
     public ResponseEntity<StandardResponse<List<UpmGroupDTO>>> getAllApprovedUPMGroups(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -36,14 +37,14 @@ public class WorkflowTemplateController {
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping("${app.endpoint.saveOrUpdateTempWorkflowTemplate}")
+    @PostMapping("/saveOrUpdateTempWorkflowTemplate")
     public ResponseEntity<StandardResponse<String>> saveOrUpdateTempWorkflowTemplate(@RequestBody WorkflowTemplateDTO request)
             throws ApiRequestException {
         StandardResponse<String> response = workflowTemplateService.saveOrUpdateTempWorkflowTemplate(request);
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("${app.endpoint.getTempWorkflowTemplate}")
+    @GetMapping("/getTempWorkflowTemplate")
     public ResponseEntity<StandardResponse<WorkflowTemplateResponse>> getTempWorkflowTemplate(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -54,7 +55,7 @@ public class WorkflowTemplateController {
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("${app.endpoint.getWorkflowTemplate}")
+    @GetMapping("/getWorkflowTemplate")
     public ResponseEntity<StandardResponse<List<WorkflowTemplateDTO>>> getWorkflowTemplate(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -65,7 +66,7 @@ public class WorkflowTemplateController {
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping("${app.endpoint.authorizeWorkFlowTemp}")
+    @PostMapping("/authorizeWorkFlowTemp")
     public ResponseEntity<StandardResponse<Boolean>> authorizeWorkflowTemplateTemp(@RequestBody ApproveRejectRQ approveRejectRQ)
             throws ApiRequestException {
         StandardResponse<Boolean> response = workflowTemplateService.authorizeWorkflowTemplateTemp(approveRejectRQ);

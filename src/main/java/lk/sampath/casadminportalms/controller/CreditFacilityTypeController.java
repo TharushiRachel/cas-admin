@@ -23,6 +23,7 @@ import java.util.List;
 
 
 @RestController
+@RequestMapping("/creditFacilityType")
 public class CreditFacilityTypeController {
 
     @Autowired
@@ -31,27 +32,27 @@ public class CreditFacilityTypeController {
     @Autowired
     private CreditFacilityTypeService creditFacilityTypeService;
 
-    @PostMapping("${app.endpoint.saveCreditFacilityType}")
+    @PostMapping("/saveCreditFacilityType")
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> saveCreditFacilityType(@Validated @RequestBody CreditFacilityTypeDTO request) throws ApiRequestException {
 
         ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> saveCreditFacilityType = creditFacilityTypeService.saveCreditFacilityTypeTemp(request);
         return ResponseEntity.ok().body(saveCreditFacilityType.getBody());
     }
 
-    @GetMapping("${app.endpoint.getCreditFacilityTempTypeById}")
+    @GetMapping("/getCreditFacilityTempTypeById/{creditFacilityTypeID}")
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> getCreditFacilityTypeTempById(@PathVariable Integer creditFacilityTypeID) throws ApiRequestException {
         ResponseEntity<StandardResponse<CreditFacilityTypeDTO>>  creditFacilityTypeTemp = creditFacilityTypeService.findCreditFacilityTypeTempByID(creditFacilityTypeID);
         return ResponseEntity.ok().body(creditFacilityTypeTemp.getBody());
     }
 
-    @PostMapping("${app.endpoint.updateCreditFacilityTempType}")
+    @PostMapping("/updateCreditFacilityTempType/{creditFacilityTypeID}")
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> updateCreditFacilityTypeTemp(@PathVariable Integer creditFacilityTypeID, @Validated @RequestBody CreditFacilityTypeDTO request) throws ApiRequestException {
         ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> facilityTypeTemp = creditFacilityTypeService.updateCreditFacilityTempType(creditFacilityTypeID, request);
 
         return ResponseEntity.ok().body(facilityTypeTemp.getBody());
     }
 
-    @PostMapping("${app.endpoint.creditFacilityTypeApproveReject}")
+    @PostMapping("/approveRejectCreditFacilityType")
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> approveRejectCreditFacilityTypeTemp(@Validated @RequestBody ApproveRejectRQ approveRejectRQ) throws ApiRequestException {
 
         ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> approveCreditFacilityType = creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ);
@@ -60,7 +61,7 @@ public class CreditFacilityTypeController {
     }
 
 
-    @GetMapping("${app.endpoint.getCreditFacilityTypeMasterList}")
+    @GetMapping("/getCreditFacilityTypeMasterList")
         public  ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> getCreditFacilityTypeMasterList(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -73,7 +74,7 @@ public class CreditFacilityTypeController {
         return ResponseEntity.ok().body(creditFacilityTypeDTOList.getBody());
     }
 
-    @GetMapping("${app.endpoint.getCreditFacilityType}")
+    @GetMapping("/getCreditFacilityType/{creditFacilityTypeID}")
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> getCreditFacilityTypeId(@PathVariable Integer creditFacilityTypeID) throws ApiRequestException {
 
         ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> creditFacilityType = creditFacilityTypeService.findCreditFacilityTypeByID(creditFacilityTypeID);
@@ -82,7 +83,7 @@ public class CreditFacilityTypeController {
         return ResponseEntity.ok().body(creditFacilityType.getBody());
     }
 
-    @GetMapping("${app.endpoint.getCreditFacilityTypeTempList}")
+    @GetMapping("/getCreditFacilityTypeTempList")
         public ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> getCreditFacilityTypeTempList(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -95,14 +96,14 @@ public class CreditFacilityTypeController {
         return ResponseEntity.ok().body(creditFacilityTypeTempList.getBody());
     }
 
-    @PostMapping("${app.endpoint.deleteCreditFacilityTypeTemp}")
+    @PostMapping("/deleteCreditFacilityTypeTemp")
     public ResponseEntity<StandardResponse<Integer>> deleteCreditFacilityTypeTemp( @RequestBody  CreditFacilityTypeDTO creditFacilityTypeTempDTO) throws ApiRequestException {
 
         ResponseEntity<StandardResponse<Integer>> response =  creditFacilityTypeService.deleteCreditFacilityTypeTemp( creditFacilityTypeTempDTO);
         return ResponseEntity.ok().body(response.getBody());
     }
 
-    @PostMapping("${app.endpoint.updateCreditFacilityMasterType}")
+    @PostMapping("/updateCreditFacilityMasterType/{creditFacilityTypeID}")
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> updateCreditFacilityTypeMaster(@PathVariable Integer creditFacilityTypeID, @Validated @RequestBody CreditFacilityTypeDTO request) throws ApiRequestException {
         ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> facilityTypeTemp = creditFacilityTypeService.updateApprovedCreditFacilityType(creditFacilityTypeID, request);
 

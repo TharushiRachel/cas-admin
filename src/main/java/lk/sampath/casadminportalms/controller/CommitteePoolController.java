@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/committeePool")
 public class CommitteePoolController {
 
     private final CommitteePoolService committeePoolService;
@@ -22,7 +23,7 @@ public class CommitteePoolController {
         this.committeePoolService = committeePoolService;
     }
 
-    @GetMapping("${app.endpoint.getTempCommitteePool}")
+    @GetMapping("/getTempCommitteePool")
     public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getTempCommitteePool(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -33,7 +34,7 @@ public class CommitteePoolController {
         return ResponseEntity.ok().body(response.getBody());
     }
 
-    @GetMapping("${app.endpoint.getCommitteePool}")
+    @GetMapping("/getCommitteePool")
     public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getCommitteePool(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
@@ -44,7 +45,7 @@ public class CommitteePoolController {
         return ResponseEntity.ok().body(response.getBody());
     }
 
-    @PostMapping(value = "${app.endpoint.savePoolUsers}",headers = "Accept=application/json")
+    @PostMapping(value = "/savePoolUsers",headers = "Accept=application/json")
     public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  savePoolUsers(
             @RequestBody List<CommitteePoolDTO> committeePoolUsers,
             @RequestHeader(name = "page", required = false) Integer headerPage,
@@ -56,7 +57,7 @@ public class CommitteePoolController {
         return ResponseEntity.ok().body(response.getBody());
     }
 
-    @PostMapping("${app.endpoint.saveTempPoolUser}")
+    @PostMapping("/saveTempPoolUser")
     public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  saveTempPoolUser(
             @RequestBody CommitteePoolDTO committeePoolDTO,
             @RequestHeader(name = "page", required = false) Integer headerPage,
@@ -68,7 +69,7 @@ public class CommitteePoolController {
         return ResponseEntity.ok().body(response.getBody());
     }
 
-    @PostMapping("${app.endpoint.approveRejectCommitteePool}")
+    @PostMapping("/approveRejectCommitteePool")
     public ResponseEntity<StandardResponse<CommitteePoolDTO>> approveRejectPoolUser(@RequestBody CommitteePoolDTO committeePoolDTO) throws ApiRequestException {
         ResponseEntity<StandardResponse<CommitteePoolDTO>> response = committeePoolService.approveRejectPoolUser(committeePoolDTO);
         return ResponseEntity.ok().body(response.getBody());
