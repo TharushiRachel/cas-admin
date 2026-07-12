@@ -23,5 +23,8 @@ public abstract class ApprovableEntity extends UserTrackableEntity{
     @Column(name = "APPROVED_BY")
     private String approvedBy;
 
-
+    @Override
+    protected boolean allowAuditUpdate() {
+        return approveStatus != MasterDataApproveStatus.APPROVED && approveStatus != MasterDataApproveStatus.REJECTED;
+    }
 }

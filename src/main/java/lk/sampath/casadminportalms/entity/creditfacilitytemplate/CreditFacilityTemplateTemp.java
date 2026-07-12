@@ -3,13 +3,10 @@ package lk.sampath.casadminportalms.entity.creditfacilitytemplate;
 import jakarta.persistence.*;
 import lk.sampath.casadminportalms.entity.common.ApprovableEntity;
 import lk.sampath.casadminportalms.entity.creditfacility.CreditFacilityType;
-import lk.sampath.casadminportalms.entity.facilitypaper.FPDocumentElement;
 import lk.sampath.casadminportalms.enums.AppsConstants;
 import lombok.*;
 
-
 import java.math.BigDecimal;
-
 import java.util.Set;
 
 
@@ -19,7 +16,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @ToString
-@Table(name = "T_CREDIT_FACILITY_TEMPLATE_TEMP")
+@Table(name = "CASV3_T_CREDIT_FACILITY_TEMPLATE_TEMP")
 public class CreditFacilityTemplateTemp extends ApprovableEntity {
 
     @Id
@@ -88,8 +85,8 @@ public class CreditFacilityTemplateTemp extends ApprovableEntity {
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "creditFacilityTemplate")
     private Set<CftOtherFacilityInformationTemp> cftOtherFacilityInformations;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "creditFacilityTemplateTemp")
-    private Set<FPDocumentElement> fPDocumentElements;
+//    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "creditFacilityTemplateTemp")
+//    private Set<FPDocumentElement> fPDocumentElements;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "creditFacilityTemplate")
     private Set<CftCustomFacilityInfoTemp> cftCustomFacilityInfos;

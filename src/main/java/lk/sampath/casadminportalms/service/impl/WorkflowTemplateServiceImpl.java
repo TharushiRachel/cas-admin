@@ -14,21 +14,21 @@ import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.repository.upmgroup.UpmGroupRepository;
 import lk.sampath.casadminportalms.repository.workflowtemplate.*;
 import lk.sampath.casadminportalms.service.WorkflowTemplateService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.*;
 
 @Service
+@Log4j2
 public class WorkflowTemplateServiceImpl implements WorkflowTemplateService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(WorkflowTemplateServiceImpl.class);
 
     private final WorkflowTemplateRepository workflowTemplateRepository;
     private final WorkflowTemplateDataRepository workflowTemplateDataRepository;
@@ -190,7 +190,7 @@ public class WorkflowTemplateServiceImpl implements WorkflowTemplateService {
             workflowTemplateTemp.setApproveStatus(MasterDataApproveStatus.REJECTED);
             workflowTemplateTempRepository.saveAndFlush(workflowTemplateTemp);
         }
-        LOG.info("END: approveCreditFacilityTemplateDTO :{}", approveRejectRQ);
+        log.info("END: approveCreditFacilityTemplateDTO :{}", approveRejectRQ);
         return new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), true);
     }
 
@@ -242,12 +242,13 @@ public class WorkflowTemplateServiceImpl implements WorkflowTemplateService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public StandardResponse<List<WorkflowTemplateDTO>> getWorkflowTemplate(Pageable pageable) throws ApiRequestException {
+    public StandardResponse<List<WorkflowTemplateDTO>> getWorkflowTemplate(int pageNo,int pageSize) throws ApiRequestException {
         WorkflowTemplateResponse result = new WorkflowTemplateResponse();
         List<WorkflowTemplateDTO> workflowTemplateTempList = new ArrayList<>();
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
         Page<WorkflowTemplate> pageDetails = this.workflowTemplateRepository.findAllWorkflowTemplate(pageable);
 
-        if (pageDetails.hasContent()) {
+        if (!pageDetails.hasContent()) {
             pageDetails.getContent().forEach(rec -> {
                 List<WorkFlowTemplateDataDTO> childArray = new ArrayList<>();
                 List<WorkflowTemplateData> workflowTemplateTempDataList =

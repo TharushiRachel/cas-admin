@@ -2,6 +2,7 @@ package lk.sampath.casadminportalms.entity.creditfacilitytemplate;
 
 import jakarta.persistence.*;
 import lk.sampath.casadminportalms.entity.common.ApprovableEntity;
+import lk.sampath.casadminportalms.entity.common.UserTrackableEntity;
 import lk.sampath.casadminportalms.enums.AppsConstants;
 import lk.sampath.casadminportalms.enums.InterestRatingSubCategory;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @Table(name = "T_CFT_INTEREST_RATE")
 @EntityListeners(AuditingEntityListener.class)
-public class CftInterestRate extends ApprovableEntity {
+public class CftInterestRate  extends UserTrackableEntity {
 
     @Id
     @Column(name = "CFT_INTEREST_RATE_ID")

@@ -1,5 +1,6 @@
 package lk.sampath.casadminportalms.dto.role;
 
+import lk.sampath.casadminportalms.entity.role.Privilege;
 import lk.sampath.casadminportalms.enums.Status;
 import lombok.Data;
 
@@ -18,4 +19,6 @@ public class PrivilegeDTO {
 
     private Status status;
 
+    public PrivilegeDTO() {
+    }
 }

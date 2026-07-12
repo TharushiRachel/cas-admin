@@ -3,7 +3,6 @@ package lk.sampath.casadminportalms.entity.creditfacilitytemplate;
 import jakarta.persistence.*;
 import lk.sampath.casadminportalms.entity.common.ApprovableEntity;
 import lk.sampath.casadminportalms.entity.creditfacility.CreditFacilityType;
-import lk.sampath.casadminportalms.entity.facilitypaper.FPDocumentElement;
 import lk.sampath.casadminportalms.enums.AppsConstants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -88,8 +87,8 @@ public class CreditFacilityTemplate extends ApprovableEntity {
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "creditFacilityTemplate")
     private Set<CftOtherFacilityInformation> cftOtherFacilityInformations;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "creditFacilityTemplate")
-    private Set<FPDocumentElement> fPDocumentElements;
+//    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "creditFacilityTemplate")
+//    private Set<FPDocumentElement> fPDocumentElements;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "creditFacilityTemplate")
     private Set<CftCustomFacilityInfo> cftCustomFacilityInfos;

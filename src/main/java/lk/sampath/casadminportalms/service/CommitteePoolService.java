@@ -10,13 +10,25 @@ import java.util.List;
 
 public interface CommitteePoolService{
 
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getTempCommitteePool(Pageable pageable)throws ApiRequestException;
+//    default ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getTempCommitteePool()throws ApiRequestException {
+//        return getTempCommitteePool(0, 10);
+//    }
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getTempCommitteePool() throws ApiRequestException;
 
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getCommitteePool(Pageable pageable)throws ApiRequestException;
+//    default ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getCommitteePool()throws ApiRequestException {
+//        return getCommitteePool(0, 10);
+//    }
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>> getCommitteePool()throws ApiRequestException;
 
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  saveCommitteePoolUsers(List<CommitteePoolDTO> committeePoolUsers, Pageable pageable)throws ApiRequestException;
+//    default ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  saveCommitteePoolUsers(List<CommitteePoolDTO> committeePoolUsers)throws ApiRequestException {
+//        return saveCommitteePoolUsers(committeePoolUsers, 0, 10);
+//    }
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  saveCommitteePoolUsers(List<CommitteePoolDTO> committeePoolUsers)throws ApiRequestException;
 
-    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  saveTempCommitteePoolUser(CommitteePoolDTO committeePoolUser, Pageable pageable)throws ApiRequestException;
+//    default ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  saveTempCommitteePoolUser(CommitteePoolDTO committeePoolUser)throws ApiRequestException {
+//        return saveTempCommitteePoolUser(committeePoolUser, 0, 10);
+//    }
+    public ResponseEntity<StandardResponse<List<CommitteePoolDTO>>>  saveTempCommitteePoolUser(CommitteePoolDTO committeePoolUser)throws ApiRequestException;
 
     public ResponseEntity<StandardResponse<CommitteePoolDTO>> approveRejectPoolUser(CommitteePoolDTO committeePoolUser)throws ApiRequestException;
 }

@@ -12,19 +12,16 @@ import lombok.Setter;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_UPM_GROUP_TEMP_AUD")
+@Table(name = "CASV3_T_UPM_GROUP_AUD")
 public class UpmGroupTempAud extends ApprovableEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_T_UPM_GROUP_AUD")
-    @SequenceGenerator(name = "SEQ_T_UPM_GROUP_AUD", sequenceName = "SEQ_T_UPM_GROUP_AUD", allocationSize = 1)
-    @Column(name = "REV", nullable = false, updatable = false)
-    private Integer rev;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CASV3_T_UPM_GROUP_AUD")
+    @SequenceGenerator(name = "SEQ_CASV3_T_UPM_GROUP_AUD", sequenceName = "SEQ_CASV3_T_UPM_GROUP_AUD", allocationSize = 1)
+    @Column(name = "UPM_GROUP_HISTORY_ID", nullable = false, updatable = false)
+    private Integer upmGroupHistoryID;
 
-    @Column(name = "REVTYPE", nullable = false, updatable = false)
-    private Integer revType;
-
-    @Column(name = "UPM_GROUP_ID", nullable = false, updatable = false)
+    @Column(name = "UPM_GROUP_ID")
     private Integer upmGroupID;
 
     @Column(name = "GROUP_CODE")

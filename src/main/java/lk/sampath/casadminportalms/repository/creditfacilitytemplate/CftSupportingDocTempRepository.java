@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface CftSupportingDocTempRepository extends JpaRepository<CftSupportingDocTemp, Integer> {
 
-    @Query(value = "SELECT SEQ_T_CFT_SUPPORTING_DOC_TEMP.NEXTVAL FROM DUAL", nativeQuery = true)
+    @Query(value = "SELECT SEQ_T_CFT_SUPPORTING_DOC.NEXTVAL FROM DUAL", nativeQuery = true)
     Integer getNextSequenceValue();
 
     List<CftSupportingDocTemp> findAllByCreditFacilityTemplateCreditFacilityTemplateID(Integer creditFacilityTemplateID);

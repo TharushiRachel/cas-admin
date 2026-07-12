@@ -1,7 +1,7 @@
 package lk.sampath.casadminportalms.controller;
 
-import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.controller.basecontroller.PaginationUtil;
+import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.userda.UserDaDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
@@ -23,15 +23,16 @@ public class UserDaController {
 
 
     @GetMapping("/userDaTemp")
-        public ResponseEntity<StandardResponse<List<UserDaDTO>>> viewAllUserDaTemp(
-                        @RequestHeader(name = "page", required = false) Integer headerPage,
-                        @RequestHeader(name = "size", required = false) Integer headerSize,
-                        @RequestParam(defaultValue = "0") int page,
-                        @RequestParam(defaultValue = "10") int size) throws  ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UserDaDTO>>> viewAllUserDaTemp(
+            @RequestHeader(name = "page", required = false) Integer headerPage,
+            @RequestHeader(name = "size", required = false) Integer headerSize,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws  ApiRequestException {
         Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
         ResponseEntity<StandardResponse<List<UserDaDTO>>> userDaTempList = userDaService.findAllUserDaTempList(pageable);
-                return ResponseEntity.ok().body(userDaTempList.getBody());
+        return ResponseEntity.ok().body(userDaTempList.getBody());
     }
+
 
     @GetMapping("/userDaTemp/{userDaID}")
     public ResponseEntity<StandardResponse<UserDaDTO>> viewUserDaTempById(@PathVariable Integer userDaID) throws ApiRequestException{
@@ -55,6 +56,7 @@ public class UserDaController {
         ResponseEntity<StandardResponse<UserDaDTO>> userDa = userDaService.findApprovedUserDaById(userDaID);
         return ResponseEntity.ok().body(userDa.getBody());
     }
+
     @PostMapping
     public ResponseEntity<StandardResponse<UserDaDTO>> saveUserDa(@Validated @RequestBody UserDaDTO request) throws  ApiRequestException{
         ResponseEntity<StandardResponse<UserDaDTO>> userDaTemp = userDaService.saveUserDaTemp(request);

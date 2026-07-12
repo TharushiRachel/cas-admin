@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_UPC_TEMPLATE_DATA_TEMP")
+@Table(name = "CASV3_T_UPC_TEMPLATE_DATA_TEMP")
 @ToString
 public class UpcTemplateDataTemp implements Serializable {
 

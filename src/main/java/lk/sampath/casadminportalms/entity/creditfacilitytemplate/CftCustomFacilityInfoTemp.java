@@ -2,6 +2,7 @@ package lk.sampath.casadminportalms.entity.creditfacilitytemplate;
 
 import jakarta.persistence.*;
 import lk.sampath.casadminportalms.entity.common.ApprovableEntity;
+import lk.sampath.casadminportalms.entity.common.UserTrackableEntity;
 import lk.sampath.casadminportalms.enums.AppsConstants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,10 +14,10 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "T_CFT_CUSTOM_FACILITY_INFO_TEMP")
+@Table(name = "CASV3_T_CFT_CUSTOM_FACILITY_INFO_TEMP")
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class CftCustomFacilityInfoTemp extends ApprovableEntity {
+public class CftCustomFacilityInfoTemp  extends UserTrackableEntity {
 
     @Id
     @Column(name = "CUSTOM_FACILITY_INFO_ID")

@@ -1,13 +1,11 @@
 package lk.sampath.casadminportalms.controller;
 
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
-import lk.sampath.casadminportalms.controller.basecontroller.PaginationUtil;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.creditfacility.CreditFacilityTypeDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.CreditFacilityTypeService;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,11 +24,11 @@ import java.util.List;
 @RequestMapping("/creditFacilityType")
 public class CreditFacilityTypeController {
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private final CreditFacilityTypeService creditFacilityTypeService;
 
-    @Autowired
-    private CreditFacilityTypeService creditFacilityTypeService;
+    public CreditFacilityTypeController(CreditFacilityTypeService creditFacilityTypeService) {
+        this.creditFacilityTypeService = creditFacilityTypeService;
+    }
 
     @PostMapping("/saveCreditFacilityType")
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> saveCreditFacilityType(@Validated @RequestBody CreditFacilityTypeDTO request) throws ApiRequestException {
@@ -62,13 +60,15 @@ public class CreditFacilityTypeController {
 
 
     @GetMapping("/getCreditFacilityTypeMasterList")
-        public  ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> getCreditFacilityTypeMasterList(
+    public  ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> getCreditFacilityTypeMasterList(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
 
-        Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
+        int effectivePage = headerPage != null ? headerPage : page;
+        int effectiveSize = headerSize != null ? headerSize : size;
+        Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
         ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>>  creditFacilityTypeDTOList =  creditFacilityTypeService.searchCreditFacilityTypes(pageable);
 
         return ResponseEntity.ok().body(creditFacilityTypeDTOList.getBody());
@@ -84,13 +84,14 @@ public class CreditFacilityTypeController {
     }
 
     @GetMapping("/getCreditFacilityTypeTempList")
-        public ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> getCreditFacilityTypeTempList(
+    public ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> getCreditFacilityTypeTempList(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-
-        Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
+        int effectivePage = headerPage != null ? headerPage : page;
+        int effectiveSize = headerSize != null ? headerSize : size;
+        Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
         ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> creditFacilityTypeTempList = creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
 
         return ResponseEntity.ok().body(creditFacilityTypeTempList.getBody());

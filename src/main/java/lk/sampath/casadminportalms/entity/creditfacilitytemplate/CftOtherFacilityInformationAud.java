@@ -2,6 +2,7 @@ package lk.sampath.casadminportalms.entity.creditfacilitytemplate;
 
 import jakarta.persistence.*;
 import lk.sampath.casadminportalms.entity.common.ApprovableEntity;
+import lk.sampath.casadminportalms.entity.common.UserTrackableEntity;
 import lk.sampath.casadminportalms.enums.AppsConstants;
 import lk.sampath.casadminportalms.enums.InputFieldValueType;
 import lombok.AllArgsConstructor;
@@ -15,12 +16,12 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Table(name = "T_CFT_OTHER_FACILITY_INFO_AUD")
-public class CftOtherFacilityInformationAud extends ApprovableEntity {
+@Table(name = "CASV3_T_CFT_OTHER_FACILITY_INFO_AUD")
+public class CftOtherFacilityInformationAud  extends UserTrackableEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_T_CFT_OTHER_FACILITY_INFO_AUD")
-    @SequenceGenerator(name = "SEQ_T_CFT_OTHER_FACILITY_INFO_AUD", sequenceName = "SEQ_T_CFT_OTHER_FACILITY_INFO_AUD", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CASV3_SEQ_CFT_OTHER_FACILITY_INFO_AUD")
+    @SequenceGenerator(name = "CASV3_SEQ_CFT_OTHER_FACILITY_INFO_AUD", sequenceName = "CASV3_SEQ_CFT_OTHER_FACILITY_INFO_AUD", allocationSize = 1)
     @Column(name = "ID")
     private Integer id;
 

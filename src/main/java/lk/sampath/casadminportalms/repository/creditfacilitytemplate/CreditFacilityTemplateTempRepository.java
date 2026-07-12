@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CreditFacilityTemplateTempRepository extends JpaRepository<CreditFacilityTemplateTemp, Integer>, QuerydslPredicateExecutor<CreditFacilityTemplateTemp> {
-    @Query(value = "SELECT SEQ_T_CREDIT_FACILITY_TEMPLATE_TEMP.NEXTVAL FROM DUAL", nativeQuery = true)
+    @Query(value = "SELECT SEQ_T_CREDIT_FACILITY_TEMPLATE.NEXTVAL FROM DUAL", nativeQuery = true)
     Integer getNextSequenceValue();
 }

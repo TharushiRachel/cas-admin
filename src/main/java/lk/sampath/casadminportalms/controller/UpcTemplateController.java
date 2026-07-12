@@ -7,7 +7,6 @@ import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.upctemplate.UpcTemplateDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.UpcTemplateService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,12 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/upcTemplate")
 public class UpcTemplateController {
 
-    @Autowired
-    private UpcTemplateService upcTemplateService;
+    private final UpcTemplateService upcTemplateService;
+
+    public UpcTemplateController(UpcTemplateService upcTemplateService) {
+        this.upcTemplateService = upcTemplateService;
+    }
 
     @GetMapping("/upcTemplateTemp/UpcTemplateTempList")
     public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(

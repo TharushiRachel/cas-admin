@@ -10,7 +10,5 @@ import java.util.List;
 
 @Repository
 public interface CftSupportingDocRepository extends JpaRepository<CftSupportingDoc, Integer> {
-    List<CftSupportingDoc> findAllBySupportingDoc_SupportingDocIDAndApproveStatusAndStatus(Integer supportDocID, MasterDataApproveStatus approveStatus, Status status);
-
     List<CftSupportingDoc> findAllByCreditFacilityTemplateCreditFacilityTemplateID(Integer creditFacilityTemplateID);
 }

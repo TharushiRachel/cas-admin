@@ -5,6 +5,7 @@ import lk.sampath.casadminportalms.dto.committetype.CommitteeTypeDTO;
 import lk.sampath.casadminportalms.entity.committeetype.CommitteeType;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 public interface CommitteeTypeService {

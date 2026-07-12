@@ -1,11 +1,11 @@
 package lk.sampath.casadminportalms.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.upctemplate.UpcTemplateDTO;
 import lk.sampath.casadminportalms.dto.upctemplate.UpcTemplateDataDTO;
+import lk.sampath.casadminportalms.dto.userSession.UserContext;
 import lk.sampath.casadminportalms.entity.upcsection.UpcSection;
 import lk.sampath.casadminportalms.entity.upctemplate.*;
 import lk.sampath.casadminportalms.enums.AppsConstants;
@@ -15,9 +15,8 @@ import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.repository.upcsection.UpcSectionRepository;
 import lk.sampath.casadminportalms.repository.upctemplate.*;
 import lk.sampath.casadminportalms.service.UpcTemplateService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,10 +27,9 @@ import java.util.*;
 
 @Service
 @Transactional
+@Log4j2
 public class UpcTemplateServiceImpl implements UpcTemplateService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UpcTemplateServiceImpl.class);
-
+    
     private static final String DOES_NOT_EXIST = "does not exist";
 
     private static final String UPC_TEMPLATE_WITH = "UPC Template with";
@@ -39,93 +37,91 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
 
     private static final String UPC_TEMPLATE_WITH_ID = "UPC Template with ID ";
 
-    @Autowired
-    private UpcTemplateTempRepository upcTemplateTempRepository;
+    private final UpcTemplateTempRepository upcTemplateTempRepository;
 
-    @Autowired
-    private UpcTemplateDataTempRepository upcTemplateDataTempRepository;
+    private final UpcTemplateDataTempRepository upcTemplateDataTempRepository;
 
-    @Autowired
-    private UpcSectionRepository upcSectionRepository;
+    private final UpcSectionRepository upcSectionRepository;
 
-    @Autowired
-    private UpcTemplateRepository upcTemplateRepository;
+    private final UpcTemplateRepository upcTemplateRepository;
 
-    @Autowired
-    private UpcTemplateDataRepository upcTemplateDataRepository;
+    private final UpcTemplateDataRepository upcTemplateDataRepository;
 
-    @Autowired
-    private UpcTemplateAudRepository upcTemplateAudRepository;
+    private final UpcTemplateAudRepository upcTemplateAudRepository;
 
-    @Autowired
-    private UpcTemplateDataAudRepository upcTemplateDataAudRepository;
+    private final UpcTemplateDataAudRepository upcTemplateDataAudRepository;
+
+    public UpcTemplateServiceImpl(UpcTemplateTempRepository upcTemplateTempRepository, UpcTemplateDataTempRepository upcTemplateDataTempRepository, UpcSectionRepository upcSectionRepository, UpcTemplateRepository upcTemplateRepository, UpcTemplateDataRepository upcTemplateDataRepository, UpcTemplateAudRepository upcTemplateAudRepository, UpcTemplateDataAudRepository upcTemplateDataAudRepository) {
+        this.upcTemplateTempRepository = upcTemplateTempRepository;
+        this.upcTemplateDataTempRepository = upcTemplateDataTempRepository;
+        this.upcSectionRepository = upcSectionRepository;
+        this.upcTemplateRepository = upcTemplateRepository;
+        this.upcTemplateDataRepository = upcTemplateDataRepository;
+        this.upcTemplateAudRepository = upcTemplateAudRepository;
+        this.upcTemplateDataAudRepository = upcTemplateDataAudRepository;
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(Pageable pageable) throws ApiRequestException {
 
-        LOG.info("START: Find All Upc Template Temp List ");
-        List<UpcTemplateTemp> upcTemplateTempList = upcTemplateTempRepository.findAll(pageable).getContent();
-        LOG.info(" Fetched All Upc Template Temp List : {} ",upcTemplateTempList);
-        List<UpcTemplateDTO> upcTemplateDTOList =  upcTemplateTempList.stream()
-                .map(UpcTemplateDTO::new)
-                .toList();
-
+        log.info("START: Find All Upc Template Temp List ");
+        Page<UpcTemplateTemp> upcTemplateTempList = upcTemplateTempRepository.findAll(pageable);
+        log.info(" Fetched All Upc Template Temp List : {} ",upcTemplateTempList);
+        Page<UpcTemplateDTO> upcTemplateDTOList = upcTemplateTempList.map(UpcTemplateDTO::new);
         StandardResponse<List<UpcTemplateDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateDTOList);
-        LOG.info("END: Find All Upc Template Temp List :{}", response.getResponse());
+        log.info("END: Find All Upc Template Temp List :{}", response.getResponse());
         return ResponseEntity.ok().body(response);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<Object>> findUpcTemplateTempById(Integer upcTemplateID) throws ApiRequestException {
-        LOG.info("START: Find Upc Template Temp By ID with UPC Template ID: {}", upcTemplateID);
+        log.info("START: Find Upc Template Temp By ID with UPC Template ID: {}", upcTemplateID);
         UpcTemplateTemp upcTemplateTemp = upcTemplateTempRepository.findById(upcTemplateID).orElseThrow(() ->
                 new ApiRequestException(UPC_TEMPLATE_WITH + upcTemplateID + DOES_NOT_EXIST)
         );
-        LOG.info("Fetched Upc Template Temp: {}", upcTemplateTemp);
+        log.info("Fetched Upc Template Temp: {}", upcTemplateTemp);
         UpcTemplateDTO upcTemplateDTO = new UpcTemplateDTO(upcTemplateTemp);
 
         StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateDTO);
-        LOG.info("END: Find Upc Template Temp By ID: {} with Response: {}", upcTemplateID, response.getResponse());
+        log.info("END: Find Upc Template Temp By ID: {} with Response: {}", upcTemplateID, response.getResponse());
         return ResponseEntity.ok().body(response);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplates(Pageable pageable) throws ApiRequestException {
-        LOG.info("START: Find All Approved Upc Templates");
-        List<UpcTemplate> upcTemplateList = upcTemplateRepository.findAll(pageable).getContent();
+        log.info("START: Find All Approved Upc Templates");
+        Page<UpcTemplate> upcTemplateList = upcTemplateRepository.findAll(pageable);
 
-        List<UpcTemplateDTO> upcTemplateDTOList = upcTemplateList.stream()
-                .map(UpcTemplateDTO::new)
-                .toList();
-        LOG.info("Converted Upc Templates to DTOs: {}", upcTemplateDTOList);
+        Page<UpcTemplateDTO> upcTemplateDTOList = upcTemplateList.map(UpcTemplateDTO::new);
+        log.info("Converted Upc Templates to DTOs: {}", upcTemplateDTOList);
         StandardResponse<List<UpcTemplateDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateDTOList);
 
-        LOG.info("END: Find All Approved Upc Templates with Response: {}", response.getResponse());
+        log.info("END: Find All Approved Upc Templates with Response: {}", response.getResponse());
         return ResponseEntity.ok().body(response);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<Object>> findApprovedUpcTemplateById(Integer upcTemplateID) throws ApiRequestException {
-        LOG.info("START: Find Approved Upc Template By ID with UPC Template ID: {}", upcTemplateID);
+        log.info("START: Find Approved Upc Template By ID with UPC Template ID: {}", upcTemplateID);
         UpcTemplate upcTemplate = upcTemplateRepository.findById(upcTemplateID).orElseThrow(() ->
                 new ApiRequestException(UPC_TEMPLATE_WITH + upcTemplateID + DOES_NOT_EXIST)
         );
-        LOG.info("Fetched Approved Upc Template: {}", upcTemplate);
+        log.info("Fetched Approved Upc Template: {}", upcTemplate);
         UpcTemplateDTO upcTemplateDTO = new UpcTemplateDTO(upcTemplate);
 
         StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateDTO);
-        LOG.info("END: Find Approved Upc Template By ID with UPC Template ID: {}. Response: {}", upcTemplateID, response.getResponse());
+        log.info("END: Find Approved Upc Template By ID with UPC Template ID: {}. Response: {}", upcTemplateID, response.getResponse());
         return ResponseEntity.ok().body(response);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<Object>> saveUpcTemplate(UpcTemplateDTO upcTemplateDTO) throws ApiRequestException {
-        LOG.info("START: Save Upm Template :{}", upcTemplateDTO);
+        log.info("START: Save Upm Template :{}", upcTemplateDTO);
 
         Date date = new Date();
         UpcTemplateTemp upcTemplateTemp = new UpcTemplateTemp();
@@ -133,7 +129,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         booleanBuilder.and(QUpcTemplateTemp.upcTemplateTemp.templateName.eq(upcTemplateDTO.getTemplateName()));
         List<UpcTemplateTemp> upcTemplateTempList = (List<UpcTemplateTemp>) upcTemplateTempRepository.findAll(booleanBuilder);
-        LOG.info("Checked for Existing Template. Found {} existing templates with name: {}", upcTemplateTempList.size(), upcTemplateDTO.getTemplateName());
+        log.info("Checked for Existing Template. Found {} existing templates with name: {}", upcTemplateTempList.size(), upcTemplateDTO.getTemplateName());
 
         validateTemplateNameUniqueness(upcTemplateDTO.getTemplateName(), null);
 
@@ -146,40 +142,39 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
             upcTemplateTemp.setUpcLabelFontColor(upcTemplateDTO.getUpcLabelFontColor());
             upcTemplateTemp.setUpcLabelBackgroundColor(upcTemplateDTO.getUpcLabelBackgroundColor());
             upcTemplateTemp.setStatus(upcTemplateDTO.getStatus());
-            upcTemplateTemp.setCreatedBy(upcTemplateDTO.getCreatedBy());
             upcTemplateTemp.setCreatedDate(date);
             upcTemplateTemp.setApproveStatus(upcTemplateDTO.getApproveStatus());
 
             if (upcTemplateDTO.getUpcTemplateDataDTOList() != null) {
                 List<UpcTemplateDataTemp> upcTemplateDataTempList = saveOrUpdateUpcTemplateData(upcTemplateDTO, upcTemplateTemp);
                 upcTemplateTemp.setUpcTemplateDataTempList(upcTemplateDataTempList);
-                LOG.info("Saved or Updated Upc Template Data: {}", upcTemplateDataTempList);
+                log.info("Saved or Updated Upc Template Data: {}", upcTemplateDataTempList);
             }
 
             upcTemplateTemp = upcTemplateTempRepository.saveAndFlush(upcTemplateTemp);
-            LOG.info("Successfully saved Upc Template with ID: {}", upcTemplateTemp.getUpcTemplateID());
+            log.info("Successfully saved Upc Template with ID: {}", upcTemplateTemp.getUpcTemplateID());
         } else {
-            LOG.warn("Upc Template with name '{}' already exists", upcTemplateDTO.getTemplateName());
+            log.warn("Upc Template with name '{}' already exists", upcTemplateDTO.getTemplateName());
             throw new ApiRequestException("Upc Section Template Already Exists");
         }
 
         UpcTemplateDTO upcTemplate = new UpcTemplateDTO(upcTemplateTemp);
         StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplate);
-        LOG.info("END: Save Upc Template successful. Response: {}", response.getResponse());
+        log.info("END: Save Upc Template successful. Response: {}", response.getResponse());
         return ResponseEntity.ok().body(response);
     }
 
     public List<UpcTemplateDataTemp> saveOrUpdateUpcTemplateData(UpcTemplateDTO upcTemplateDTO, UpcTemplateTemp upcTemplateTemp) {
-        LOG.info("START: save Or Update Upc Template Data :{}", upcTemplateDTO);
+        log.info("START: save Or Update Upc Template Data :{}", upcTemplateDTO);
         List<UpcTemplateDataTemp> newDataTemps = new ArrayList<>();
 
         if (upcTemplateDTO.getIsModified().equals(AppsConstants.YesNo.Y)) {
             List<UpcTemplateDataTemp> existingDataTemps = upcTemplateDataTempRepository.findByUpcTemplateTempUpcTemplateID(upcTemplateTemp.getUpcTemplateID());
-            LOG.info("Existing UpcTemplateDataTemps to be deleted: {}", existingDataTemps);
+            log.info("Existing UpcTemplateDataTemps to be deleted: {}", existingDataTemps);
 
             if (!existingDataTemps.isEmpty()) {
                 upcTemplateDataTempRepository.deleteAll(existingDataTemps);
-                LOG.info("Deleted obsolete UpcTemplateDataTemps.");
+                log.info("Deleted obsolete UpcTemplateDataTemps.");
             }
 
             for (UpcTemplateDataDTO upcTemplateDataDTO : upcTemplateDTO.getUpcTemplateDataDTOList()) {
@@ -187,7 +182,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
                 newDataTemps.add(upcTemplateDataTemp);
             }
 
-            LOG.info("Saving new UpcTemplateDataTemps: {}", newDataTemps);
+            log.info("Saving new UpcTemplateDataTemps: {}", newDataTemps);
         } else {
 
             for (UpcTemplateDataDTO upcTemplateDataDTO : upcTemplateDTO.getUpcTemplateDataDTOList()) {
@@ -195,7 +190,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
                 newDataTemps.add(upcTemplateDataTemp);
             }
 
-            LOG.info("Saving UpcTemplateDataTemps without deletion: {}", newDataTemps);
+            log.info("Saving UpcTemplateDataTemps without deletion: {}", newDataTemps);
         }
 
         return newDataTemps;
@@ -221,22 +216,22 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<Object>> updateUpcTemplateTemp(Integer upcTemplateID, UpcTemplateDTO upcTemplateDTO) throws ApiRequestException {
-        LOG.info("START: Update UpcTemplateTemp for ID: {}", upcTemplateID);
+        log.info("START: Update UpcTemplateTemp for ID: {}", upcTemplateID);
         Date date = new Date();
 
         UpcTemplateTemp upcTemplateTemp = upcTemplateTempRepository.findById(upcTemplateID).orElseThrow(() ->
                 new ApiRequestException(UPC_TEMPLATE_WITH + upcTemplateID + DOES_NOT_EXIST)
         );
-        LOG.info("Fetched UpcTemplateTemp to be updated: {}", upcTemplateTemp);
+        log.info("Fetched UpcTemplateTemp to be updated: {}", upcTemplateTemp);
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         booleanBuilder.and(QUpcTemplateTemp.upcTemplateTemp.templateName.eq(upcTemplateDTO.getTemplateName()));
 
 
         if(upcTemplateDTO.getTemplateName() == null || upcTemplateDTO.getTemplateName().trim().isEmpty()){
-            LOG.info(" Upc Template name is null or empty. Template ID: {}", upcTemplateID);
+            log.info(" Upc Template name is null or empty. Template ID: {}", upcTemplateID);
             throw new ApiRequestException("Upc Template cannot be empty or null");
         }
-        LOG.info("Validating uniqueness for template name: {}", upcTemplateDTO.getTemplateName());
+        log.info("Validating uniqueness for template name: {}", upcTemplateDTO.getTemplateName());
         validateTemplateNameUniqueness(upcTemplateDTO.getTemplateName(), upcTemplateID);
 
         upcTemplateTemp.setTemplateName(upcTemplateDTO.getTemplateName());
@@ -245,10 +240,9 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
         upcTemplateTemp.setUpcLabelFontColor(upcTemplateDTO.getUpcLabelFontColor());
         upcTemplateTemp.setUpcLabelBackgroundColor(upcTemplateDTO.getUpcLabelBackgroundColor());
         upcTemplateTemp.setStatus(upcTemplateDTO.getStatus());
-        upcTemplateTemp.setModifiedBy(upcTemplateDTO.getModifiedBy());
         upcTemplateTemp.setLastModifiedDate(date);
         upcTemplateTemp.setApproveStatus(upcTemplateDTO.getApproveStatus());
-        LOG.info("Updated fields for UpcTemplateTemp: {}", upcTemplateTemp);
+        log.info("Updated fields for UpcTemplateTemp: {}", upcTemplateTemp);
         if (upcTemplateDTO.getUpcTemplateDataDTOList() != null && upcTemplateDTO.getIsModified().equals(AppsConstants.YesNo.Y)) {
             List<UpcTemplateDataTemp> upcTemplateDataTempList = saveOrUpdateUpcTemplateData(upcTemplateDTO, upcTemplateTemp);
             upcTemplateTemp.setUpcTemplateDataTempList(upcTemplateDataTempList);
@@ -259,7 +253,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
         UpcTemplateDTO upcTemplate = new UpcTemplateDTO(upcTemplateTemp);
 
         StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplate);
-        LOG.info("END: Response body after updating UpcTemplateTemp: {}", response.getResponse());
+        log.info("END: Response body after updating UpcTemplateTemp: {}", response.getResponse());
 
         return ResponseEntity.ok().body(response);
 
@@ -269,25 +263,26 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<Object>> approveRejectUpcTemplate(ApproveRejectRQ approveRejectRQ) throws ApiRequestException {
-        LOG.info("START: Approve/Reject UPC Template: {}", approveRejectRQ);
+        log.info("START: Approve/Reject UPC Template: {}", approveRejectRQ);
 
         if (approveRejectRQ == null || approveRejectRQ.getApproveRejectDataID() == null) {
-            LOG.info("ERROR: Invalid ApproveRejectRQ: DataID cannot be null");
+            log.info("ERROR: Invalid ApproveRejectRQ: DataID cannot be null");
             throw new ApiRequestException("Invalid ApproveRejectRQ: DataID cannot be null");
         }
 
         UpcTemplateTemp upcTemplateTemp = upcTemplateTempRepository.findById(approveRejectRQ.getApproveRejectDataID())
                 .orElseThrow(() -> new ApiRequestException(
                         UPC_TEMPLATE_WITH_ID + approveRejectRQ.getApproveRejectDataID() + DOES_NOT_EXIST));
-        LOG.info("Fetched UpcTemplateTemp for approval/rejection: {}", upcTemplateTemp);
+        log.info("Fetched UpcTemplateTemp for approval/rejection: {}", upcTemplateTemp);
 
         Optional<UpcTemplate> optionalUpcTemplate = upcTemplateRepository.findById(upcTemplateTemp.getUpcTemplateID());
         UpcTemplate findUpcTemplate = optionalUpcTemplate.orElse(null);
 
         upcTemplateTemp.setApprovedDate(new Date());
         upcTemplateTemp.setApproveStatus(approveRejectRQ.getApproveStatus());
+        upcTemplateTemp.setApprovedBy(UserContext.getUsername());
         UpcTemplateTemp savedTemp = upcTemplateTempRepository.saveAndFlush(upcTemplateTemp);
-        LOG.info("Saved updated UpcTemplateTemp: {}", savedTemp);
+        log.info("Saved updated UpcTemplateTemp: {}", savedTemp);
         ResponseEntity<StandardResponse<Object>> response;
 
         if (approveRejectRQ.getApproveStatus().equals(MasterDataApproveStatus.APPROVED)) {
@@ -298,7 +293,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
             throw new ApiRequestException("Unknown approval status: " + approveRejectRQ.getApproveStatus());
         }
 
-        LOG.info("END: Approve/Reject UPC Template Response: {}", response.getBody());
+        log.info("END: Approve/Reject UPC Template Response: {}", response.getBody());
         return response;
     }
 
@@ -321,7 +316,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
     }
 
     private ResponseEntity<StandardResponse<Object>> handleRejection(UpcTemplateTemp temp) {
-        LOG.info("Handling rejection for UPC Template Temp ID: {}", temp.getUpcTemplateID());
+        log.info("Handling rejection for UPC Template Temp ID: {}", temp.getUpcTemplateID());
 
         saveUpcTemplateAudit(temp);
         if (temp.getUpcTemplateDataTempList() != null) {
@@ -406,12 +401,12 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
         audit.setLastModifiedDate(temp.getLastModifiedDate());
 
         upcTemplateAudRepository.save(audit);
-        LOG.info("Saved audit record for UPC Template ID: {}", temp.getUpcTemplateID());
+        log.info("Saved audit record for UPC Template ID: {}", temp.getUpcTemplateID());
     }
 
     private void saveUpcTemplateDataAudit(List<UpcTemplateDataTemp> dataTempList) {
         if (dataTempList == null || dataTempList.isEmpty()) {
-            LOG.warn("No data records found for audit.");
+            log.warn("No data records found for audit.");
             return;
         }
 
@@ -427,13 +422,13 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
         }).toList();
 
         upcTemplateDataAudRepository.saveAll(audits);
-        LOG.info("Saved {} data audit records.", audits.size());
+        log.info("Saved {} data audit records.", audits.size());
     }
 
     public List<UpcTemplateData> saveOrUpdateMasterTemplateData(UpcTemplateTemp temp, UpcTemplate master) {
 
         if (temp == null || master == null || temp.getUpcTemplateDataTempList() == null) {
-            LOG.info("END: Input is invalid. Temp: {}, Master: {}, Template Data Temp List is null.", temp, master);
+            log.info("END: Input is invalid. Temp: {}, Master: {}, Template Data Temp List is null.", temp, master);
             return Collections.emptyList();
         }
 
@@ -454,11 +449,11 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
         }).toList();
 
         List<UpcTemplateData> savedData = upcTemplateDataRepository.saveAll(masterData);
-        LOG.info("Saved master template data for template ID: {}", master.getUpcTemplateID());
+        log.info("Saved master template data for template ID: {}", master.getUpcTemplateID());
 
         saveUpcTemplateDataAudit(temp.getUpcTemplateDataTempList());
         upcTemplateDataTempRepository.deleteAll(temp.getUpcTemplateDataTempList());
-        LOG.info("END: Save/Update Master Template Data for Master Template ID: {}", master.getUpcTemplateID());
+        log.info("END: Save/Update Master Template Data for Master Template ID: {}", master.getUpcTemplateID());
 
         return savedData;
     }
@@ -467,23 +462,23 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<Object>> updateApprovedUpcTemplate(Integer upcTemplateID, UpcTemplateDTO upcTemplateDTO) throws ApiRequestException {
 
-        LOG.info("START: Update UPC Template :{}", upcTemplateDTO);
+        log.info("START: Update UPC Template :{}", upcTemplateDTO);
 
         UpcTemplate upcTemplate = upcTemplateRepository.findById(upcTemplateID).orElseThrow(() ->
                 new ApiRequestException(UPC_TEMPLATE_WITH_ID + upcTemplateID + DOES_NOT_EXIST)
         );
-        LOG.info("Fetched existing UPC Template: {}", upcTemplate);
+        log.info("Fetched existing UPC Template: {}", upcTemplate);
         if(!upcTemplate.getTemplateName().equals(upcTemplateDTO.getTemplateName())){
             validateTemplateNameUniqueness(upcTemplateDTO.getTemplateName(), upcTemplateID);
         } else if (upcTemplateDTO.getTemplateName() == null || upcTemplateDTO.getTemplateName().trim().isEmpty()) {
-            LOG.info("Template name is null or empty. Throwing ApiRequestException.");
+            log.info("Template name is null or empty. Throwing ApiRequestException.");
             throw new ApiRequestException("Upc Template cannot be empty or null");
 
         }
 
         UpcTemplateTemp upcTemplateTemp = mapToUpcTemplateTemp(upcTemplate, upcTemplateDTO);
         upcTemplateTemp = upcTemplateTempRepository.saveAndFlush(upcTemplateTemp);
-        LOG.info("Saved updated UpcTemplateTemp: {}", upcTemplateTemp);
+        log.info("Saved updated UpcTemplateTemp: {}", upcTemplateTemp);
         if (upcTemplateDTO.getUpcTemplateDataDTOList() != null) {
             List<UpcTemplateDataTemp> upcTemplateDataTempList = updateUpcTemplateTempFromMaster(upcTemplateDTO, upcTemplateTemp);
             upcTemplateTemp.setUpcTemplateDataTempList(upcTemplateDataTempList);
@@ -492,7 +487,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
         UpcTemplateDTO upcTemplateUpdate = new UpcTemplateDTO(upcTemplateTemp);
 
         StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateUpdate);
-        LOG.info("END: Update Approved UPC Template response :{}.",response.getResponse() );
+        log.info("END: Update Approved UPC Template response :{}.",response.getResponse() );
         return ResponseEntity.ok().body(response);
     }
 
@@ -560,7 +555,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
         }
 
         upcTemplateDataTempList = upcTemplateDataTempRepository.saveAll(upcTemplateDataTempList);
-        LOG.info("Saved {} UPC Template Data Temps", upcTemplateDataTempList.size());
+        log.info("Saved {} UPC Template Data Temps", upcTemplateDataTempList.size());
 
         return upcTemplateDataTempList;
     }
@@ -568,9 +563,9 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<Void>> deleteUpcTemplateFromTemp(Integer upcTemplateID) throws ApiRequestException {
-        LOG.info("START: Delete UPC Template from Temp with ID: {}", upcTemplateID);
+        log.info("START: Delete UPC Template from Temp with ID: {}", upcTemplateID);
         if (!upcTemplateTempRepository.existsById(upcTemplateID)) {
-            LOG.info("END : UPC Template with ID: {} does not exist. Throwing ApiRequestException.", upcTemplateID);
+            log.info("END : UPC Template with ID: {} does not exist. Throwing ApiRequestException.", upcTemplateID);
 
             throw new ApiRequestException(UPC_TEMPLATE_WITH_ID + upcTemplateID + " does not exist");
         }
@@ -579,7 +574,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
         upcTemplateTempRepository.deleteById(upcTemplateID);
 
         StandardResponse<Void> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateID);
-        LOG.info("END: Successfully deleted UPC Template from Temp with ID: {}", upcTemplateID);
+        log.info("END: Successfully deleted UPC Template from Temp with ID: {}", upcTemplateID);
         return ResponseEntity.ok().body(response);
     }
 }

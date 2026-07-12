@@ -1,13 +1,12 @@
 package lk.sampath.casadminportalms.controller;
 
 
-import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.controller.basecontroller.PaginationUtil;
+import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.supportingdoc.SupportingDocDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.SupportingDocService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,9 +18,11 @@ import java.util.List;
 @RequestMapping("/supportingDoc")
 public class SupportingDocController {
 
-    @Autowired
-    private SupportingDocService supportingDocService;
+    private final SupportingDocService supportingDocService;
 
+    public SupportingDocController(SupportingDocService supportingDocService) {
+        this.supportingDocService = supportingDocService;
+    }
 
     @GetMapping("/supportingDocTemp")
     public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> viewAllSupportingDocsTemp(
@@ -39,6 +40,7 @@ public class SupportingDocController {
         ResponseEntity<StandardResponse<SupportingDocDTO>> supportingDocDTO = supportingDocService.findSupportingDocTempById(supportingDocID);
         return ResponseEntity.ok().body(supportingDocDTO.getBody());
     }
+
     @GetMapping("/supportingDocsList")
     public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> getApprovedSupportingDocData(
             @RequestHeader(name = "page", required = false) Integer headerPage,

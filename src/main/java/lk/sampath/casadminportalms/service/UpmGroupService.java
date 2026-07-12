@@ -15,11 +15,11 @@ public interface UpmGroupService {
 
     ResponseEntity<StandardResponse<UpmGroupDTO>> findUpmGroupTempByID(Integer upmGroupID) throws ApiRequestException;
 
-    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> findAllUpmGroupTempList(Pageable pageable) throws ApiRequestException;
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> findAllUpmGroupTempList() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<UpmGroupDTO>> findUpmGroupById(int upmGroupID);
 
-    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> searchUpmGroups(Pageable pageable);
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> searchUpmGroups();
 
     ResponseEntity<StandardResponse<UpmGroupDTO>> saveUPMGroupTemp(UpmGroupDTO upmGroupDTO) throws ApiRequestException;
 

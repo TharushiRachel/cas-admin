@@ -9,12 +9,12 @@ import lombok.Setter;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_UPC_TEMPLATE_DATA_AUD")
+@Table(name = "CASV3_T_UPC_TEMPLATE_DATA_AUD")
 public class UpcTemplateDataAud {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UPC_TEMPLATE_DATA_AUD")
-    @SequenceGenerator(name = "SEQ_UPC_TEMPLATE_DATA_AUD", sequenceName = "SEQ_UPC_TEMPLATE_DATA_AUD", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CASV3_SEQ_UPC_TEMPLATE_DATA_AUD")
+    @SequenceGenerator(name = "CASV3_SEQ_UPC_TEMPLATE_DATA_AUD", sequenceName = "CASV3_SEQ_UPC_TEMPLATE_DATA_AUD", allocationSize = 1)
     @Column(name = "ID")
     private Integer id;
 

@@ -14,7 +14,7 @@ import lombok.ToString;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_UPM_GROUP_TEMP")
+@Table(name = "CASV3_T_UPM_GROUP_TEMP")
 @ToString
 public class UpmGroupTemp extends ApprovableEntity {
 

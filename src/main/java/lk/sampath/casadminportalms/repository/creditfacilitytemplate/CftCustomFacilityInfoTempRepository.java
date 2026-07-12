@@ -11,7 +11,7 @@ import java.util.List;
 public interface CftCustomFacilityInfoTempRepository extends JpaRepository<CftCustomFacilityInfoTemp, Integer> {
 //    void deleteAllByCreditFacilityTemplateID(Integer creditFacilityTemplateID);
 
-    @Query(value = "SELECT SEQ_T_CFT_INTEREST_RATE_TEMP.NEXTVAL FROM DUAL", nativeQuery = true)
+    @Query(value = "SELECT SEQ_T_CUSTOM_FACILITY_INFO.NEXTVAL FROM DUAL", nativeQuery = true)
     Integer getNextSequenceValue();
 
     List<CftCustomFacilityInfoTemp> findAllByCreditFacilityTemplateCreditFacilityTemplateID(Integer creditFacilityTemplateID);

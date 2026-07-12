@@ -22,12 +22,13 @@ public interface CreditFacilityTypeRepository extends JpaRepository<CreditFacili
     @Query( value = "SELECT * FROM T_CREDIT_FACILITY_TYPE WHERE approve_status = 'APPROVED'", nativeQuery = true)
     List<CreditFacilityType> findAllApprovedCreditFacilityTypes();
 
-    @Query(
+        @Query(
             value = "SELECT * FROM T_CREDIT_FACILITY_TYPE WHERE approve_status = 'APPROVED'",
             countQuery = "SELECT COUNT(1) FROM T_CREDIT_FACILITY_TYPE WHERE approve_status = 'APPROVED'",
             nativeQuery = true
-    )
-    Page<CreditFacilityType> findAllApprovedCreditFacilityTypes(Pageable pageable);
+        )
+        Page<CreditFacilityType> findAllApprovedCreditFacilityTypes(Pageable pageable);
+
 
     boolean existsByFacilityTypeName(String facilityTypeName);
 

@@ -13,7 +13,7 @@ import java.util.Set;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_ROLE_TEMP")
+@Table(name = "CASV3_T_ROLE_TEMP")
 public class RoleTemp extends ApprovableEntity {
 
     @Id
@@ -31,7 +31,7 @@ public class RoleTemp extends ApprovableEntity {
     private Status status;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "T_ROLE_PRIVILEGE_TEMP",
+    @JoinTable(name = "CASV3_T_ROLE_PRIVILEGE_TEMP",
             joinColumns = {@JoinColumn(name = "ROLE_ID", referencedColumnName = "ROLE_ID")},
             inverseJoinColumns = {@JoinColumn(name = "PRIVILEGE_ID", referencedColumnName = "PRIVILEGE_ID")})
     private Set<Privilege> privileges;

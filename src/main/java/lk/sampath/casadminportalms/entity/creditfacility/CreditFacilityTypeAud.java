@@ -16,13 +16,13 @@ import lombok.*;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_CREDIT_FACILITY_TYPE_AUD")
+@Table(name = "CASV3_T_CREDIT_FACILITY_TYPE_AUD")
 
 public class CreditFacilityTypeAud extends ApprovableEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_T_UPM_GROUP_AUD")
-    @SequenceGenerator(name = "SEQ_T_UPM_GROUP_AUD", sequenceName = "SEQ_T_UPM_GROUP_AUD", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CASV3_SEQ_FACILITY_TYPE_AUD")
+    @SequenceGenerator(name = "CASV3_SEQ_FACILITY_TYPE_AUD", sequenceName = "CASV3_SEQ_FACILITY_TYPE_AUD", allocationSize = 1)
     @Column(name = "ID")
     private Integer id;
 

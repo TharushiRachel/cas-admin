@@ -7,6 +7,7 @@ import lk.sampath.casadminportalms.dto.workflowtemplate.WorkflowTemplateDTO;
 import lk.sampath.casadminportalms.dto.workflowtemplate.WorkflowTemplateResponse;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 public interface WorkflowTemplateService  {
@@ -17,7 +18,7 @@ public interface WorkflowTemplateService  {
 
     StandardResponse<WorkflowTemplateResponse> getTempWorkflowTemplate(Pageable pageable) throws ApiRequestException;
 
-    StandardResponse<List<WorkflowTemplateDTO>> getWorkflowTemplate(Pageable pageable)throws ApiRequestException;
+    StandardResponse<List<WorkflowTemplateDTO>> getWorkflowTemplate(int pageNo,int pageSize)throws ApiRequestException;
 
     StandardResponse<Boolean>  authorizeWorkflowTemplateTemp(ApproveRejectRQ approveRejectRQ)throws ApiRequestException;
 }

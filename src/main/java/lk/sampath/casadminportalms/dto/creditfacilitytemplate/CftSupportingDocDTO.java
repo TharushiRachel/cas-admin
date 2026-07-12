@@ -38,7 +38,7 @@ public class CftSupportingDocDTO implements Serializable {
         this.supportingDocID = cftSupportingDoc.getSupportingDoc().getSupportingDocID();
         this.documentName = cftSupportingDoc.getSupportingDoc().getDocumentName();
         this.mandatory = cftSupportingDoc.getMandatory();
-        this.approveStatus = cftSupportingDoc.getApproveStatus();
+        //this.approveStatus = cftSupportingDoc.getApproveStatus();
         this.status = cftSupportingDoc.getStatus();
         this.recordStatus = cftSupportingDoc.getRecordStatus();
     }
@@ -50,7 +50,7 @@ public class CftSupportingDocDTO implements Serializable {
         this.supportingDocID = cftSupportingDoc.getSupportingDoc().getSupportingDocID();
         this.documentName = cftSupportingDoc.getSupportingDoc().getDocumentName();
         this.mandatory = cftSupportingDoc.getMandatory();
-        this.approveStatus = cftSupportingDoc.getApproveStatus();
+        //this.approveStatus = cftSupportingDoc.getApproveStatus();
         this.status = cftSupportingDoc.getStatus();
         this.recordStatus = cftSupportingDoc.getRecordStatus();
     }

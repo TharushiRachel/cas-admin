@@ -21,6 +21,10 @@ public class Role extends ApprovableEntity {
     @Column(name = "ROLE_NAME")
     private String roleName;
 
+    @Version
+    @Column(name = "VERSION")
+    private Integer version;
+
     @Column(name = "UPM_PRIVILAGE_CODE")
     private String upmPrivilegeCode;
 

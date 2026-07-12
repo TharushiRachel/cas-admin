@@ -19,6 +19,7 @@ public class UpmGroupDTO implements Serializable {
     private Integer workFlowLevel;
 
     private Status status;
+
     private MasterDataApproveStatus approveStatus;
 
     private Date approvedDate;
@@ -32,7 +33,4 @@ public class UpmGroupDTO implements Serializable {
     private Date lastModifiedDate;
 
     private String modifiedBy;
-
-
-
 }

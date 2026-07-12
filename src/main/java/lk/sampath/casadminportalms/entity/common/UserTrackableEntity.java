@@ -1,15 +1,9 @@
 package lk.sampath.casadminportalms.entity.common;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
+import jakarta.persistence.*;
+import lk.sampath.casadminportalms.dto.userSession.UserContext;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -20,21 +14,17 @@ import static jakarta.persistence.TemporalType.TIMESTAMP;
 @MappedSuperclass
 @Getter
 @Setter
-@EntityListeners(AuditingEntityListener.class)
-public class UserTrackableEntity implements Serializable {
+public abstract class UserTrackableEntity implements Serializable {
 
     private static final long serialVersionUID = 2405172041950251807L;
 
-    @CreatedDate
     @Temporal(TIMESTAMP)
     @Column(name = "CREATED_DATE")
     private Date createdDate;
 
-    @CreatedBy
     @Column(name = "CREATED_BY")
     private String createdBy;
 
-    @LastModifiedDate
     @Temporal(TIMESTAMP)
     @Column(name = "MODIFIED_DATE")
     private Date lastModifiedDate;
@@ -42,4 +32,29 @@ public class UserTrackableEntity implements Serializable {
     @Column(name = "MODIFIED_BY")
     private String modifiedBy;
 
+    @PrePersist
+    public void prePersist() {
+
+        if (createdBy != null) {
+            return;
+        }
+
+        this.createdBy = UserContext.getUsername();
+        this.createdDate = new Date();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+
+        if (!allowAuditUpdate() || modifiedBy != null) {
+            return;
+        }
+
+        this.modifiedBy = UserContext.getUsername();
+        this.lastModifiedDate = new Date();
+    }
+
+    protected boolean allowAuditUpdate() {
+        return true;
+    }
 }

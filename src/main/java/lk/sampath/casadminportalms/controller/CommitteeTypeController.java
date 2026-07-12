@@ -1,12 +1,12 @@
 package lk.sampath.casadminportalms.controller;
 
-
 import lk.sampath.casadminportalms.controller.basecontroller.PaginationUtil;
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.committetype.CommitteeTypeDTO;
 import lk.sampath.casadminportalms.entity.committeetype.CommitteeType;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.CommitteeTypeService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,6 +20,7 @@ import java.util.List;
  *
  * @author SITS-Ushan
  */
+@Log4j2
 @RestController
 @RequestMapping("/committeeType")
 public class CommitteeTypeController {
@@ -41,8 +42,10 @@ public class CommitteeTypeController {
             @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
+//        log.info("START | getCommitteeType - CommitteeTypeController | request : {}", leadStatusUpdateDTO);
         Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
         StandardResponse<List<CommitteeType>> response = committeeTypeService.getCommitteeTypes(pageable);
+        log.info("END | getCommitteeType - CommitteeTypeController | response : {}", response);
         return ResponseEntity.ok().body(response);
     }
 

@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_UPC_TEMPLATE_TEMP")
+@Table(name = "CASV3_T_UPC_TEMPLATE_TEMP")
 public class UpcTemplateTemp extends ApprovableEntity {
 
     @Id

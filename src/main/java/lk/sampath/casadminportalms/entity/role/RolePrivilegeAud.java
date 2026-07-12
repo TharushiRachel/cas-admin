@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name = "T_ROLE_PRIVILEGE_AUD")
+@Table(name = "CASV3_T_ROLE_PRIVILEGE_AUD")
 public class RolePrivilegeAud implements Serializable {
 
     private static final long serialVersionUID = 2405172041950251807L;

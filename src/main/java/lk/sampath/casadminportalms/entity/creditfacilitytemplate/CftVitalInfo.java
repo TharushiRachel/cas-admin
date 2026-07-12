@@ -2,6 +2,7 @@ package lk.sampath.casadminportalms.entity.creditfacilitytemplate;
 
 import jakarta.persistence.*;
 import lk.sampath.casadminportalms.entity.common.ApprovableEntity;
+import lk.sampath.casadminportalms.entity.common.UserTrackableEntity;
 import lk.sampath.casadminportalms.enums.AppsConstants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @Table(name = "T_CFT_VITAL_INFO")
 @EntityListeners(AuditingEntityListener.class)
-public class CftVitalInfo extends ApprovableEntity {
+public class CftVitalInfo  extends UserTrackableEntity {
 
     @Id
     @Column(name = "CFT_VITAL_INFO_ID")

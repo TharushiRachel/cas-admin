@@ -9,12 +9,12 @@ import lombok.*;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_SUPPORTING_DOC_AUD")
+@Table(name = "CASV3_T_SUPPORTING_DOC_AUD")
 
 public class SupportingDocAud extends ApprovableEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_T_SUPPORTING_DOC_AUD")
-    @SequenceGenerator(name= "SEQ_T_SUPPORTING_DOC_AUD", sequenceName = "SEQ_T_SUPPORTING_DOC_AUD", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CASV3_SEQ_SUPPORTING_DOC_AUD")
+    @SequenceGenerator(name= "CASV3_SEQ_SUPPORTING_DOC_AUD", sequenceName = "CASV3_SEQ_SUPPORTING_DOC_AUD", allocationSize = 1)
     @Column(name = "ID")
     private Integer id;
 

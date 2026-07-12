@@ -1,11 +1,10 @@
 package lk.sampath.casadminportalms.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-
-
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.creditfacilitytemplate.*;
+import lk.sampath.casadminportalms.dto.userSession.UserContext;
 import lk.sampath.casadminportalms.entity.creditfacility.CreditFacilityType;
 import lk.sampath.casadminportalms.entity.creditfacilitytemplate.*;
 import lk.sampath.casadminportalms.entity.supportingdoc.SupportingDoc;
@@ -17,11 +16,11 @@ import lk.sampath.casadminportalms.repository.creditfacilitytemplate.*;
 import lk.sampath.casadminportalms.repository.creditfacilitytype.CreditFacilityTypeRepository;
 import lk.sampath.casadminportalms.repository.supportingdoc.SupportingDocRepository;
 import lk.sampath.casadminportalms.service.CreditFacilityTemplateService;
-import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -30,87 +29,84 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
+@Log4j2
 public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplateService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CreditFacilityTemplateServiceImpl.class);
 
     private static final String NOT_FOUND_RECORD_MSG = "Not Found";
 
     private static final String DOES_NOT_EXISTS = "Does Not Exists";
 
-    @Autowired
-    private CreditFacilityTemplateRepository creditFacilityTemplateRepository;
+    private final CreditFacilityTemplateRepository creditFacilityTemplateRepository;
 
-    @Autowired
-    private CreditFacilityTemplateTempRepository creditFacilityTemplateTempRepository;
+    private final CreditFacilityTemplateTempRepository creditFacilityTemplateTempRepository;
 
-    @Autowired
-    private CreditFacilityTypeRepository creditFacilityTypeDao;
+    private final CreditFacilityTypeRepository creditFacilityTypeDao;
+   
+    private final CreditFacilityTemplateAudRepo creditFacilityTemplateAudRepo;
+   
+    private final CftInterestRateRepository cftInterestRateRepository;
 
-    @Autowired
-    private CreditFacilityTemplateAudRepo creditFacilityTemplateAudRepo;
-    @Autowired
-    private CftInterestRateRepository cftInterestRateRepository;
+    private final CftInterestRateTempRepository cftInterestRateTempRepository;
 
-    @Autowired
-    private CftInterestRateTempRepository cftInterestRateTempRepository;
+    private final CftVitalInfoTempRepository cftVitalInfoTempRepository;
+   
+    private final CftVitalInfoRepository cftVitalInfoRepository;
 
-    @Autowired
-    private CftVitalInfoTempRepository cftVitalInfoTempRepository;
-    @Autowired
-    private CftVitalInfoRepository cftVitalInfoRepository;
+    private final CftCustomFacilityInfoTempRepository cftCustomFacilityInfoTempRepository;
 
-    @Autowired
-    private CftCustomFacilityInfoTempRepository cftCustomFacilityInfoTempRepository;
+    private final CftCustomFacilityInfoRepository cftCustomFacilityInfoRepository;
 
-    @Autowired
-    private CftCustomFacilityInfoRepository cftCustomFacilityInfoRepository;
+    private final CftSupportingDocRepository cftSupportingDocRepository;
 
-    @Autowired
-    private CftSupportingDocRepository cftSupportingDocRepository;
+    private final CftSupportingDocTempRepository cftSupportingDocTempRepository;
 
-    @Autowired
-    private CftSupportingDocTempRepository cftSupportingDocTempRepository;
+    private final SupportingDocRepository supportingDocRepository;
+   
+    private final CftOtherFacilityInfoRepository otherFacilityInfoRepository;
+   
+    private final CftOtherFacilityInfoTempRepository otherFacilityInfoTempRepository;
 
-    @Autowired
-    private SupportingDocRepository supportingDocRepository;
-    @Autowired
-    private CftOtherFacilityInfoRepository otherFacilityInfoRepository;
+    private final CftInterestRateAudRepo cftInterestRateAudRepo;
 
-    @Autowired
-    private CftOtherFacilityInfoTempRepository otherFacilityInfoTempRepository;
+    private final CftVitalInfoAudRepo cftVitalInfoAudRepo;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private final CftCustomFacilityInfoAudRepo cftCustomFacilityInfoAudRepo;
 
-    @Autowired
-    private CftInterestRateAudRepo cftInterestRateAudRepo;
+    private final CftSupportingDocAudRepo cftSupportingDocAudRepo;
 
-    @Autowired
-    private CftVitalInfoAudRepo cftVitalInfoAudRepo;
+    private final CftOtherFacilityInfoAudRepo cftOtherFacilityInfoAudRepo;
 
-    @Autowired
-    private CftCustomFacilityInfoAudRepo cftCustomFacilityInfoAudRepo;
-
-    @Autowired
-    private CftSupportingDocAudRepo cftSupportingDocAudRepo;
-
-    @Autowired
-    private CftOtherFacilityInfoAudRepo cftOtherFacilityInfoAudRepo;
-
-
+    public CreditFacilityTemplateServiceImpl(CreditFacilityTemplateRepository creditFacilityTemplateRepository, CreditFacilityTemplateTempRepository creditFacilityTemplateTempRepository, CreditFacilityTypeRepository creditFacilityTypeDao, CreditFacilityTemplateAudRepo creditFacilityTemplateAudRepo, CftInterestRateRepository cftInterestRateRepository, CftInterestRateTempRepository cftInterestRateTempRepository, CftVitalInfoTempRepository cftVitalInfoTempRepository, CftVitalInfoRepository cftVitalInfoRepository, CftCustomFacilityInfoTempRepository cftCustomFacilityInfoTempRepository, CftCustomFacilityInfoRepository cftCustomFacilityInfoRepository, CftSupportingDocRepository cftSupportingDocRepository, CftSupportingDocTempRepository cftSupportingDocTempRepository, SupportingDocRepository supportingDocRepository, CftOtherFacilityInfoRepository otherFacilityInfoRepository, CftOtherFacilityInfoTempRepository otherFacilityInfoTempRepository, CftInterestRateAudRepo cftInterestRateAudRepo, CftVitalInfoAudRepo cftVitalInfoAudRepo, CftCustomFacilityInfoAudRepo cftCustomFacilityInfoAudRepo, CftSupportingDocAudRepo cftSupportingDocAudRepo, CftOtherFacilityInfoAudRepo cftOtherFacilityInfoAudRepo) {
+        this.creditFacilityTemplateRepository = creditFacilityTemplateRepository;
+        this.creditFacilityTemplateTempRepository = creditFacilityTemplateTempRepository;
+        this.creditFacilityTypeDao = creditFacilityTypeDao;
+        this.creditFacilityTemplateAudRepo = creditFacilityTemplateAudRepo;
+        this.cftInterestRateRepository = cftInterestRateRepository;
+        this.cftInterestRateTempRepository = cftInterestRateTempRepository;
+        this.cftVitalInfoTempRepository = cftVitalInfoTempRepository;
+        this.cftVitalInfoRepository = cftVitalInfoRepository;
+        this.cftCustomFacilityInfoTempRepository = cftCustomFacilityInfoTempRepository;
+        this.cftCustomFacilityInfoRepository = cftCustomFacilityInfoRepository;
+        this.cftSupportingDocRepository = cftSupportingDocRepository;
+        this.cftSupportingDocTempRepository = cftSupportingDocTempRepository;
+        this.supportingDocRepository = supportingDocRepository;
+        this.otherFacilityInfoRepository = otherFacilityInfoRepository;
+        this.otherFacilityInfoTempRepository = otherFacilityInfoTempRepository;
+        this.cftInterestRateAudRepo = cftInterestRateAudRepo;
+        this.cftVitalInfoAudRepo = cftVitalInfoAudRepo;
+        this.cftCustomFacilityInfoAudRepo = cftCustomFacilityInfoAudRepo;
+        this.cftSupportingDocAudRepo = cftSupportingDocAudRepo;
+        this.cftOtherFacilityInfoAudRepo = cftOtherFacilityInfoAudRepo;
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp(Pageable pageable) {
+    public ResponseEntity<StandardResponse<Page<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp(Pageable pageable) {
 
-        List<CreditFacilityTemplateTemp> creditFacilityTemplateTempList = creditFacilityTemplateTempRepository.findAll(pageable).getContent();
+        Page<CreditFacilityTemplateTemp> creditFacilityTemplateTempList = creditFacilityTemplateTempRepository.findAll(pageable);
+        Page<CreditFacilityTemplateDTO> pagedCreditFacilityTemplateDTOList = creditFacilityTemplateTempList.map(CreditFacilityTemplateDTO::new);
 
-        List<CreditFacilityTemplateDTO> creditFacilityTemplateDTOList = creditFacilityTemplateTempList.stream()
-                .map(CreditFacilityTemplateDTO :: new)
-                .toList();
-
-        StandardResponse<List<CreditFacilityTemplateDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), creditFacilityTemplateDTOList);
+        StandardResponse<Page<CreditFacilityTemplateDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), pagedCreditFacilityTemplateDTOList);
         return ResponseEntity.ok().body(response);
     }
 
@@ -130,16 +126,65 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplates(Pageable pageable) {
+    public ResponseEntity<StandardResponse<Page<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplates(Pageable pageable) {
+        int page = pageable.getPageNumber();
+        int size = pageable.getPageSize();
 
-        List<CreditFacilityTemplate> creditFacilityTemplateList = creditFacilityTemplateRepository.findAll(pageable).getContent();
+        // Always stable ordering
+        Sort idSort = Sort.by(Sort.Direction.ASC, "creditFacilityTemplateID");
 
-        List<CreditFacilityTemplateDTO> creditFacilityTemplateDTOList = creditFacilityTemplateList.stream()
-                .map(CreditFacilityTemplateDTO::new)
-                .toList();
+        // 1) Priority set: ACT + APPROVED
+        BooleanBuilder priorityPredicate = new BooleanBuilder();
+        priorityPredicate.and(QCreditFacilityTemplate.creditFacilityTemplate.status.eq(AppsConstants.Status.ACT));
+        priorityPredicate.and(QCreditFacilityTemplate.creditFacilityTemplate.approveStatus.eq(MasterDataApproveStatus.APPROVED));
 
-        StandardResponse<List<CreditFacilityTemplateDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), creditFacilityTemplateDTOList);
-        return ResponseEntity.ok().body(response);
+        List<CreditFacilityTemplate> priorityAll =
+                (List<CreditFacilityTemplate>) creditFacilityTemplateRepository.findAll(priorityPredicate, idSort);
+
+        long priorityCount = priorityAll.size();
+        int start = page * size;
+        int end = Math.min(start + size, (int) priorityCount);
+
+        List<CreditFacilityTemplate> pageContent = new ArrayList<>();
+
+        // 2) Fill current page from priority first
+        if (start < priorityCount) {
+            pageContent.addAll(priorityAll.subList(start, end));
+        }
+
+        // 3) Fill remaining slots from non-priority
+        int remaining = size - pageContent.size();
+        if (remaining > 0) {
+            BooleanBuilder nonPriorityPredicate = new BooleanBuilder();
+            nonPriorityPredicate.and(
+                    QCreditFacilityTemplate.creditFacilityTemplate.status.ne(AppsConstants.Status.ACT)
+                            .or(QCreditFacilityTemplate.creditFacilityTemplate.approveStatus.ne(MasterDataApproveStatus.APPROVED))
+            );
+
+            int nonPriorityOffset = Math.max(0, start - (int) priorityCount);
+            Pageable nonPriorityPageable = PageRequest.of(nonPriorityOffset / size, size, idSort);
+
+            Page<CreditFacilityTemplate> nonPriorityPage =
+                    creditFacilityTemplateRepository.findAll(nonPriorityPredicate, nonPriorityPageable);
+
+            List<CreditFacilityTemplate> nonPriorityList = nonPriorityPage.getContent();
+            if (!nonPriorityList.isEmpty()) {
+                pageContent.addAll(nonPriorityList.subList(0, Math.min(remaining, nonPriorityList.size())));
+            }
+        }
+
+        // 4) Total elements for proper page metadata
+        long totalElements = creditFacilityTemplateRepository.count();
+
+        Page<CreditFacilityTemplate> finalPage =
+                new org.springframework.data.domain.PageImpl<>(pageContent, pageable, totalElements);
+
+        Page<CreditFacilityTemplateDTO> dtoPage = finalPage.map(CreditFacilityTemplateDTO::new);
+
+        StandardResponse<Page<CreditFacilityTemplateDTO>> response =
+                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), dtoPage);
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -160,7 +205,7 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> saveCreditFacilityTemplateTemp(CreditFacilityTemplateDTO creditFacilityTemplateDTO) throws ApiRequestException {
 
-        LOG.info("START: saveCreditFacilityTemplateTemp :{}", creditFacilityTemplateDTO);
+        log.info("START: saveCreditFacilityTemplateTemp :{}", creditFacilityTemplateDTO);
         CreditFacilityTemplateTemp creditFacilityTemplateTemp;
         CreditFacilityTemplateTemp newCreditFacilityTemplateTemp = new CreditFacilityTemplateTemp();
 
@@ -188,6 +233,8 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
             creditFacilityTemplateTemp.setCftCustomFacilityInfos(customFacilityInfoTempList);
             creditFacilityTemplateTemp.setCftSupportingDocs(cftSupportingDocTempList);
             creditFacilityTemplateTemp.setCftOtherFacilityInformations(cftOtherFacilityInformationTempList);
+
+            creditFacilityTemplateTemp.setLastModifiedDate(new Date());
 
             creditFacilityTemplateTemp.setCreditFacilityTemplateID(nextId);
             newCreditFacilityTemplateTemp = creditFacilityTemplateTempRepository.saveAndFlush(creditFacilityTemplateTemp);
@@ -337,7 +384,7 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> authorizeCreditFacilityTemplate(ApproveRejectRQ approveRejectRQ) throws ApiRequestException {
 
-        LOG.info("START: approveCreditFacilityTemplateDTO :{}", approveRejectRQ);
+        log.info("START: approveCreditFacilityTemplateDTO :{}", approveRejectRQ);
 
         Date date = new Date();
 
@@ -353,6 +400,7 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
 
         creditFacilityTemplateTemp.setApprovedDate(date);
         creditFacilityTemplateTemp.setApproveStatus(approveRejectRQ.getApproveStatus());
+        creditFacilityTemplateTemp.setApprovedBy(UserContext.getUsername());
 
         CreditFacilityTemplateTemp newCft = creditFacilityTemplateTempRepository.saveAndFlush(creditFacilityTemplateTemp);
 
@@ -366,7 +414,7 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
             throw new ApiRequestException("Unknown approval status: "+ approveRejectRQ.getApproveStatus());
         }
 
-        LOG.info("END: approveCreditFacilityTemplateDTO :{}", approveRejectRQ);
+        log.info("END: approveCreditFacilityTemplateDTO :{}", approveRejectRQ);
         return response;
     }
 
@@ -375,11 +423,8 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
         CreditFacilityTemplateDTO creditFacilityTemplateDTO;
 
         if(facilityTemplate != null && facilityTemplate.getCreditFacilityTemplateID().equals(creditFacilityTemplateTemp.getCreditFacilityTemplateID())){
-
-            LOG.info("#################");
             creditFacilityTemplateDTO = updateCreditFacilityTemplateToMaster(creditFacilityTemplateTemp, facilityTemplate);
         } else {
-            LOG.info("$$$$$$$$$$$$$$$$$$$");
             creditFacilityTemplateDTO = createCreditFacilityTemplateObj(creditFacilityTemplateTemp);
         }
 
@@ -465,6 +510,9 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
         creditFacilityTemplate.setNewFacilityEmail(creditFacilityTemplateTemp.getNewFacilityEmail());
         creditFacilityTemplate.setExistingFacilityEmail(creditFacilityTemplateTemp.getExistingFacilityEmail());
         creditFacilityTemplate.setCreatedDate(creditFacilityTemplateTemp.getCreatedDate());
+        creditFacilityTemplate.setCreatedBy(creditFacilityTemplateTemp.getCreatedBy());
+        creditFacilityTemplate.setLastModifiedDate(creditFacilityTemplateTemp.getLastModifiedDate());
+        creditFacilityTemplate.setModifiedBy(creditFacilityTemplateTemp.getModifiedBy());
         creditFacilityTemplate.setApproveStatus(creditFacilityTemplateTemp.getApproveStatus());
 
         List<CftVitalInfo> cftVitalInfoList = cftVitalInfoRepository.findAllByCreditFacilityTemplateCreditFacilityTemplateID(creditFacilityTemplate.getCreditFacilityTemplateID());
@@ -510,9 +558,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
                 vitalInfo.setMandatory(cftVitalInfoTemp.getMandatory());
                 vitalInfo.setDisplayOrder(cftVitalInfoTemp.getDisplayOrder());
                 vitalInfo.setStatus(cftVitalInfoTemp.getStatus());
-                vitalInfo.setCreatedDate(cftVitalInfoTemp.getCreatedDate());
-                vitalInfo.setApprovedDate(creditFacilityTemplate.getApprovedDate());
-                vitalInfo.setApproveStatus(creditFacilityTemplate.getApproveStatus());
                 vitalInfo.setRecordStatus(cftVitalInfoTemp.getRecordStatus());
 
                 cftVitalInfoSet.add(vitalInfo);
@@ -542,9 +587,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
                 cftInterestRate.setInterestRatingSubCategory(interestRateTemp.getInterestRatingSubCategory());
                 cftInterestRate.setIsEditable(interestRateTemp.getIsEditable());
 
-                cftInterestRate.setApproveStatus(creditFacilityTemplate.getApproveStatus());
-                cftInterestRate.setApprovedDate(creditFacilityTemplate.getApprovedDate());
-                cftInterestRate.setCreatedDate(interestRateTemp.getCreatedDate());
                 cftInterestRate.setRecordStatus(interestRateTemp.getRecordStatus());
 
                 cftInterestRateDTOList.add(cftInterestRate);
@@ -568,9 +610,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
             cftSupportingDoc.setMandatory(cftSupportingDocTemp.getMandatory());
             cftSupportingDoc.setStatus(cftSupportingDocTemp.getStatus());
 
-            cftSupportingDoc.setCreatedDate(cftSupportingDocTemp.getCreatedDate());
-            cftSupportingDoc.setApproveStatus(creditFacilityTemplate.getApproveStatus());
-            cftSupportingDoc.setApprovedDate(creditFacilityTemplate.getApprovedDate());
             cftSupportingDoc.setRecordStatus(cftSupportingDocTemp.getRecordStatus());
 
             cftSupportingDocSet.add(cftSupportingDoc);
@@ -598,9 +637,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
             cftOtherFacilityInformation.setDisplayOrder(cftOtherFacilityInformationTemp.getDisplayOrder());
             cftOtherFacilityInformation.setMandatory(cftOtherFacilityInformationTemp.getMandatory());
             cftOtherFacilityInformation.setStatus(cftOtherFacilityInformationTemp.getStatus());
-            cftOtherFacilityInformation.setApproveStatus(creditFacilityTemplate.getApproveStatus());
-            cftOtherFacilityInformation.setApprovedDate(creditFacilityTemplate.getApprovedDate());
-            cftOtherFacilityInformation.setCreatedDate(cftOtherFacilityInformationTemp.getCreatedDate());
             cftOtherFacilityInformation.setRecordStatus(cftOtherFacilityInformationTemp.getRecordStatus());
 
             otherFacilityInformationSet.add(cftOtherFacilityInformation);
@@ -628,10 +664,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
             cftCustomFacilityInfo.setMandatory(cftCustomFacilityInfoTemp.getMandatory());
             cftCustomFacilityInfo.setStatus(cftCustomFacilityInfoTemp.getStatus());
             cftCustomFacilityInfo.setDisplayOrder(cftCustomFacilityInfoTemp.getDisplayOrder());
-
-            cftCustomFacilityInfo.setApproveStatus(cftCustomFacilityInfoTemp.getApproveStatus());
-            cftCustomFacilityInfo.setApprovedDate(cftCustomFacilityInfoTemp.getApprovedDate());
-            cftCustomFacilityInfo.setApprovedBy(cftCustomFacilityInfoTemp.getApprovedBy());
             cftCustomFacilityInfo.setRecordStatus(cftCustomFacilityInfoTemp.getRecordStatus());
 
             cftCustomFacilityInfoSet.add(cftCustomFacilityInfo);
@@ -694,8 +726,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
     }
 
     public Set<CftInterestRateTemp> saveCtfInterestRateTemp(CreditFacilityTemplateDTO creditFacilityTemplateDTO, CreditFacilityTemplateTemp creditFacilityTemplateTemp ){
-
-        Date date = new Date();
         Set<CftInterestRateTemp> cftInterestRateTempList = new HashSet<>();
 
         if(creditFacilityTemplateDTO.getIsCftInterestRateDTOListChange().equals(AppsConstants.YesNo.Y)){
@@ -710,8 +740,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
 
                     CftInterestRateTemp interestRateTemp = new CftInterestRateTemp();
                     Integer nextId = cftInterestRateTempRepository.getNextSequenceValue();
-                    interestRateTemp.setCreatedDate(date);
-                    interestRateTemp.setApproveStatus(MasterDataApproveStatus.DRAFT);
                     interestRateTemp.setCftInterestRateID(nextId);
 
                     interestRateTemp.setCreditFacilityTemplate(creditFacilityTemplateTemp);
@@ -766,8 +794,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
             cftInterestRateAud.setRecordStatus(cftInterestRate.getRecordStatus());
         }
 
-        cftInterestRateAud.setApproveStatus(MasterDataApproveStatus.APPROVED);
-        cftInterestRateAud.setApprovedDate(new Date());
         cftInterestRateAud.setId(null);
 
           cftInterestRateAudRepo.saveAndFlush(cftInterestRateAud);
@@ -836,10 +862,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
             cftVitalInfoAud.setRecordStatus(cftVitalInfo.getRecordStatus());
         }
 
-
-        // Set audit-specific fields
-        cftVitalInfoAud.setApproveStatus(MasterDataApproveStatus.APPROVED); // Default status
-        cftVitalInfoAud.setApprovedDate(new Date());
         cftVitalInfoAud.setId(null);
 
         cftVitalInfoAudRepo.saveAndFlush(cftVitalInfoAud);
@@ -865,7 +887,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
 
                 Integer nextId = cftCustomFacilityInfoTempRepository.getNextSequenceValue();
                 cftCustomFacilityInfoTemp.setCftCustomFacilityInfoID(nextId);
-                cftCustomFacilityInfoTemp.setApproveStatus(MasterDataApproveStatus.DRAFT);
                 cftCustomFacilityInfoTemp.setCreatedDate(date);
 
                 cftCustomFacilityInfoTemp.setCreditFacilityTemplate(creditFacilityTemplateTemp);
@@ -916,8 +937,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
             cftVitalInfoAud.setRecordStatus(cftCustomFacilityInfo.getRecordStatus());
         }
 
-        cftVitalInfoAud.setApproveStatus(MasterDataApproveStatus.APPROVED);
-        cftVitalInfoAud.setApprovedDate(new Date());
         cftVitalInfoAud.setId(null);
 
         cftCustomFacilityInfoAudRepo.saveAndFlush(cftVitalInfoAud);
@@ -944,7 +963,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
                 CftSupportingDocTemp cftSupportingDocTemp = new CftSupportingDocTemp();
                 Integer nextId = cftSupportingDocTempRepository.getNextSequenceValue();
                 cftSupportingDocTemp.setCreatedDate(date);
-                cftSupportingDocTemp.setApproveStatus(MasterDataApproveStatus.DRAFT);
                 cftSupportingDocTemp.setCftSupportingDocID(nextId);
                 cftSupportingDocTemp.setCreditFacilityTemplate(creditFacilityTemplateTemp);
                 cftSupportingDocTemp.setMandatory(cftSupportingDocDTO.getMandatory());
@@ -984,9 +1002,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
             cftSupportingDocAud.setRecordStatus(cftSupportingDoc.getRecordStatus());
         }
 
-        // Set audit-specific fields
-        cftSupportingDocAud.setApproveStatus(MasterDataApproveStatus.DRAFT);
-        cftSupportingDocAud.setApprovedDate(new Date());
         cftSupportingDocAud.setId(null);
 
         cftSupportingDocAudRepo.saveAndFlush(cftSupportingDocAud);
@@ -1013,7 +1028,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
                     Integer nextId = otherFacilityInfoTempRepository.getNextSequenceValue();
                     cftOtherFacilityInformationTemp.setCreatedDate(date);
                     cftOtherFacilityInformationTemp.setCreditFacilityTemplate(creditFacilityTemplateTemp);
-                    cftOtherFacilityInformationTemp.setApproveStatus(MasterDataApproveStatus.DRAFT);
                     cftOtherFacilityInformationTemp.setCftOtherFacilityInfoID(nextId);
                     cftOtherFacilityInformationTemp.setOtherFacilityInfoCode(facilityInfoDTO.getOtherFacilityInfoCode());
                     cftOtherFacilityInformationTemp.setOtherFacilityInfoName(facilityInfoDTO.getOtherFacilityInfoName());
@@ -1068,10 +1082,6 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
             cftOtherFacilityInformationAud.setRecordStatus(cftOtherFacilityInformation.getRecordStatus());
         }
 
-
-        // Set audit-specific fields
-        cftOtherFacilityInformationAud.setApproveStatus(MasterDataApproveStatus.DRAFT);
-        cftOtherFacilityInformationAud.setApprovedDate(new Date());
         cftOtherFacilityInformationAud.setId(null);
 
         cftOtherFacilityInfoAudRepo.saveAndFlush(cftOtherFacilityInformationAud);

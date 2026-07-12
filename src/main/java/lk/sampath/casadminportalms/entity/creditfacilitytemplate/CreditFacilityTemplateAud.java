@@ -15,11 +15,11 @@ import java.math.BigDecimal;
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Table(name = "T_CREDIT_FACILITY_TEMPLATE_AUD")
+@Table(name = "CASV3_T_CREDIT_FACILITY_TEMPLATE_AUD")
 public class CreditFacilityTemplateAud extends ApprovableEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_T_CREDIT_FACILITY_TEMPLATE_AUD")
-    @SequenceGenerator(name = "SEQ_T_CREDIT_FACILITY_TEMPLATE_AUD", sequenceName = "SEQ_T_CREDIT_FACILITY_TEMPLATE_AUD", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CASV3_SEQ_CREDIT_FACILITY_TEMPLATE_AUD")
+    @SequenceGenerator(name = "CASV3_SEQ_CREDIT_FACILITY_TEMPLATE_AUD", sequenceName = "CASV3_SEQ_CREDIT_FACILITY_TEMPLATE_AUD", allocationSize = 1)
     @Column(name = "ID")
     private Integer id;
     @Column(name = "CREDIT_FACILITY_TEMPLATE_ID")

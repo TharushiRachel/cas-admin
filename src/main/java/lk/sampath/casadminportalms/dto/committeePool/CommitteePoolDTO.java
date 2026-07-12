@@ -42,13 +42,13 @@ public class CommitteePoolDTO {
     public CommitteePoolDTO(){}
 
     public CommitteePoolDTO(CommitteePool committeePool){
-        this.committeePoolId = committeePool.getCommitteePoolId();
+        this.committeePoolId = committeePool.getPoolId();
         this.userName = committeePool.getUserName();
         this.userDisplayName = committeePool.getUserDisplayName();
-        this.designation = committeePool.getDesignation();
-        this.workClass = committeePool.getWorkClass();
+//        this.designation = committeePool.getDesignation();
+//        this.workClass = committeePool.getWorkClass();
         this.userId = committeePool.getUserId();
-        this.status = committeePool.getStatus();
+//        this.status = committeePool.getStatus();
         this.createdDate = committeePool.getCreatedDate();
         this.createdBy = committeePool.getCreatedBy();
         this.lastModifiedDate = committeePool.getLastModifiedDate();
@@ -59,13 +59,13 @@ public class CommitteePoolDTO {
     }
 
     public CommitteePoolDTO(CommitteePoolTemp committeePoolTemp){
-        this.committeePoolId = committeePoolTemp.getCommitteePoolId();
+        this.committeePoolId = committeePoolTemp.getPoolId();
         this.userName = committeePoolTemp.getUserName();
         this.userDisplayName = committeePoolTemp.getUserDisplayName();
-        this.designation = committeePoolTemp.getDesignation();
-        this.workClass = committeePoolTemp.getWorkClass();
+//        this.designation = committeePoolTemp.getD();
+//        this.workClass = committeePoolTemp.getWorkClass();
         this.userId = committeePoolTemp.getUserId();
-        this.status = committeePoolTemp.getStatus();
+//        this.status = committeePoolTemp.getStatus();
         this.createdDate = committeePoolTemp.getCreatedDate();
         this.createdBy = committeePoolTemp.getCreatedBy();
         this.lastModifiedDate = committeePoolTemp.getLastModifiedDate();

@@ -12,9 +12,9 @@ import lk.sampath.casadminportalms.repository.userda.UserDaAudRepository;
 import lk.sampath.casadminportalms.repository.userda.UserDaRepository;
 import lk.sampath.casadminportalms.repository.userda.UserDaTempRepository;
 import lk.sampath.casadminportalms.service.UserDaService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,10 +28,9 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@Log4j2
 public class UserDaServiceImpl implements UserDaService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UserDaServiceImpl.class);
-
+    
     private static final String USER_DA_WITH = "User Da with ";
 
     private static final String USER_DA_TEMP_WITH = "User Da with TEMP ";
@@ -83,7 +82,7 @@ public class UserDaServiceImpl implements UserDaService {
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<UserDaDTO>> saveUserDaTemp(UserDaDTO userDaDTO) throws ApiRequestException {
 
-        LOG.info("START: save UserDA :{}", userDaDTO);
+        log.info("START: save UserDA :{}", userDaDTO);
 
         if (userDaDTO == null || userDaDTO.getUserName() == null || userDaDTO.getUserName().trim().isEmpty()) {
             throw new ApiRequestException("User cannot be empty or null.");
@@ -112,10 +111,10 @@ public class UserDaServiceImpl implements UserDaService {
             userDaTempSave.setCreatedBy(userDaDTO.getCreatedBy());
             userDaTempSave.setModifiedBy(userDaDTO.getModifiedBy());
 
-            LOG.info(USER_DA_TEMP_WITH, userDaTempSave);
+            log.info(USER_DA_TEMP_WITH, userDaTempSave);
 
             userDaTempSave = userDaTempRepository.saveAndFlush(userDaTempSave);
-            LOG.info("SUCCESS: Saved User DA with ID : {}", userDaTempSave.getUserDaID());
+            log.info("SUCCESS: Saved User DA with ID : {}", userDaTempSave.getUserDaID());
         } else {
             throw new ApiRequestException("UserDA Already Exists");
         }
@@ -136,7 +135,7 @@ public class UserDaServiceImpl implements UserDaService {
         Date date = new Date();
         Optional<UserDa> optionalUserDa = userDaRepository.findById(userDaTemp.getUserDaID());
         UserDa findUserDa = optionalUserDa.orElse(null);
-        LOG.info("findUserDa :{}", findUserDa);
+        log.info("findUserDa :{}", findUserDa);
 
         userDaTemp.setApprovedDate(date);
         userDaTemp.setApproveStatus(approveRejectRQ.getApproveStatus());
@@ -171,7 +170,7 @@ public class UserDaServiceImpl implements UserDaService {
     }
 
     private ResponseEntity<StandardResponse<UserDaDTO>> handleRejection(UserDaTemp temp){
-        LOG.info("Handling rejection for User Da Temp ID: {} ", temp.getUserDaID());
+        log.info("Handling rejection for User Da Temp ID: {} ", temp.getUserDaID());
         saveUserDaAudit(temp);
         StandardResponse<UserDaDTO> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), temp);
         return ResponseEntity.ok().body(response);
@@ -234,7 +233,7 @@ public class UserDaServiceImpl implements UserDaService {
         audit.setModifiedBy(temp.getModifiedBy());
 
         userDaAudRepository.save(audit);
-        LOG.info("saved audit record for User Da ID: {}", temp.getUserDaID());
+        log.info("saved audit record for User Da ID: {}", temp.getUserDaID());
     }
 
     @Override
@@ -278,7 +277,7 @@ public class UserDaServiceImpl implements UserDaService {
 
             userDaTempRepository.save(userDaDb);
 
-            LOG.info("END: Update UserDa: {}", userDaDb);
+            log.info("END: Update UserDa: {}", userDaDb);
 
             StandardResponse<UserDaDTO> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), userDaDb);
             return ResponseEntity.ok().body(response);
@@ -288,13 +287,13 @@ public class UserDaServiceImpl implements UserDaService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<UserDaDTO>> updateApprovedUserDa(Integer userDaID, UserDaDTO userDaDTO) throws ApiRequestException{
-        LOG.info("START: Update UPC Section :{}", userDaDTO);
+        log.info("START: Update UPC Section :{}", userDaDTO);
 
         UserDa userDaDb = userDaRepository.findById(userDaID).orElseThrow(() -> {
             throw new ApiRequestException(USER_DA_WITH + userDaID + DOES_NOT_EXISTS);
         });
 
-        LOG.info("START : GET UserDa. {}", userDaDb);
+        log.info("START : GET UserDa. {}", userDaDb);
 
         if(!userDaDb.getUserName().equals(userDaDTO.getUserName())){
             validateUserDaNameUniqueness(userDaDTO.getUserName(), userDaID);
@@ -304,7 +303,7 @@ public class UserDaServiceImpl implements UserDaService {
 
         UserDaTemp userDaTemp = mapToUserDaTemp(userDaDb, userDaDTO);
 
-        LOG.info("END : GET UserDa {}", userDaTemp);
+        log.info("END : GET UserDa {}", userDaTemp);
         userDaTemp = userDaTempRepository.saveAndFlush(userDaTemp);
 
         StandardResponse<UserDaDTO> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), userDaTemp);

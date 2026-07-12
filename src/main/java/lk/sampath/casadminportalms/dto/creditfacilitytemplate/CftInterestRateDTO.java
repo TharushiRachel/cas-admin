@@ -53,14 +53,14 @@ public class CftInterestRateDTO implements Serializable {
         this.rateCode = cftInterestRate.getRateCode();
         this.value = cftInterestRate.getValue();
         this.isDefault = cftInterestRate.getIsDefault();
-        this.approveStatus = cftInterestRate.getApproveStatus();
+        //this.approveStatus = cftInterestRate.getApproveStatus();
         this.status = cftInterestRate.getStatus();
 
-        if (cftInterestRate.getApprovedDate() != null) {
-            this.approvedDate = cftInterestRate.getApprovedDate();
-        }
-        this.approveStatus = cftInterestRate.getApproveStatus();
-        this.approvedBy = cftInterestRate.getApprovedBy();
+//        if (cftInterestRate.getApprovedDate() != null) {
+//            this.approvedDate = cftInterestRate.getApprovedDate();
+//        }
+//        this.approveStatus = cftInterestRate.getApproveStatus();
+//        this.approvedBy = cftInterestRate.getApprovedBy();
         this.interestRatingSubCategory = cftInterestRate.getInterestRatingSubCategory();
         this.isEditable = cftInterestRate.getIsEditable();
         this.recordStatus = cftInterestRate.getRecordStatus();
@@ -76,11 +76,11 @@ public class CftInterestRateDTO implements Serializable {
         this.isDefault = cftInterestRate.getIsDefault();
         this.status = cftInterestRate.getStatus();
 
-        if (cftInterestRate.getApprovedDate() != null) {
-            this.approvedDate = cftInterestRate.getApprovedDate();
-        }
-        this.approveStatus = cftInterestRate.getApproveStatus();
-        this.approvedBy = cftInterestRate.getApprovedBy();
+//        if (cftInterestRate.getApprovedDate() != null) {
+//            this.approvedDate = cftInterestRate.getApprovedDate();
+//        }
+//        this.approveStatus = cftInterestRate.getApproveStatus();
+//        this.approvedBy = cftInterestRate.getApprovedBy();
         this.interestRatingSubCategory = cftInterestRate.getInterestRatingSubCategory();
         this.isEditable = cftInterestRate.getIsEditable();
         this.recordStatus = cftInterestRate.getRecordStatus();

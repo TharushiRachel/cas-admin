@@ -1,13 +1,17 @@
 package lk.sampath.casadminportalms.controller;
 
-import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.controller.basecontroller.PaginationUtil;
+import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
+import lk.sampath.casadminportalms.dto.role.PrivilegeDTO;
 import lk.sampath.casadminportalms.dto.role.RoleDTO;
+import lk.sampath.casadminportalms.dto.role.UpmRolePrivilegeDTO;
+import lk.sampath.casadminportalms.entity.role.Privilege;
 import lk.sampath.casadminportalms.entity.role.PrivilegeCategory;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -51,15 +55,16 @@ public class RoleController {
     }
 
     @GetMapping("/searchRoles")
-    public ResponseEntity<StandardResponse<List<RoleDTO>>> listRole(
+    public ResponseEntity<StandardResponse<Page<RoleDTO>>> listRole(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws  ApiRequestException{
         Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
-        ResponseEntity<StandardResponse<List<RoleDTO>>> roles = roleService.findAllApprovedRoles(pageable);
+        ResponseEntity<StandardResponse<Page<RoleDTO>>> roles = roleService.findAllApprovedRoles(pageable);
         return ResponseEntity.ok().body(roles.getBody());
     }
+
 
     @GetMapping("/{roleID}")
     public ResponseEntity<StandardResponse<Object>> viewRoleById(@PathVariable Integer roleID) throws ApiRequestException {
@@ -67,7 +72,7 @@ public class RoleController {
         return ResponseEntity.ok().body(role.getBody());
     }
 
-    @PostMapping
+    @PostMapping("/saveRole")
     public ResponseEntity<StandardResponse<Object>> saveRole(@Validated @RequestBody RoleDTO request) throws  ApiRequestException{
         ResponseEntity<StandardResponse<Object>> role = roleService.saveRoleTemp(request);
         return ResponseEntity.ok().body(role.getBody());
@@ -91,9 +96,9 @@ public class RoleController {
         return ResponseEntity.ok().body(role.getBody());
     }
 
-    @PostMapping("/deleteRoleTemp")
-    public ResponseEntity<StandardResponse<Void>> deleteRoleTempById(@RequestBody  RoleDTO roleDTO) throws  ApiRequestException{
-        ResponseEntity<StandardResponse<Void>> role = roleService.deleteRoleTempById(roleDTO.getRoleID());
+    @GetMapping("/getPrivilegesByCode/{groupCode}")
+    public ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> getPrivilegesByCode(@PathVariable int groupCode) throws  ApiRequestException{
+        ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> role = roleService.getUserPrivilegesByUMPCode(groupCode);
         return ResponseEntity.ok().body(role.getBody());
     }
 }

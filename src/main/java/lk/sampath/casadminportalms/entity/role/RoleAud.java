@@ -13,13 +13,15 @@ import java.util.Set;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_ROLES_AUD")
+@Table(name = "CASV3_T_ROLE_AUD")
 public class RoleAud extends ApprovableEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "SEQ_T_ROLES_AUD")
     @SequenceGenerator(name="SEQ_T_ROLES_AUD",sequenceName = "SEQ_T_ROLES_AUD",allocationSize = 1)
-    @Column(name = "ID")
+    @Column(name = "ROLE_AUD_ID")
     private Integer id;
+
     @Column(name = "ROLE_ID", nullable = false, updatable = false)
     private Integer roleID;
 

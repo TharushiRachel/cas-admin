@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface UserDaService {
+
     ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllUserDaTempList(Pageable pageable) throws ApiRequestException;
     ResponseEntity<StandardResponse<UserDaDTO>> findUserDaTempByID(Integer userDaID) throws ApiRequestException;
     ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllApprovedUserDa(Pageable pageable) throws ApiRequestException;

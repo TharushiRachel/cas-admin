@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface CftInterestRateTempRepository extends JpaRepository<CftInterestRateTemp, Integer> {
 
-    @Query(value = "SELECT SEQ_T_CFT_INTEREST_RATE_TEMP.NEXTVAL FROM DUAL", nativeQuery = true)
+    @Query(value = "SELECT SEQ_T_CFT_INTEREST_RATE.NEXTVAL FROM DUAL", nativeQuery = true)
     Integer getNextSequenceValue();
 
 

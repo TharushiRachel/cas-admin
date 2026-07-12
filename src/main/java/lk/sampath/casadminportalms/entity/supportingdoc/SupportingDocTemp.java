@@ -8,7 +8,7 @@ import lombok.*;
 @Entity
 @Setter
 @Getter
-@Table(name = "T_SUPPORTING_DOC_TEMP")
+@Table(name = "CASV3_T_SUPPORTING_DOC_TEMP")
 @ToString
 @RequiredArgsConstructor
 

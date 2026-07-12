@@ -1,5 +1,7 @@
 package lk.sampath.casadminportalms.enums;
 
+import org.springframework.util.StringUtils;
+
 public enum MasterDataApproveStatus {
     DRAFT("Draft", "DRAFT"),
     PENDING("Pending", "PENDING"),
@@ -34,5 +36,12 @@ public enum MasterDataApproveStatus {
         return null;
     }
 
+    public static MasterDataApproveStatus resolveApproveStatus(String statusStr) {
+        MasterDataApproveStatus matchingStatus = null;
+        if (!StringUtils.isEmpty(statusStr)) {
+            matchingStatus = MasterDataApproveStatus.valueOf(statusStr.trim());
+        }
 
+        return matchingStatus;
+    }
 }

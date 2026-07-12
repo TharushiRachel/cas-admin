@@ -7,8 +7,10 @@ import lk.sampath.casadminportalms.enums.ErrorEnums;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.repository.committeetype.CommitteeTypeRepository;
 import lk.sampath.casadminportalms.service.CommitteeTypeService;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@Log4j2
 public class CommitteeTypeServiceImpl implements CommitteeTypeService {
 
     private final CommitteeTypeRepository committeeTypeRepository;
@@ -56,7 +59,8 @@ public class CommitteeTypeServiceImpl implements CommitteeTypeService {
         Date newDate = new Date();
         CommitteeType newCommitteeType = modelMapper.map(request, CommitteeType.class);
         newCommitteeType.setCreatedDate(newDate);
-        newCommitteeType.setModifiedDate(newDate);
+        newCommitteeType.setLastModifiedDate(newDate);
+        newCommitteeType.setCommitteeTypeId(null);
 
         List<CommitteeType> duplicateCommitteeType = this.committeeTypeRepository.findByCommitteeType(request.getCommitteeType());
 
@@ -81,11 +85,11 @@ public class CommitteeTypeServiceImpl implements CommitteeTypeService {
         Date newDate = new Date();
         CommitteeType tempCommitteeType = this.committeeTypeRepository.findById(committeeTypeID)
                 .orElseThrow(() -> new ApiRequestException("Committee Type with ID " + committeeTypeID + " does not exist"));
-        tempCommitteeType.setCommitteeTypeDescription(request.getCommitteeTypeDescription());
+//        tempCommitteeType.setCommitteeTypeDescription(request.getCommitteeTypeDescription());
         tempCommitteeType.setCommitteeType(request.getCommitteeType());
-        tempCommitteeType.setStatus(String.valueOf(request.getStatus()));
+        tempCommitteeType.setStatus(request.getStatus());
         tempCommitteeType.setCreatedUserDisplayName(request.getCreatedUserDisplayName());
-        tempCommitteeType.setModifiedDate(newDate);
+        tempCommitteeType.setLastModifiedDate(newDate);
         tempCommitteeType.setModifiedBy(request.getModifiedBy());
         tempCommitteeType.setIsSystem(request.getIsSystem());
         CommitteeType resCommitteeType = this.committeeTypeRepository.save(tempCommitteeType);

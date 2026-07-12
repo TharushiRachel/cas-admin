@@ -16,7 +16,7 @@ import lombok.*;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_CREDIT_FACILITY_TYPE_TEMP")
+@Table(name = "CASV3_T_CREDIT_FACILITY_TYPE_TEMP")
 
 @ToString
 public class CreditFacilityTypeTemp extends ApprovableEntity {

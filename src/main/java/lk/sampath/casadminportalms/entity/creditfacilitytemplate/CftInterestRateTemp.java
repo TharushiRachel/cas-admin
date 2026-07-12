@@ -2,6 +2,7 @@ package lk.sampath.casadminportalms.entity.creditfacilitytemplate;
 
 import jakarta.persistence.*;
 import lk.sampath.casadminportalms.entity.common.ApprovableEntity;
+import lk.sampath.casadminportalms.entity.common.UserTrackableEntity;
 import lk.sampath.casadminportalms.enums.AppsConstants;
 import lk.sampath.casadminportalms.enums.InterestRatingSubCategory;
 import lombok.AllArgsConstructor;
@@ -15,8 +16,8 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Table(name = "T_CFT_INTEREST_RATE_TEMP")
-public class CftInterestRateTemp extends ApprovableEntity {
+@Table(name = "CASV3_T_CFT_INTEREST_RATE_TEMP")
+public class CftInterestRateTemp  extends UserTrackableEntity {
 
     @Id
     @Column(name = "CFT_INTEREST_RATE_ID")

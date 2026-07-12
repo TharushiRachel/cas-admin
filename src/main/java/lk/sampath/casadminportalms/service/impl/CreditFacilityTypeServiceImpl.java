@@ -3,6 +3,7 @@ package lk.sampath.casadminportalms.service.impl;
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.creditfacility.CreditFacilityTypeDTO;
+import lk.sampath.casadminportalms.dto.userSession.UserContext;
 import lk.sampath.casadminportalms.entity.creditfacility.CreditFacilityType;
 import lk.sampath.casadminportalms.entity.creditfacility.CreditFacilityTypeAud;
 import lk.sampath.casadminportalms.entity.creditfacility.CreditFacilityTypeTemp;
@@ -14,11 +15,11 @@ import lk.sampath.casadminportalms.repository.creditfacilitytype.CreditFacilityT
 import lk.sampath.casadminportalms.repository.creditfacilitytype.CreditFacilityTypeRepository;
 import lk.sampath.casadminportalms.repository.creditfacilitytype.CreditFacilityTypeTempRepository;
 import lk.sampath.casadminportalms.service.CreditFacilityTypeService;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,9 +35,8 @@ import java.util.*;
  */
 
 @Service
+@Log4j2
 public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CreditFacilityTypeServiceImpl.class);
 
     public static final String CREDIT_FACILITY_TYPE_WITH = "Credit Facility Type with ID ";
 
@@ -69,14 +69,14 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
     @Override
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> saveCreditFacilityTypeTemp(CreditFacilityTypeDTO creditFacilityTypeTempDTO) throws ApiRequestException {
 
-        LOG.info("START: Save Credit Facility type :{}", creditFacilityTypeTempDTO);
+        log.info("START: Save Credit Facility type :{}", creditFacilityTypeTempDTO);
         CreditFacilityTypeTemp creditFacilityTypeTemp = new CreditFacilityTypeTemp();
         Date date = new Date();
         StandardResponse<CreditFacilityTypeDTO> response;
 
         try {
             if (StringUtils.isEmpty(creditFacilityTypeTempDTO.getFacilityTypeName())) {
-                LOG.info("END: Facility Type Name is empty or null. Throwing ApiRequestException.");
+                log.info("END: Facility Type Name is empty or null. Throwing ApiRequestException.");
 
                 throw new ApiRequestException("Facility Type Name Cannot be null or empty");
             }
@@ -88,9 +88,8 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
             creditFacilityTypeTemp.setDescription(creditFacilityTypeTempDTO.getDescription());
             creditFacilityTypeTemp.setStatus(creditFacilityTypeTempDTO.getStatus());
             creditFacilityTypeTemp.setApproveStatus(creditFacilityTypeTempDTO.getApproveStatus());
-            creditFacilityTypeTemp.setCreatedBy(creditFacilityTypeTempDTO.getCreatedBy());
             creditFacilityTypeTemp.setCreatedDate(date);
-            LOG.info("Converted Credit Facility type to Save :{}", creditFacilityTypeTemp);
+            log.info("Converted Credit Facility type to Save :{}", creditFacilityTypeTemp);
                 creditFacilityTypeTempRepository.save(creditFacilityTypeTemp);
             CreditFacilityTypeDTO creditFacilityTypeTempDto = new CreditFacilityTypeDTO(creditFacilityTypeTemp);
             response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), creditFacilityTypeTempDto);
@@ -98,7 +97,7 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
         catch (Exception exception){
 
-            LOG.info("END: In Adding Credit facility type threw the exception  with message :{}", exception.getMessage());
+            log.info("END: In Adding Credit facility type threw the exception  with message :{}", exception.getMessage());
            if (exception instanceof ApiRequestException){
                throw exception;
            }
@@ -108,19 +107,19 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
            }
         }
 
-        LOG.info("END: Response Body in Save Credit Facility type :{}", response.getResponse());
+        log.info("END: Response Body in Save Credit Facility type :{}", response.getResponse());
         return ResponseEntity.ok().body(response);
     }
 
     private void validateCreditFacilityTypeNameUniquenessAdd (CreditFacilityTypeDTO creditFacilityTypeTempDTO ) throws ApiRequestException {
-        LOG.info("START: validateCreditFacilityTypeNameUniquenessAdd function in Save Credit Facility type :{}", creditFacilityTypeTempDTO);
+        log.info("START: validateCreditFacilityTypeNameUniquenessAdd function in Save Credit Facility type :{}", creditFacilityTypeTempDTO);
         if (creditFacilityTypeTempRepository.existsByFacilityTypeName(creditFacilityTypeTempDTO.getFacilityTypeName())) {
-            LOG.info("END: validateCreditFacilityTypeNameUniquenessAdd function in Save Credit Facility type threw excpetion for facility name:{}", creditFacilityTypeTempDTO.getFacilityTypeName());
+            log.info("END: validateCreditFacilityTypeNameUniquenessAdd function in Save Credit Facility type threw excpetion for facility name:{}", creditFacilityTypeTempDTO.getFacilityTypeName());
                 throw new ApiRequestException(CREDIT_FACILITY_TYPE_WITH+creditFacilityTypeTempDTO.getFacilityTypeName() +ALL_READY_EXISTS + TEMP_TABLE);
         }
 
         if (creditFacilityTypeRepository.existsByFacilityTypeName(creditFacilityTypeTempDTO.getFacilityTypeName()) ) {
-            LOG.info("END: validateCreditFacilityTypeNameUniquenessAdd function in Save Credit Facility type threw excpetion for facility name:{}", creditFacilityTypeTempDTO.getFacilityTypeName());
+            log.info("END: validateCreditFacilityTypeNameUniquenessAdd function in Save Credit Facility type threw excpetion for facility name:{}", creditFacilityTypeTempDTO.getFacilityTypeName());
             throw new ApiRequestException(CREDIT_FACILITY_TYPE_WITH+creditFacilityTypeTempDTO.getFacilityTypeName() +ALL_READY_EXISTS + MASTER_TABLE);
         }
 
@@ -129,19 +128,19 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
     @Transactional(readOnly = true)
     @Override
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> findCreditFacilityTypeTempByID(Integer creditFacilityTypeID) throws ApiRequestException {
-        LOG.info("START: Find Credit Facility type from temp by ID :{}", creditFacilityTypeID);
+        log.info("START: Find Credit Facility type from temp by ID :{}", creditFacilityTypeID);
         StandardResponse<CreditFacilityTypeDTO> response;
         try {
             CreditFacilityTypeTemp creditFacilityTypeTemp = creditFacilityTypeTempRepository.findById(creditFacilityTypeID).orElseThrow(() ->
                     new ApiRequestException(CREDIT_FACILITY_TYPE_WITH + creditFacilityTypeID + DOES_NOT_EXISTS));
 
             CreditFacilityTypeDTO creditFacilityTypeTempDTO = new CreditFacilityTypeDTO(creditFacilityTypeTemp);
-            LOG.info("Find Credit Facility type from temp by ID :{}", creditFacilityTypeTempDTO);
+            log.info("Find Credit Facility type from temp by ID :{}", creditFacilityTypeTempDTO);
             response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), creditFacilityTypeTempDTO);
         }
 
         catch (Exception exception){
-            LOG.info("END: In find by id from temp threw the exception with message :{}", exception.getMessage());
+            log.info("END: In find by id from temp threw the exception with message :{}", exception.getMessage());
             if (exception instanceof ApiRequestException){
                 throw exception;
             }
@@ -150,7 +149,7 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
             }
         }
 
-        LOG.info("END: Find Credit Facility type from temp by ID :{}", creditFacilityTypeID);
+        log.info("END: Find Credit Facility type from temp by ID :{}", creditFacilityTypeID);
         return ResponseEntity.ok().body(response);
     }
 
@@ -158,7 +157,7 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> updateCreditFacilityTempType(Integer creditFacilityTypeID, CreditFacilityTypeDTO creditFacilityTypeTempDTO) throws ApiRequestException {
 
-        LOG.info("START: Update Credit Facility type in Temp :{}, with ID :{}", creditFacilityTypeTempDTO, creditFacilityTypeID);
+        log.info("START: Update Credit Facility type in Temp :{}, with ID :{}", creditFacilityTypeTempDTO, creditFacilityTypeID);
         CreditFacilityTypeTemp creditFacilityTypeTemp ;
 
         try {
@@ -175,7 +174,6 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
             creditFacilityTypeTemp.setStatus(creditFacilityTypeTempDTO.getStatus());
             creditFacilityTypeTemp.setLastModifiedDate(date);
-            creditFacilityTypeTemp.setModifiedBy(creditFacilityTypeTempDTO.getModifiedBy());
             creditFacilityTypeTemp.setFacilityTypeName(creditFacilityTypeTempDTO.getFacilityTypeName());
             creditFacilityTypeTemp.setDescription(creditFacilityTypeTempDTO.getDescription());
             creditFacilityTypeTemp.setApproveStatus(creditFacilityTypeTempDTO.getApproveStatus());
@@ -186,7 +184,7 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
         }
 
         catch (Exception exception){
-            LOG.info("END: In update credit facility type in temp threw the exception with message :{}", exception.getMessage());
+            log.info("END: In update credit facility type in temp threw the exception with message :{}", exception.getMessage());
             if (exception instanceof ApiRequestException){
                 throw exception;
             }
@@ -198,13 +196,13 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
         }
 
         StandardResponse<CreditFacilityTypeDTO> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), new CreditFacilityTypeDTO(creditFacilityTypeTemp));
-        LOG.info("END:  Update Credit Facility type in Temp :{}, with ID :{}", creditFacilityTypeTempDTO, creditFacilityTypeID);
+        log.info("END:  Update Credit Facility type in Temp :{}, with ID :{}", creditFacilityTypeTempDTO, creditFacilityTypeID);
         return ResponseEntity.ok().body(response);
     }
 
     private void validateCreditFacilityTypeNameUniquenessTemp (CreditFacilityTypeTemp creditFacilityTypeTemp,CreditFacilityTypeDTO creditFacilityTypeTempDTO ) throws ApiRequestException {
 
-        LOG.info("START: validateCreditFacilityTypeNameUniquenessTemp in update temp :{}, with ID :{}", creditFacilityTypeTempDTO, creditFacilityTypeTemp.getCreditFacilityTypeID());
+        log.info("START: validateCreditFacilityTypeNameUniquenessTemp in update temp :{}, with ID :{}", creditFacilityTypeTempDTO, creditFacilityTypeTemp.getCreditFacilityTypeID());
 
         if(!creditFacilityTypeTemp.getFacilityTypeName().equals(creditFacilityTypeTempDTO.getFacilityTypeName())
 
@@ -228,7 +226,7 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> approveRejectCreditFacilityType(ApproveRejectRQ approveRejectRQ) throws ApiRequestException {
 
-        LOG.info("START: Approve Reject Credit Facility Type :{}", approveRejectRQ);
+        log.info("START: Approve Reject Credit Facility Type :{}", approveRejectRQ);
         CreditFacilityTypeTemp creditFacilityTypeTemp;
         ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response = null;
         try {
@@ -251,18 +249,13 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
 
             creditFacilityTypeTemp.setApproveStatus(approveRejectRQ.getApproveStatus());
-
             creditFacilityTypeTemp.setApprovedDate(date);
+            creditFacilityTypeTemp.setApprovedBy(UserContext.getUsername());
 
-
-                creditFacilityTypeTempRepository.save(creditFacilityTypeTemp);
-
-
+            creditFacilityTypeTempRepository.save(creditFacilityTypeTemp);
 
             if (approveRejectRQ.getApproveStatus().equals(MasterDataApproveStatus.APPROVED)) {
-
                     response = handleApproval(creditFacilityTypeTemp, findCreditFacilityType);
-
             }
             else
                 if (approveRejectRQ.getApproveStatus().equals(MasterDataApproveStatus.REJECTED)) {
@@ -271,15 +264,15 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
                 }
                 else{
-                    LOG.info("END: Invalid approval status: {}", approveRejectRQ.getApproveStatus());
+                    log.info("END: Invalid approval status: {}", approveRejectRQ.getApproveStatus());
 
                     throw new ApiRequestException("Not a valid approval status");
                 }
 
-            LOG.info("SUCCESS: Moved Credit Facility Type Temp with ID :{} to Credit Facility Type with ID :{}", creditFacilityTypeTemp.getCreditFacilityTypeID(), approveRejectRQ.getApproveRejectDataID());
+            log.info("SUCCESS: Moved Credit Facility Type Temp with ID :{} to Credit Facility Type with ID :{}", creditFacilityTypeTemp.getCreditFacilityTypeID(), approveRejectRQ.getApproveRejectDataID());
         }
         catch (Exception exception){
-            LOG.info("END: In approve reject credit facility type threw the exception with message :{}", exception.getMessage());
+            log.info("END: In approve reject credit facility type threw the exception with message :{}", exception.getMessage());
             if (exception instanceof ApiRequestException){
                 throw exception;
             }
@@ -290,13 +283,13 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
         }
 
-        LOG.info("END:  approve reject Credit Facility type in Temp with ID :{}", approveRejectRQ.getApproveRejectDataID() );
+        log.info("END:  approve reject Credit Facility type in Temp with ID :{}", approveRejectRQ.getApproveRejectDataID() );
         return response;
     }
 
 
     private ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> handleApproval(CreditFacilityTypeTemp creditFacilityTypeTemp, CreditFacilityType existingCreditFacilityType) {
-        LOG.info("START: Handling approval for Credit Facility Type Temp with ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID());
+        log.info("START: Handling approval for Credit Facility Type Temp with ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID());
 
         CreditFacilityType savedCreditFacilityType;
         try {
@@ -310,7 +303,7 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
                 savedCreditFacilityType = saveCreditFacilityTypeToMaster(creditFacilityTypeTemp);
             }
 
-            LOG.info("Saving audit information for Credit Facility Type Temp with ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID());
+            log.info("Saving audit information for Credit Facility Type Temp with ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID());
 
             saveCreditFacilityTypeAudit(creditFacilityTypeTemp);
 
@@ -318,21 +311,21 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
         }
         catch (Exception e) {
-            LOG.info("Error occurred while handling approval for Credit Facility Type Temp with ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID(), e);
+            log.info("Error occurred while handling approval for Credit Facility Type Temp with ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID(), e);
 
             throw new ApiRequestException(APPROVE_REJECT_FAIL);
         }
 
 
         StandardResponse<CreditFacilityTypeDTO> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), new CreditFacilityTypeDTO( savedCreditFacilityType));
-        LOG.info("END: Returning response for Credit Facility Type with ID: {}", savedCreditFacilityType.getCreditFacilityTypeID());
+        log.info("END: Returning response for Credit Facility Type with ID: {}", savedCreditFacilityType.getCreditFacilityTypeID());
 
         return ResponseEntity.ok().body(response);
     }
 
     private ResponseEntity<StandardResponse<CreditFacilityTypeDTO>>  handleRejection(CreditFacilityTypeTemp creditFacilityTypeTemp) {
 
-        LOG.info("Handling rejection for UPM Group Temp ID: {}", creditFacilityTypeTemp.getFacilityTypeName());
+        log.info("Handling rejection for UPM Group Temp ID: {}", creditFacilityTypeTemp.getFacilityTypeName());
         StandardResponse<CreditFacilityTypeDTO> response;
         try {
             saveCreditFacilityTypeAudit(creditFacilityTypeTemp);
@@ -340,11 +333,11 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
         }
         catch (Exception e) {
-            LOG.info("Error occurred while handling rejection for Credit Facility Type Temp with ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID(), e);
+            log.info("Error occurred while handling rejection for Credit Facility Type Temp with ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID(), e);
 
             throw new ApiRequestException(APPROVE_REJECT_FAIL);
         }
-        LOG.info("END: Rejection handled for Credit Facility Type Temp with ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID());
+        log.info("END: Rejection handled for Credit Facility Type Temp with ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID());
 
         return ResponseEntity.ok().body(response);
     }
@@ -408,19 +401,19 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
         creditFacilityTypeAudRepository.save(audit);
 
-        LOG.info("Saved audit record for UPM Group ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID());
+        log.info("Saved audit record for UPM Group ID: {}", creditFacilityTypeTemp.getCreditFacilityTypeID());
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> updateApprovedCreditFacilityType(Integer creditFacilityTypeID, CreditFacilityTypeDTO creditFacilityTypeDTO) throws ApiRequestException{
 
-        LOG.info("START : Update approved Credit Facility Type {}", creditFacilityTypeDTO);
+        log.info("START : Update approved Credit Facility Type {}", creditFacilityTypeDTO);
         CreditFacilityType creditFacilityTypeDb;
         CreditFacilityTypeTemp creditFacilityTypeTemp = new CreditFacilityTypeTemp();
         try {
             if (StringUtils.isEmpty(creditFacilityTypeDTO.getFacilityTypeName())) {
-                LOG.info("END : Update approved Credit Facility Type threw error");
+                log.info("END : Update approved Credit Facility Type threw error");
                 throw new ApiRequestException("Facility Type Name Cannot be null");
             }
              creditFacilityTypeDb = creditFacilityTypeRepository.findById(creditFacilityTypeID).orElseThrow(() ->
@@ -441,13 +434,13 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
             creditFacilityTypeTemp.setDescription(creditFacilityTypeDTO.getDescription());
             creditFacilityTypeTemp.setCreatedBy(creditFacilityTypeDb.getCreatedBy());
             creditFacilityTypeTemp.setCreatedDate(creditFacilityTypeDb.getCreatedDate());
-            LOG.info(" GET Updated Credit Facility Type from Temp {}", creditFacilityTypeTemp);
+            log.info(" GET Updated Credit Facility Type from Temp {}", creditFacilityTypeTemp);
                 creditFacilityTypeTempRepository.save(creditFacilityTypeTemp);
 
         }
 
         catch (Exception exception){
-            LOG.info("END: In update approved credit facility type threw the exception with message :{}", exception.getMessage());
+            log.info("END: In update approved credit facility type threw the exception with message :{}", exception.getMessage());
             if (exception instanceof ApiRequestException){
                 throw exception;
             }
@@ -459,7 +452,7 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
         }
 
-        LOG.info("END : Updated Credit Facility Type from Temp {}", creditFacilityTypeDb);
+        log.info("END : Updated Credit Facility Type from Temp {}", creditFacilityTypeDb);
 
 
         StandardResponse<CreditFacilityTypeDTO> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), new CreditFacilityTypeDTO (creditFacilityTypeTemp));
@@ -486,31 +479,17 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
     @Transactional(readOnly = true)
     @Override
     public ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> searchCreditFacilityTypes(Pageable pageable) throws ApiRequestException {
-        LOG.info("START : Search Credit Facility Type List  in Master ");
-        List<CreditFacilityType> creditFacilityTypes = new ArrayList<>();
-        List<CreditFacilityTypeDTO> creditFacilityTypeDTOList;
-        try {
-
-                creditFacilityTypes = creditFacilityTypeRepository.findAllApprovedCreditFacilityTypes(pageable).getContent();
-
-            creditFacilityTypeDTOList = creditFacilityTypes.stream().map(creditFacilityType -> modelMapper.map(creditFacilityType, CreditFacilityTypeDTO.class)).toList();
-        }
-
-        catch (Exception exception){
-            LOG.info("END: Failed to fetch Credit Facility Types with error: {}", exception.getMessage(), exception);
-
-            throw new ApiRequestException("Unable to Fetch Credit Facility Types");
-
-        }
-        StandardResponse<List<CreditFacilityTypeDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), creditFacilityTypeDTOList);
-        LOG.info("END :  Search Credit Facility Type List in Master ");
+        log.info("START : Search Credit Facility Type List  in Master ");
+        Page<CreditFacilityType> creditFacilityTypePage = creditFacilityTypeRepository.findAll(pageable);
+        StandardResponse<List<CreditFacilityTypeDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), creditFacilityTypePage);
+        log.info("END :  Search Credit Facility Type List in Master ");
         return ResponseEntity.ok().body(response);
     }
 
     @Transactional(readOnly = true)
     @Override
     public ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> findCreditFacilityTypeByID(Integer creditFacilityTypeID) throws ApiRequestException {
-        LOG.info("START : GET Credit Facility Types in Master with ID : {} ",creditFacilityTypeID);
+        log.info("START : GET Credit Facility Types in Master with ID : {} ",creditFacilityTypeID);
         CreditFacilityType creditFacilityType;
         CreditFacilityTypeDTO creditFacilityTypeDTO;
         try {
@@ -521,7 +500,7 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
         }
 
         catch (Exception exception){
-            LOG.info("END: Credit Facility Types in Master threw the exception with message :{}", exception.getMessage());
+            log.info("END: Credit Facility Types in Master threw the exception with message :{}", exception.getMessage());
             if (exception instanceof ApiRequestException){
                 throw exception;
             }
@@ -532,37 +511,17 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
         }
         StandardResponse<CreditFacilityTypeDTO> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), creditFacilityTypeDTO);
-        LOG.info("END : GET Credit Facility Types in Master with ID : {} ",creditFacilityTypeID);
+        log.info("END : GET Credit Facility Types in Master with ID : {} ",creditFacilityTypeID);
         return ResponseEntity.ok().body(response);
     }
 
     @Transactional(readOnly = true)
     @Override
     public ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> findAllCreditFacilityTypeTempList(Pageable pageable) throws ApiRequestException {
-        LOG.info("START : GET Credit Facility Types List in Temp ");
-        List<CreditFacilityTypeTemp> creditFacilityTypeTempList;
-        List<CreditFacilityTypeDTO> creditFacilityTypeTempListDTO = new ArrayList<>();
-        try {
-
-
-             creditFacilityTypeTempList = creditFacilityTypeTempRepository.findAll(pageable).getContent();
-            LOG.info(" Fetched Credit Facility Types List in Temp : {}", creditFacilityTypeTempList);
-             if (!creditFacilityTypeTempList.isEmpty()){
-                 for(CreditFacilityTypeTemp creditType : creditFacilityTypeTempList){
-
-                     creditFacilityTypeTempListDTO.add( new CreditFacilityTypeDTO(creditType));
-                 }
-             }
-
-        }
-        catch (Exception exception){
-            LOG.info("END: Credit Facility Types in Master threw an exception with message: {}", exception.getMessage(), exception);
-
-            throw new ApiRequestException("Unable to Fetch Credit Facility Types");
-
-        }
-        StandardResponse<List<CreditFacilityTypeDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), creditFacilityTypeTempListDTO);
-        LOG.info("END : GET Credit Facility Types List in Temp ");
+        log.info("START : GET Credit Facility Types List in Temp ");
+        Page<CreditFacilityTypeTemp> creditFacilityTypeTempPage = creditFacilityTypeTempRepository.findAll(pageable);
+        StandardResponse<List<CreditFacilityTypeDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), creditFacilityTypeTempPage);
+        log.info("END : GET Credit Facility Types List in Temp ");
         return ResponseEntity.ok().body(response);
     }
 
@@ -570,7 +529,7 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<Integer>> deleteCreditFacilityTypeTemp( CreditFacilityTypeDTO creditFacilityTypeTempDTO) throws ApiRequestException {
 
-        LOG.info("START : Delete Credit Facility Type with ID {} ",creditFacilityTypeTempDTO);
+        log.info("START : Delete Credit Facility Type with ID {} ",creditFacilityTypeTempDTO);
         CreditFacilityTypeTemp creditFacilityTypeTemp;
         try {
              creditFacilityTypeTemp = creditFacilityTypeTempRepository.findById(creditFacilityTypeTempDTO.getCreditFacilityTypeID()).orElseThrow(() ->
@@ -582,7 +541,7 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
         }
 
         catch (Exception exception){
-            LOG.info("END: Credit Facility Types Delete threw the exception with message :{}", exception.getMessage());
+            log.info("END: Credit Facility Types Delete threw the exception with message :{}", exception.getMessage());
             if (exception instanceof ApiRequestException){
                 throw exception;
             }
@@ -593,7 +552,7 @@ public class CreditFacilityTypeServiceImpl implements CreditFacilityTypeService 
 
         }
         StandardResponse<Integer> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), creditFacilityTypeTemp.getCreditFacilityTypeID());
-        LOG.info("END : Delete Credit Facility Type with ID {} ",creditFacilityTypeTempDTO.getCreditFacilityTypeID());
+        log.info("END : Delete Credit Facility Type with ID {} ",creditFacilityTypeTempDTO.getCreditFacilityTypeID());
         return ResponseEntity.ok().body(response);
     }
 

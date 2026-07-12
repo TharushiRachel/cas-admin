@@ -1,12 +1,11 @@
 package lk.sampath.casadminportalms.controller;
 
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
-import lk.sampath.casadminportalms.controller.basecontroller.PaginationUtil;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.upcsection.UpcSectionDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.UpcSectionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,8 +17,11 @@ import java.util.List;
 @RequestMapping("/upcSection")
 public class UpcSectionController {
 
-    @Autowired
-    private UpcSectionService upcSectionService;
+    private final UpcSectionService upcSectionService;
+
+    public UpcSectionController(UpcSectionService upcSectionService) {
+        this.upcSectionService = upcSectionService;
+    }
 
 
     @GetMapping("/upcSectionTemp")
@@ -28,10 +30,13 @@ public class UpcSectionController {
             @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
+        int effectivePage = headerPage != null ? headerPage : page;
+        int effectiveSize = headerSize != null ? headerSize : size;
+        Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
         ResponseEntity<StandardResponse<List<UpcSectionDTO>>> upcSectionTempList = upcSectionService.findAllUpcSectionTempList(pageable);
         return ResponseEntity.ok().body(upcSectionTempList.getBody());
     }
+
 
     @GetMapping("/upcSectionTemp/{upcSectionID}")
     public ResponseEntity<StandardResponse<UpcSectionDTO>> viewUpcSectionTempById(@PathVariable Integer upcSectionID) throws ApiRequestException {
@@ -39,15 +44,17 @@ public class UpcSectionController {
         return ResponseEntity.ok().body(upcSectionTemp.getBody());
     }
 
-    @RequestMapping(value = "/upcSectionList", method = {RequestMethod.GET, RequestMethod.POST})
+    @GetMapping("/upcSectionList")
     public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> getPagedUpcSectionData(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
+        int effectivePage = headerPage != null ? headerPage : page;
+        int effectiveSize = headerSize != null ? headerSize : size;
+        Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
         ResponseEntity<StandardResponse<List<UpcSectionDTO>>> pageDataResult =
-            upcSectionService.findAllApprovedUpcSection(pageable);
+                upcSectionService.findAllApprovedUpcSection(pageable);
 
         return ResponseEntity.ok().body(pageDataResult.getBody());
     }
@@ -90,4 +97,9 @@ public class UpcSectionController {
         return ResponseEntity.ok().body(upcSection.getBody());
     }
 
+    @GetMapping("/approvedActiveList")
+    public ResponseEntity<StandardResponse<UpcSectionDTO>> approvedActiveList() throws ApiRequestException {
+        ResponseEntity<StandardResponse<UpcSectionDTO>>  upcSectionDTO = upcSectionService.approvedActiveList();
+        return ResponseEntity.ok().body(upcSectionDTO.getBody());
+    }
 }

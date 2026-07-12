@@ -1,10 +1,10 @@
 package lk.sampath.casadminportalms.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.supportingdoc.SupportingDocDTO;
+import lk.sampath.casadminportalms.dto.userSession.UserContext;
 import lk.sampath.casadminportalms.entity.supportingdoc.*;
 import lk.sampath.casadminportalms.enums.ErrorEnums;
 import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
@@ -13,9 +13,8 @@ import lk.sampath.casadminportalms.repository.supportingdoc.SupportingDocReposit
 import lk.sampath.casadminportalms.repository.supportingdoc.SupportingDocTempAudRepository;
 import lk.sampath.casadminportalms.repository.supportingdoc.SupportingDocTempRepository;
 import lk.sampath.casadminportalms.service.SupportingDocService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,9 +27,9 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@Log4j2
 public class SupportingDocServiceImpl implements SupportingDocService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SupportingDocServiceImpl.class);
     private static final String SUPPORTING_DOC_WITH = "Supporting Doc with ";
 
     private static final String SUPPORTING_DOC_TEMP_WITH = "Supporting Doc Temp with ";
@@ -39,18 +38,21 @@ public class SupportingDocServiceImpl implements SupportingDocService {
 
     private static final String EMPTY_NULL = "Supporting Doc name cannot be empty or null";
 
-    @Autowired
-    private SupportingDocRepository supportingDocRepository;
+    private final SupportingDocRepository supportingDocRepository;
 
-    @Autowired
-    private SupportingDocTempRepository supportingDocTempRepository;
+    private final SupportingDocTempRepository supportingDocTempRepository;
 
-    @Autowired
-    private SupportingDocTempAudRepository supportingDocTempAudRepository;
+    private final SupportingDocTempAudRepository supportingDocTempAudRepository;
+
+    public SupportingDocServiceImpl(SupportingDocRepository supportingDocRepository, SupportingDocTempRepository supportingDocTempRepository, SupportingDocTempAudRepository supportingDocTempAudRepository) {
+        this.supportingDocRepository = supportingDocRepository;
+        this.supportingDocTempRepository = supportingDocTempRepository;
+        this.supportingDocTempAudRepository = supportingDocTempAudRepository;
+    }
 
     @Override
     public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> findAllSupportingDocTempList(Pageable pageable) throws ApiRequestException {
-        List<SupportingDocTemp> supportingDocTempList = supportingDocTempRepository.findAll(pageable).getContent();
+        Page<SupportingDocTemp> supportingDocTempList = supportingDocTempRepository.findAll(pageable);
          StandardResponse<List<SupportingDocDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), supportingDocTempList);
          return ResponseEntity.ok().body(response);
     }
@@ -65,7 +67,7 @@ public class SupportingDocServiceImpl implements SupportingDocService {
 
     @Override
     public ResponseEntity<StandardResponse<List<SupportingDocDTO>>> searchSupportingDocGroups(Pageable pageable) throws ApiRequestException{
-        List<SupportingDoc> supportingDocList = supportingDocRepository.findAll(pageable).getContent();
+        Page<SupportingDoc> supportingDocList = supportingDocRepository.findAll(pageable);
         StandardResponse<List<SupportingDocDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), supportingDocList);
 
         return ResponseEntity.ok().body(response);
@@ -83,7 +85,7 @@ public class SupportingDocServiceImpl implements SupportingDocService {
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<SupportingDocDTO>> saveSupportingDocTemp (SupportingDocDTO supportingDocDTO) throws ApiRequestException {
 
-        LOG.info("START: save Supporting Document :{}", supportingDocDTO);
+        log.info("START: save Supporting Document :{}", supportingDocDTO);
 
         if (supportingDocDTO == null || supportingDocDTO.getDocumentName() == null || supportingDocDTO.getDocumentName().trim().isEmpty()) {
             throw new ApiRequestException(EMPTY_NULL);
@@ -102,18 +104,14 @@ public class SupportingDocServiceImpl implements SupportingDocService {
             supportingDocTempSave.setStatus(supportingDocDTO.getStatus());
             supportingDocTempSave.setCreatedDate(date);
             supportingDocTempSave.setLastModifiedDate(date);
-            supportingDocTempSave.setDocumentName(supportingDocDTO.getDocumentName());
             supportingDocTempSave.setApproveStatus(supportingDocDTO.getApproveStatus());
-            supportingDocTempSave.setApprovedBy(supportingDocDTO.getApprovedBy());
-            supportingDocTempSave.setApprovedDate(supportingDocDTO.getApprovedDate());
-            supportingDocTempSave.setCreatedBy(supportingDocDTO.getCreatedBy());
-            supportingDocTempSave.setModifiedBy(supportingDocDTO.getModifiedBy());
+            supportingDocTempSave.setDocumentName(supportingDocDTO.getDocumentName());
             supportingDocTempSave.setDescription(supportingDocDTO.getDescription());
             supportingDocTempSave.setSupportDocumentType(supportingDocDTO.getSupportDocumentType());
-            LOG.info(SUPPORTING_DOC_WITH, supportingDocTempSave);
+            log.info(SUPPORTING_DOC_WITH, supportingDocTempSave);
 
             supportingDocTempSave = supportingDocTempRepository.saveAndFlush(supportingDocTempSave);
-            LOG.info("SUCCESS: Saved Supporting Doc with ID :{}", supportingDocTempSave.getSupportingDocID());
+            log.info("SUCCESS: Saved Supporting Doc with ID :{}", supportingDocTempSave.getSupportingDocID());
 
         } else {
             throw new ApiRequestException("Supporting Document Already Exists");
@@ -126,7 +124,7 @@ public class SupportingDocServiceImpl implements SupportingDocService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<SupportingDocDTO>> approveRejectSupportingDoc (ApproveRejectRQ approveRejectRQ) throws ApiRequestException {
-        LOG.info("START: Approve/Reject Supporting Document: {}", approveRejectRQ);
+        log.info("START: Approve/Reject Supporting Document: {}", approveRejectRQ);
 
         if (approveRejectRQ == null || approveRejectRQ.getApproveRejectDataID() == null) {
             throw new ApiRequestException("Invalid ApproveRejectRQ: DataID cannot be null");
@@ -138,10 +136,11 @@ public class SupportingDocServiceImpl implements SupportingDocService {
 
         Optional<SupportingDoc> optionalSupportingDoc = supportingDocRepository.findById(supportingDocTemp.getSupportingDocID());
         SupportingDoc findSupportingDoc = optionalSupportingDoc.orElse(null);
-        LOG.info("Find Supporting Document: {}", findSupportingDoc);
+        log.info("Find Supporting Document: {}", findSupportingDoc);
 
         supportingDocTemp.setApprovedDate(new Date());
         supportingDocTemp.setApproveStatus(approveRejectRQ.getApproveStatus());
+        supportingDocTemp.setApprovedBy(UserContext.getUsername());
         supportingDocTempRepository.saveAndFlush(supportingDocTemp);
 
         ResponseEntity<StandardResponse<SupportingDocDTO>> response;
@@ -174,7 +173,7 @@ public class SupportingDocServiceImpl implements SupportingDocService {
     }
 
     private ResponseEntity<StandardResponse<SupportingDocDTO>> handleRejection (SupportingDocTemp supportingDocTemp) {
-        LOG.info("Handling rejection for Supporting Doc Temp ID: {}", supportingDocTemp.getSupportingDocID());
+        log.info("Handling rejection for Supporting Doc Temp ID: {}", supportingDocTemp.getSupportingDocID());
 
         insertToAuditTable(supportingDocTemp);
         StandardResponse<SupportingDocDTO> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), supportingDocTemp);
@@ -241,7 +240,7 @@ public class SupportingDocServiceImpl implements SupportingDocService {
         supportingDocAud.setModifiedBy(supportingDocTemp.getModifiedBy());
 
         supportingDocTempAudRepository.save(supportingDocAud);
-        LOG.info("Saved audit record for Supporting Document ID: {}", supportingDocAud.getSupportingDocID());
+        log.info("Saved audit record for Supporting Document ID: {}", supportingDocAud.getSupportingDocID());
     }
 
     @Override
@@ -282,7 +281,7 @@ public class SupportingDocServiceImpl implements SupportingDocService {
         supportingDocTemp.setCreatedDate(supportingDocDTO.getCreatedDate());
         supportingDocTemp.setCreatedBy(supportingDocDTO.getCreatedBy());
 
-        LOG.info("Updated Supporting Document Temp : {}", supportingDocTemp);
+        log.info("Updated Supporting Document Temp : {}", supportingDocTemp);
 
         supportingDocTempRepository.save(supportingDocTemp);
 
@@ -295,13 +294,13 @@ public class SupportingDocServiceImpl implements SupportingDocService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
     public ResponseEntity<StandardResponse<SupportingDocDTO>> updateApprovedSupportingDoc(Integer supportingDocID,SupportingDocDTO supportingDocDTO) throws ApiRequestException {
-        LOG.info("START: Update Supporting Document :{}", supportingDocDTO);
+        log.info("START: Update Supporting Document :{}", supportingDocDTO);
 
         SupportingDoc supportingDoc = supportingDocRepository.findById(supportingDocID).orElseThrow(() -> {
             throw new ApiRequestException(SUPPORTING_DOC_WITH + supportingDocID + DOES_NOT_EXISTS);
         });
 
-        LOG.info("START : GET SupportingDoc. {}", supportingDoc);
+        log.info("START : GET SupportingDoc. {}", supportingDoc);
         if(!supportingDoc.getDocumentName().equals(supportingDocDTO.getDocumentName())){
             validateSupportingDocNameUniqueness (supportingDocDTO.getDocumentName(),supportingDocID);
         } else if ( supportingDocDTO.getDocumentName() == null || supportingDocDTO.getDocumentName().trim().isEmpty()) {
@@ -310,7 +309,7 @@ public class SupportingDocServiceImpl implements SupportingDocService {
 
         SupportingDocTemp supportingDocTemp = mapToSupportingDocTemp(supportingDoc, supportingDocDTO);
 
-        LOG.info("END : GET SupportingDoc {}", supportingDocTemp);
+        log.info("END : GET SupportingDoc {}", supportingDocTemp);
         supportingDocTemp = supportingDocTempRepository.saveAndFlush(supportingDocTemp);
 
         StandardResponse<SupportingDocDTO> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), supportingDocTemp);

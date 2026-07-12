@@ -263,8 +263,6 @@ public class CreditFacilityTemplateDTO implements Serializable {
                 }
             }
         }
-
-
     }
 
     public List<CftVitalInfoDTO> getCftVitalInfoDTOList() {

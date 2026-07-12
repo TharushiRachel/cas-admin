@@ -23,7 +23,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 
@@ -220,6 +225,11 @@ class WorkflowTemplateServiceImplTest {
 
     @Test
     void testGetTempWorkflowTemplate() throws ApiRequestException {
+        // Setup variables
+        int pageNo = 0;
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+
         // Case 1: When there is content in the repository
         WorkflowTemplateTemp workflowTemplateTemp = new WorkflowTemplateTemp();
         workflowTemplateTemp.setWorkFlowTemplateId(1);
@@ -231,7 +241,10 @@ class WorkflowTemplateServiceImplTest {
 
         List<WorkflowTemplateTemp> templateList = new ArrayList<>();
         templateList.add(workflowTemplateTemp);
-        when(workflowTemplateTempRepository.findAllWorkflowTemplateTemp()).thenReturn(templateList);
+        Page<WorkflowTemplateTemp> pageWithContent = Mockito.mock(Page.class);
+        Mockito.when(pageWithContent.hasContent()).thenReturn(true);
+        Mockito.when(pageWithContent.getContent()).thenReturn(templateList);
+        Mockito.when(workflowTemplateTempRepository.findAllWorkflowTemplateTemp(pageable)).thenReturn(pageWithContent);
 
         // Child data mock
         WorkflowTemplateDataTemp childData = new WorkflowTemplateDataTemp();
@@ -247,10 +260,10 @@ class WorkflowTemplateServiceImplTest {
         assertNotNull(childDataList);
         assertEquals(1, childDataList.size());
 
-        when(workflowTemplateDataTempRepository.findAllTempWorkflowTemplateData(anyInt()))
+        Mockito.when(workflowTemplateDataTempRepository.findAllTempWorkflowTemplateData((int) Mockito.anyLong()))
                 .thenReturn(childDataList);
 
-        workflowTemplateServiceImpl.getTempWorkflowTemplate();
+        workflowTemplateServiceImpl.getTempWorkflowTemplate(pageNo, pageSize);
     }
 
     @Test
@@ -272,11 +285,12 @@ class WorkflowTemplateServiceImplTest {
         templateData.setDisplayOrder(1);
 
         // Mock behavior
-        when(workflowTemplateRepository.findAllWorkflowTemplate()).thenReturn(Collections.singletonList(template));
+        Page<WorkflowTemplate> page = new PageImpl<>(Collections.singletonList(template));
+        when(workflowTemplateRepository.findAllWorkflowTemplate(any(Pageable.class))).thenReturn(page);
         when(workflowTemplateDataRepository.findAllWorkflowTemplateData(1)).thenReturn(Collections.singletonList(templateData));
 
         // Call the method
-        StandardResponse<List<WorkflowTemplateDTO>> response = workflowTemplateServiceImpl.getWorkflowTemplate();
+        StandardResponse<List<WorkflowTemplateDTO>> response = workflowTemplateServiceImpl.getWorkflowTemplate(0, 10);
 
         // Assertions
         assertNotNull(response);
@@ -284,11 +298,17 @@ class WorkflowTemplateServiceImplTest {
         assertNotNull(response.getResponse());
 
         // Verify repository interactions
-        verify(workflowTemplateRepository, times(1)).findAllWorkflowTemplate();
+        verify(workflowTemplateRepository, times(1)).findAllWorkflowTemplate(any(Pageable.class));
 
         when(workflowTemplateDataTempRepository.findAllTempWorkflowTemplateData(1)).thenReturn(List.of(workflowTemplateDataTemp));
-        when(workflowTemplateTempRepository.findAllWorkflowTemplateTemp()).thenReturn(List.of());
-        workflowTemplateServiceImpl.getWorkflowTemplate();
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<WorkflowTemplateTemp> pageWithContent = Mockito.mock(Page.class);
+        Mockito.when(pageWithContent.hasContent()).thenReturn(true);
+        when(pageWithContent.getContent()).thenReturn(List.of());
+
+        Mockito.when(workflowTemplateTempRepository.findAllWorkflowTemplateTemp(pageable)).thenReturn(pageWithContent);
+        workflowTemplateServiceImpl.getWorkflowTemplate(0, 10);
     }
 
 

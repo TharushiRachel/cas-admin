@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface CftVitalInfoTempRepository extends JpaRepository<CftVitalInfoTemp, Integer> {
 
-    @Query(value = "SELECT SEQ_T_CFT_VITAL_INFO_TEMP.NEXTVAL FROM DUAL", nativeQuery = true)
+    @Query(value = "SELECT SEQ_T_CFT_VITAL_INFO.NEXTVAL FROM DUAL", nativeQuery = true)
     Integer getNextSequenceValue();
 
     List<CftVitalInfoTemp> findAllByCreditFacilityTemplateCreditFacilityTemplateID(Integer creditFacilityTemplateID);

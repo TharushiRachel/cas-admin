@@ -13,12 +13,12 @@ import java.util.Date;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_UPC_TEMPLATE_AUD")
+@Table(name = "CASV3_T_UPC_TEMPLATE_AUD")
 public class UpcTemplateAud extends ApprovableEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UPC_TEMPLATE_AUD")
-    @SequenceGenerator(name = "SEQ_UPC_TEMPLATE_AUD", sequenceName = "SEQ_UPC_TEMPLATE_AUD", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CASV3_SEQ_UPC_TEMPLATE_AUD")
+    @SequenceGenerator(name = "CASV3_SEQ_UPC_TEMPLATE_AUD", sequenceName = "CASV3_SEQ_UPC_TEMPLATE_AUD", allocationSize = 1)
     @Column(name = "ID")
     private Integer id;
 

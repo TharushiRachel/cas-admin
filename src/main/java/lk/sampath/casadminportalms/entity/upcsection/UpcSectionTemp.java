@@ -10,8 +10,7 @@ import lombok.*;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_UPC_SECTION_TEMP")
-
+@Table(name = "CASV3_T_UPC_SECTION_TEMP")
 public class UpcSectionTemp extends ApprovableEntity {
 
     @Id

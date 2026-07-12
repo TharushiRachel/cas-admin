@@ -1,7 +1,7 @@
 package lk.sampath.casadminportalms.controller;
 
-import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.controller.basecontroller.PaginationUtil;
+import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.upmgroup.UpmGroupDTO;
 import lk.sampath.casadminportalms.dto.workflowtemplate.WorkflowTemplateDTO;
@@ -37,6 +37,7 @@ public class WorkflowTemplateController {
         return ResponseEntity.ok().body(response);
     }
 
+
     @PostMapping("/saveOrUpdateTempWorkflowTemplate")
     public ResponseEntity<StandardResponse<String>> saveOrUpdateTempWorkflowTemplate(@RequestBody WorkflowTemplateDTO request)
             throws ApiRequestException {
@@ -55,14 +56,11 @@ public class WorkflowTemplateController {
         return ResponseEntity.ok().body(response);
     }
 
+
     @GetMapping("/getWorkflowTemplate")
     public ResponseEntity<StandardResponse<List<WorkflowTemplateDTO>>> getWorkflowTemplate(
-            @RequestHeader(name = "page", required = false) Integer headerPage,
-            @RequestHeader(name = "size", required = false) Integer headerSize,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
-        StandardResponse<List<WorkflowTemplateDTO>> response = workflowTemplateService.getWorkflowTemplate(pageable);
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
+        StandardResponse<List<WorkflowTemplateDTO>> response = workflowTemplateService.getWorkflowTemplate(page, size);
         return ResponseEntity.ok().body(response);
     }
 
