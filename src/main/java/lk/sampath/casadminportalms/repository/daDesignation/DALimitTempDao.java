@@ -16,6 +16,7 @@ public interface DALimitTempDao extends JpaRepository<DALimitTemp, Integer> {
 
     List<DALimitTemp> findAllByStatus(AppsConstants.Status status);
 
+    List<DALimitTemp> findAllByDesignationId(Integer designationId);
+
+    void deleteAllByDesignationId(Integer designationId);
 }
-
-

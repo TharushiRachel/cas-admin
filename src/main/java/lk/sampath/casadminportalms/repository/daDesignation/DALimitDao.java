@@ -15,4 +15,10 @@ public interface DALimitDao extends JpaRepository<DALimit, Integer> {
     DALimit findByDesignationIdAndColumnIdAndStatus(Integer designationId, Integer columnId, AppsConstants.Status status);
 
     List<DALimit> findAllByStatus(AppsConstants.Status status);
+
+    List<DALimit> findAllByIsCommitteeAndStatus(String isCommittee, AppsConstants.Status status);
+
+    List<DALimit> findAllByDesignationIdInAndStatus(List<Integer> designationIds, AppsConstants.Status status);
+
+    void deleteAllByDesignationId(Integer designationId);
 }
