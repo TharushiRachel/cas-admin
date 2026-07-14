@@ -15,7 +15,7 @@ import lk.sampath.casadminportalms.dto.dadesignation.DATableHeaderDTO;
 import lk.sampath.casadminportalms.dto.dadesignation.DATableHeadingResponse;
 import lk.sampath.casadminportalms.dto.userSession.UserContext;
 import lk.sampath.casadminportalms.entity.daDesignation.DADesignationMasterData;
-import lk.sampath.casadminportalms.entity.daDesignation.DALimit;
+import lk.sampath.casadminportalms.entity.daDesignation.DALimitTemp;
 import lk.sampath.casadminportalms.entity.daDesignation.DATableHeader;
 import lk.sampath.casadminportalms.enums.AppsConstants;
 import lk.sampath.casadminportalms.enums.DaTableType;
@@ -24,7 +24,7 @@ import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.repository.daDesignation.DADesignationMasterRepository;
 import lk.sampath.casadminportalms.repository.daDesignation.DALimitHeadingRepository;
-import lk.sampath.casadminportalms.repository.daDesignation.DALimitRepository;
+import lk.sampath.casadminportalms.repository.daDesignation.DALimitTempRepository;
 import lk.sampath.casadminportalms.service.DaDesignationService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,14 +49,14 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
     private final DALimitHeadingRepository daLimitHeadingRepository;
     private final DADesignationMasterRepository daDesignationMasterRepository;
-    private final DALimitRepository daLimitRepository;
+    private final DALimitTempRepository daLimitTempRepository;
 
     public DaDesignationServiceImpl(DALimitHeadingRepository daLimitHeadingRepository,
                                     DADesignationMasterRepository daDesignationMasterRepository,
-                                    DALimitRepository daLimitRepository) {
+                                    DALimitTempRepository daLimitTempRepository) {
         this.daLimitHeadingRepository = daLimitHeadingRepository;
         this.daDesignationMasterRepository = daDesignationMasterRepository;
-        this.daLimitRepository = daLimitRepository;
+        this.daLimitTempRepository = daLimitTempRepository;
     }
 
     @Override
@@ -333,7 +333,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
         designation.setIsCommittee(isCommittee);
         designation.setStatus(STATUS_ACT);
-        designation.setApproveStatus(MasterDataApproveStatus.APPROVED.name());
+        designation.setApproveStatus(MasterDataApproveStatus.PENDING.name());
         designation.setDisplayOrder(resolveDisplayOrder(request.getDisplayOrder(), isCommittee, designation.getDisplayOrder()));
         designation.setModifiedDate(now);
         designation.setModifiedBy(username);
@@ -366,20 +366,25 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                                   String isCommittee,
                                   List<DAColumnValueRequest> columnValues,
                                   Map<Integer, DATableHeader> columnHeadersBySubId) {
-        daLimitRepository.deleteByDesignationIdAndIsCommittee(designationId, isCommittee);
+        daLimitTempRepository.deleteByDesignationIdAndIsCommittee(designationId, isCommittee);
+
+        String username = UserContext.getUsername();
+        Date now = new Date();
 
         for (DAColumnValueRequest columnValue : columnValues) {
             DATableHeader header = columnHeadersBySubId.get(columnValue.getSubId());
 
-            DALimit limit = new DALimit();
-            limit.setDesignationId(designationId);
-            limit.setColumnId(columnValue.getSubId());
-            limit.setRiskValue(columnValue.getRiskValue());
-            limit.setRiskRating(header.getLabel());
-            limit.setIsCommittee(isCommittee);
-            limit.setStatus(AppsConstants.Status.ACT);
-            limit.setApproveStatus(MasterDataApproveStatus.APPROVED);
-            daLimitRepository.save(limit);
+            DALimitTemp limitTemp = new DALimitTemp();
+            limitTemp.setDesignationId(designationId);
+            limitTemp.setColumnId(columnValue.getSubId());
+            limitTemp.setRiskValue(columnValue.getRiskValue());
+            limitTemp.setRiskRating(header.getLabel());
+            limitTemp.setIsCommittee(isCommittee);
+            limitTemp.setStatus(AppsConstants.Status.ACT);
+            limitTemp.setApproveStatus(MasterDataApproveStatus.PENDING);
+            limitTemp.setCreatedBy(username);
+            limitTemp.setCreatedDate(now);
+            daLimitTempRepository.save(limitTemp);
         }
     }
 
@@ -397,10 +402,10 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         response.setStatus(designation.getStatus());
 
         Map<String, Double> values = new LinkedHashMap<>();
-        List<DALimit> limits = daLimitRepository
+        List<DALimitTemp> limits = daLimitTempRepository
                 .findAllByDesignationIdAndIsCommitteeAndStatus(designation.getId(), isCommittee, AppsConstants.Status.ACT);
         limits.stream()
-                .sorted(Comparator.comparing(DALimit::getColumnId, Comparator.nullsLast(Integer::compareTo)))
+                .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
                 .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
         response.setValues(values);
         return response;
