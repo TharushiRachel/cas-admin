@@ -222,13 +222,13 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
         if (!CollectionUtils.isEmpty(request.getCommittee())) {
             for (DADesignationSaveRequest row : request.getCommittee()) {
-                bulkResponse.getCommittee().add(saveSingleRow(row, DaTableType.COMMITTEE, designationByCode));
+                bulkResponse.getCommittee().add(saveOrUpdateSingleRow(row, DaTableType.COMMITTEE, designationByCode));
             }
         }
 
         if (!CollectionUtils.isEmpty(request.getIndividual())) {
             for (DADesignationSaveRequest row : request.getIndividual()) {
-                bulkResponse.getIndividual().add(saveSingleRow(row, DaTableType.INDIVIDUAL, designationByCode));
+                bulkResponse.getIndividual().add(saveOrUpdateSingleRow(row, DaTableType.INDIVIDUAL, designationByCode));
             }
         }
 
@@ -241,9 +241,9 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         return ResponseEntity.ok(response);
     }
 
-    private DADesignationSaveResponse saveSingleRow(DADesignationSaveRequest request,
-                                                    DaTableType tableType,
-                                                    Map<String, DADesignationMasterData> designationByCode) {
+    private DADesignationSaveResponse saveOrUpdateSingleRow(DADesignationSaveRequest request,
+                                                            DaTableType tableType,
+                                                            Map<String, DADesignationMasterData> designationByCode) {
         validateSaveRequest(request, tableType);
 
         String dbTableType = tableType.name();
@@ -283,8 +283,8 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         String username = UserContext.getUsername();
 
         DADesignationMasterData designation = resolveExistingDesignation(request, designationByCode);
-
         boolean isNew = designation.getId() == null;
+
         if (StringUtils.hasText(request.getDesignation())) {
             designation.setDesignation(request.getDesignation().trim());
         } else if (isNew) {
@@ -319,9 +319,11 @@ public class DaDesignationServiceImpl implements DaDesignationService {
     private DADesignationMasterData resolveExistingDesignation(DADesignationSaveRequest request,
                                                               Map<String, DADesignationMasterData> designationByCode) {
         if (request.getDesignationId() != null) {
-            return daDesignationMasterRepository.findById(request.getDesignationId())
+            DADesignationMasterData byId = daDesignationMasterRepository.findById(request.getDesignationId())
                     .orElseThrow(() -> new ApiRequestException(
                             "DA Designation with id " + request.getDesignationId() + " does not exist"));
+            cacheDesignation(designationByCode, byId);
+            return byId;
         }
 
         if (StringUtils.hasText(request.getDesignationCode())) {

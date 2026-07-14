@@ -16,6 +16,10 @@ public interface DaDesignationService {
 
     ResponseEntity<StandardResponse<List<DADesignationCodeDTO>>> getAllDesignationCodeDetails() throws ApiRequestException;
 
+    /**
+     * Create or update designation + temp limits.
+     * Pass designationId to update; omit it (or use designationCode) to create / reuse by code.
+     */
     ResponseEntity<StandardResponse<DADesignationBulkSaveResponse>> saveDaDesignationLimits(DADesignationBulkSaveRequest request)
             throws ApiRequestException;
 }
