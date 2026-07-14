@@ -9,7 +9,7 @@ import java.util.List;
 @Entity
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_WORK_FLOW_TEMPLATE_TEMP")
+@Table(name = "CASV3_T_WORK_FLOW_TEMPLATE_TEMP")
 @AllArgsConstructor
 @Setter
 @Builder(toBuilder = true)
@@ -31,6 +31,10 @@ public class WorkflowTemplateTemp extends ApprovableEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS")
     private Status status;
+
+    @Version
+    @Column(name = "VERSION")
+    protected Integer version;
 
     @OneToMany(mappedBy = "workflowTemplateTemp",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<WorkflowTemplateDataTemp> workFlowTemplateDataSet;

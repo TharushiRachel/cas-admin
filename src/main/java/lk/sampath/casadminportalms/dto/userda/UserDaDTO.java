@@ -35,7 +35,7 @@ public class UserDaDTO  {
 
     private String modifiedBy;
 
-
+    private BigDecimal cleanAmount;
 
 
 }

@@ -32,4 +32,7 @@ public class UserDa extends ApprovableEntity  {
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS")
     private Status status;
+
+    @Column(name = "CLEAN_AMOUNT")
+    private BigDecimal cleanAmount;
 }

@@ -14,6 +14,7 @@ import lk.sampath.casadminportalms.repository.userda.UserDaTempRepository;
 import lk.sampath.casadminportalms.service.UserDaService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +50,7 @@ public class UserDaServiceImpl implements UserDaService {
 
     @Override
     public ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllUserDaTempList(Pageable pageable) throws ApiRequestException {
-        List<UserDaTemp> userDaTempList = userDaTempRepository.findAll(pageable).getContent();
+        Page<UserDaTemp> userDaTempList = userDaTempRepository.findAll(pageable);
         StandardResponse<List<UserDaDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), userDaTempList);
         return ResponseEntity.ok().body(response);
     }
@@ -64,7 +66,7 @@ public class UserDaServiceImpl implements UserDaService {
     @Override
     @Transactional(readOnly = true)
     public ResponseEntity<StandardResponse<List<UserDaDTO>>> findAllApprovedUserDa(Pageable pageable) {
-        List<UserDa> userDaList = userDaRepository.findAll(pageable).getContent();
+        Page<UserDa> userDaList = userDaRepository.findAll(pageable);
         StandardResponse<List<UserDaDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), userDaList);
         return  ResponseEntity.ok().body(response);
     }
@@ -86,6 +88,10 @@ public class UserDaServiceImpl implements UserDaService {
 
         if (userDaDTO == null || userDaDTO.getUserName() == null || userDaDTO.getUserName().trim().isEmpty()) {
             throw new ApiRequestException("User cannot be empty or null.");
+        }
+
+        if (userDaDTO.getCleanAmount() != null && userDaDTO.getCleanAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new ApiRequestException("Clean amount should be positive!");
         }
 
         Date date = new Date();
@@ -110,7 +116,7 @@ public class UserDaServiceImpl implements UserDaService {
             userDaTempSave.setApprovedBy(userDaDTO.getApprovedBy());
             userDaTempSave.setCreatedBy(userDaDTO.getCreatedBy());
             userDaTempSave.setModifiedBy(userDaDTO.getModifiedBy());
-
+            userDaTempSave.setCleanAmount(userDaDTO.getCleanAmount());
             log.info(USER_DA_TEMP_WITH, userDaTempSave);
 
             userDaTempSave = userDaTempRepository.saveAndFlush(userDaTempSave);
@@ -189,7 +195,7 @@ public class UserDaServiceImpl implements UserDaService {
         userDa.setApprovedBy(userDaTemp.getApprovedBy());
         userDa.setCreatedBy(userDaTemp.getCreatedBy());
         userDa.setModifiedBy(userDaTemp.getModifiedBy());
-
+        userDa.setCleanAmount(userDaTemp.getCleanAmount());
 
         return userDaRepository.saveAndFlush(userDa);
     }
@@ -231,7 +237,7 @@ public class UserDaServiceImpl implements UserDaService {
         audit.setApprovedBy(temp.getApprovedBy());
         audit.setCreatedBy(temp.getCreatedBy());
         audit.setModifiedBy(temp.getModifiedBy());
-
+        audit.setCleanAmount(temp.getCleanAmount());
         userDaAudRepository.save(audit);
         log.info("saved audit record for User Da ID: {}", temp.getUserDaID());
     }
@@ -243,6 +249,10 @@ public class UserDaServiceImpl implements UserDaService {
         UserDaTemp userDaDb = userDaTempRepository.findById(userDaID).orElseThrow(() -> {
             throw new ApiRequestException(USER_DA_TEMP_WITH + userDaID + DOES_NOT_EXISTS);
         });
+
+        if (userDaDTO.getCleanAmount() != null && userDaDTO.getCleanAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new ApiRequestException("Clean amount should be positive!");
+        }
         Date date = new Date();
 
         BooleanBuilder booleanBuilder = new BooleanBuilder();
@@ -274,7 +284,7 @@ public class UserDaServiceImpl implements UserDaService {
             userDaDb.setCreatedDate(userDaDTO.getCreatedDate());
             userDaDb.setCreatedBy(userDaDTO.getCreatedBy());
             userDaDb.setLastModifiedDate(date);
-
+            userDaDb.setCleanAmount(userDaDTO.getCleanAmount());
             userDaTempRepository.save(userDaDb);
 
             log.info("END: Update UserDa: {}", userDaDb);
@@ -292,6 +302,10 @@ public class UserDaServiceImpl implements UserDaService {
         UserDa userDaDb = userDaRepository.findById(userDaID).orElseThrow(() -> {
             throw new ApiRequestException(USER_DA_WITH + userDaID + DOES_NOT_EXISTS);
         });
+
+        if (userDaDTO.getCleanAmount() != null && userDaDTO.getCleanAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new ApiRequestException("Clean amount should be positive!");
+        }
 
         log.info("START : GET UserDa. {}", userDaDb);
 
@@ -351,7 +365,7 @@ public class UserDaServiceImpl implements UserDaService {
         userDaTemp.setCreatedDate(userDa.getCreatedDate());
         userDaTemp.setCreatedBy(userDa.getCreatedBy());
         userDaTemp.setLastModifiedDate(date);
-
+        userDaTemp.setCleanAmount(userDaDTO.getCleanAmount());
         return userDaTemp;
     }
 

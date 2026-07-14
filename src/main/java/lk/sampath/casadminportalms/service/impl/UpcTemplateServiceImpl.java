@@ -5,6 +5,7 @@ import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.upctemplate.UpcTemplateDTO;
 import lk.sampath.casadminportalms.dto.upctemplate.UpcTemplateDataDTO;
+import lk.sampath.casadminportalms.dto.upctemplate.UpcTemplateResponse;
 import lk.sampath.casadminportalms.dto.userSession.UserContext;
 import lk.sampath.casadminportalms.entity.upcsection.UpcSection;
 import lk.sampath.casadminportalms.entity.upctemplate.*;
@@ -63,13 +64,12 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(Pageable pageable) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UpcTemplateResponse>>> findAllUpcTemplateTempList(Pageable pageable) throws ApiRequestException {
 
         log.info("START: Find All Upc Template Temp List ");
-        Page<UpcTemplateTemp> upcTemplateTempList = upcTemplateTempRepository.findAll(pageable);
+        Page<UpcTemplateResponse> upcTemplateTempList = upcTemplateTempRepository.findAllTemplates(pageable);
         log.info(" Fetched All Upc Template Temp List : {} ",upcTemplateTempList);
-        Page<UpcTemplateDTO> upcTemplateDTOList = upcTemplateTempList.map(UpcTemplateDTO::new);
-        StandardResponse<List<UpcTemplateDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateDTOList);
+        StandardResponse<List<UpcTemplateResponse>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateTempList);
         log.info("END: Find All Upc Template Temp List :{}", response.getResponse());
         return ResponseEntity.ok().body(response);
     }
@@ -91,13 +91,11 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplates(Pageable pageable) throws ApiRequestException {
+    public ResponseEntity<StandardResponse<List<UpcTemplateResponse>>> findAllApprovedUpcTemplates(Pageable pageable) throws ApiRequestException {
         log.info("START: Find All Approved Upc Templates");
-        Page<UpcTemplate> upcTemplateList = upcTemplateRepository.findAll(pageable);
-
-        Page<UpcTemplateDTO> upcTemplateDTOList = upcTemplateList.map(UpcTemplateDTO::new);
-        log.info("Converted Upc Templates to DTOs: {}", upcTemplateDTOList);
-        StandardResponse<List<UpcTemplateDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateDTOList);
+        Page<UpcTemplateResponse> upcTemplateList = upcTemplateRepository.findAllTemplates(pageable);
+        log.info("Converted Upc Templates to DTOs: {}", upcTemplateList);
+        StandardResponse<List<UpcTemplateResponse>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateList);
 
         log.info("END: Find All Approved Upc Templates with Response: {}", response.getResponse());
         return ResponseEntity.ok().body(response);

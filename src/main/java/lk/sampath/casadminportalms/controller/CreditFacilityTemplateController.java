@@ -2,6 +2,7 @@ package lk.sampath.casadminportalms.controller;
 
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
+import lk.sampath.casadminportalms.dto.creditfacilitytemplate.CftResponse;
 import lk.sampath.casadminportalms.dto.creditfacilitytemplate.CreditFacilityTemplateDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.CreditFacilityTemplateService;
@@ -23,7 +24,7 @@ public class CreditFacilityTemplateController {
     }
 
     @GetMapping("/getAllCftTemp")
-    public ResponseEntity<StandardResponse<Page<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp(
+    public ResponseEntity<StandardResponse<Page<CftResponse>>> getAllCreditFacilityTemplatesTemp(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
@@ -31,7 +32,7 @@ public class CreditFacilityTemplateController {
         int effectivePage = headerPage != null ? headerPage : page;
         int effectiveSize = headerSize != null ? headerSize : size;
         Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
-        ResponseEntity<StandardResponse<Page<CreditFacilityTemplateDTO>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplatesTemp(pageable);
+        ResponseEntity<StandardResponse<Page<CftResponse>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplatesTemp(pageable);
         return ResponseEntity.ok().body(pagedCreditFacilityTemplates.getBody());
     }
 
@@ -42,7 +43,7 @@ public class CreditFacilityTemplateController {
     }
 
     @GetMapping("/getAllCft")
-    public ResponseEntity<StandardResponse<Page<CreditFacilityTemplateDTO>>> getCreditFacilityTemplates(
+    public ResponseEntity<StandardResponse<Page<CftResponse>>> getCreditFacilityTemplates(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
@@ -50,7 +51,7 @@ public class CreditFacilityTemplateController {
         int effectivePage = headerPage != null ? headerPage : page;
         int effectiveSize = headerSize != null ? headerSize : size;
         Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
-        ResponseEntity<StandardResponse<Page<CreditFacilityTemplateDTO>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplates(pageable);
+        ResponseEntity<StandardResponse<Page<CftResponse>>> pagedCreditFacilityTemplates = creditFacilityTemplateService.getAllCreditFacilityTemplates(pageable);
         return ResponseEntity.ok().body(pagedCreditFacilityTemplates.getBody());
     }
 

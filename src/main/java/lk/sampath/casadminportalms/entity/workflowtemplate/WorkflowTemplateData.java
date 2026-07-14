@@ -9,22 +9,13 @@ import lombok.*;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@ToString
 @AllArgsConstructor
 @Table(name = "T_WORK_FLOW_TEMPLATE_DATA")
-public class WorkflowTemplateData extends ApprovableEntity {
+public class WorkflowTemplateData  {
 
     @Id
     @Column(name = "WORK_FLOW_TEMPLATE_DATA_ID")
     private Integer workFlowTemplateDataID;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "WORK_FLOW_TEMPLATE_ID")
-    private WorkflowTemplate workFlowTemplate;
-
-    @ManyToOne
-    @JoinColumn(name = "UPM_GROUP_ID")
-    private UpmGroup upmGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "NEXT_UPM_GROUP_ID")
@@ -33,6 +24,14 @@ public class WorkflowTemplateData extends ApprovableEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PREVIOUS_UPM_GROUP_ID")
     private UpmGroup previousUPMGroup;
+
+    @ManyToOne
+    @JoinColumn(name = "UPM_GROUP_ID")
+    private UpmGroup upmGroup;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "WORK_FLOW_TEMPLATE_ID")
+    private WorkflowTemplate workFlowTemplate;
 
     @Column(name = "DISPLAY_ORDER")
     private Integer displayOrder;

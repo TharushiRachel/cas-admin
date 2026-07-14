@@ -11,7 +11,6 @@ import java.util.Set;
 @Getter
 @RequiredArgsConstructor
 @Table(name = "T_WORK_FLOW_TEMPLATE")
-@ToString
 @Builder
 @AllArgsConstructor
 public class WorkflowTemplate extends ApprovableEntity {
@@ -32,6 +31,10 @@ public class WorkflowTemplate extends ApprovableEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS")
     private Status status;
+
+    @Version
+    @Column(name = "VERSION")
+    protected Integer version;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "workFlowTemplate")
     private Set<WorkflowTemplateData> workFlowTemplateDataSet;

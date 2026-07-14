@@ -12,11 +12,11 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @Builder
-@Table(name = "T_WORK_FLOW_TEMPLATE_DATA_TEMP")
-public class WorkflowTemplateDataTemp extends ApprovableEntity {
+@Table(name = "CASV3_T_WORK_FLOW_TEMPLATE_DATA_TEMP")
+public class WorkflowTemplateDataTemp {
 
     @Id
-    @Column(name = "WORK_FLOW_TEMPLATE_DATA_ID")
+    @Column(name = "WORK_FLOW_TEMPLATE_DATA_TEMP_ID")
     private Integer workFlowTemplateTempDataId;
 
     @ManyToOne

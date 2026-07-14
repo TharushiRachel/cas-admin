@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Entity
 @Setter
 @Getter
-@Table(name = "T_USER_DA_TEMP")
+@Table(name = "CASV3_T_USER_DA_TEMP")
 @RequiredArgsConstructor
 
 
@@ -32,4 +32,17 @@ public class UserDaTemp extends ApprovableEntity  {
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS")
     private Status status;
+
+    @Column(name = "CLEAN_AMOUNT")
+    private BigDecimal cleanAmount;
+
+
+    @PrePersist
+    @PreUpdate
+    private void initializeFields() {
+        if (cleanAmount == null) {
+            cleanAmount = BigDecimal.ZERO;
+        }
+    }
+
 }

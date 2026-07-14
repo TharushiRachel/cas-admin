@@ -5,6 +5,7 @@ import lk.sampath.casadminportalms.controller.basecontroller.PaginationUtil;
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.upctemplate.UpcTemplateDTO;
+import lk.sampath.casadminportalms.dto.upctemplate.UpcTemplateResponse;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.UpcTemplateService;
 import org.springframework.data.domain.Pageable;
@@ -25,13 +26,13 @@ public class UpcTemplateController {
     }
 
     @GetMapping("/upcTemplateTemp/UpcTemplateTempList")
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllUpcTemplateTempList(
+    public ResponseEntity<StandardResponse<List<UpcTemplateResponse>>> findAllUpcTemplateTempList(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
         Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
-        ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> spcTemplates = upcTemplateService.findAllUpcTemplateTempList(pageable);
+        ResponseEntity<StandardResponse<List<UpcTemplateResponse>>> spcTemplates = upcTemplateService.findAllUpcTemplateTempList(pageable);
         return ResponseEntity.ok().body(spcTemplates.getBody());
     }
 
@@ -42,13 +43,13 @@ public class UpcTemplateController {
     }
 
     @GetMapping("/upcTemplateTemp/findAllApprovedUpcTemplates")
-    public ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> findAllApprovedUpcTemplateList(
+    public ResponseEntity<StandardResponse<List<UpcTemplateResponse>>> findAllApprovedUpcTemplateList(
             @RequestHeader(name = "page", required = false) Integer headerPage,
             @RequestHeader(name = "size", required = false) Integer headerSize,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
         Pageable pageable = PaginationUtil.createPageable(headerPage, headerSize, page, size);
-        ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> upcTemplates = upcTemplateService.findAllApprovedUpcTemplates(pageable);
+        ResponseEntity<StandardResponse<List<UpcTemplateResponse>>> upcTemplates = upcTemplateService.findAllApprovedUpcTemplates(pageable);
         return ResponseEntity.ok().body(upcTemplates.getBody());
     }
 

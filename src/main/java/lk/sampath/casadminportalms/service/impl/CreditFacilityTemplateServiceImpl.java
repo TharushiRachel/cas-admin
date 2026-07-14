@@ -101,12 +101,12 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<Page<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplatesTemp(Pageable pageable) {
+    public ResponseEntity<StandardResponse<Page<CftResponse>>> getAllCreditFacilityTemplatesTemp(Pageable pageable) {
 
-        Page<CreditFacilityTemplateTemp> creditFacilityTemplateTempList = creditFacilityTemplateTempRepository.findAll(pageable);
-        Page<CreditFacilityTemplateDTO> pagedCreditFacilityTemplateDTOList = creditFacilityTemplateTempList.map(CreditFacilityTemplateDTO::new);
-
-        StandardResponse<Page<CreditFacilityTemplateDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), pagedCreditFacilityTemplateDTOList);
+        log.info("START: CreditFacilityTemplateServiceImpl | getAllCreditFacilityTemplatesTemp | getAllCreditFacilityTemplatesTemp :{}", pageable);
+        Page<CftResponse> cftResponsePage = creditFacilityTemplateTempRepository.findAllTemplates(pageable);
+        log.info("END: CreditFacilityTemplateServiceImpl | getAllCreditFacilityTemplatesTemp | getAllCreditFacilityTemplatesTemp :{}", cftResponsePage.getSize());
+        StandardResponse<Page<CftResponse>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), cftResponsePage);
         return ResponseEntity.ok().body(response);
     }
 
@@ -126,63 +126,16 @@ public class CreditFacilityTemplateServiceImpl implements CreditFacilityTemplate
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<Page<CreditFacilityTemplateDTO>>> getAllCreditFacilityTemplates(Pageable pageable) {
-        int page = pageable.getPageNumber();
-        int size = pageable.getPageSize();
+    public ResponseEntity<StandardResponse<Page<CftResponse>>> getAllCreditFacilityTemplates(Pageable pageable) {
 
-        // Always stable ordering
-        Sort idSort = Sort.by(Sort.Direction.ASC, "creditFacilityTemplateID");
+        log.info("START: CreditFacilityTemplateServiceImpl | getAllCreditFacilityTemplatesTemp | getAllCreditFacilityTemplates :{}", pageable);
 
-        // 1) Priority set: ACT + APPROVED
-        BooleanBuilder priorityPredicate = new BooleanBuilder();
-        priorityPredicate.and(QCreditFacilityTemplate.creditFacilityTemplate.status.eq(AppsConstants.Status.ACT));
-        priorityPredicate.and(QCreditFacilityTemplate.creditFacilityTemplate.approveStatus.eq(MasterDataApproveStatus.APPROVED));
+        Page<CftResponse> cftResponsePage = creditFacilityTemplateRepository.findAllTemplates(pageable);
 
-        List<CreditFacilityTemplate> priorityAll =
-                (List<CreditFacilityTemplate>) creditFacilityTemplateRepository.findAll(priorityPredicate, idSort);
+        log.info("END: CreditFacilityTemplateServiceImpl | getAllCreditFacilityTemplatesTemp | getAllCreditFacilityTemplates :{}", cftResponsePage.getSize());
 
-        long priorityCount = priorityAll.size();
-        int start = page * size;
-        int end = Math.min(start + size, (int) priorityCount);
-
-        List<CreditFacilityTemplate> pageContent = new ArrayList<>();
-
-        // 2) Fill current page from priority first
-        if (start < priorityCount) {
-            pageContent.addAll(priorityAll.subList(start, end));
-        }
-
-        // 3) Fill remaining slots from non-priority
-        int remaining = size - pageContent.size();
-        if (remaining > 0) {
-            BooleanBuilder nonPriorityPredicate = new BooleanBuilder();
-            nonPriorityPredicate.and(
-                    QCreditFacilityTemplate.creditFacilityTemplate.status.ne(AppsConstants.Status.ACT)
-                            .or(QCreditFacilityTemplate.creditFacilityTemplate.approveStatus.ne(MasterDataApproveStatus.APPROVED))
-            );
-
-            int nonPriorityOffset = Math.max(0, start - (int) priorityCount);
-            Pageable nonPriorityPageable = PageRequest.of(nonPriorityOffset / size, size, idSort);
-
-            Page<CreditFacilityTemplate> nonPriorityPage =
-                    creditFacilityTemplateRepository.findAll(nonPriorityPredicate, nonPriorityPageable);
-
-            List<CreditFacilityTemplate> nonPriorityList = nonPriorityPage.getContent();
-            if (!nonPriorityList.isEmpty()) {
-                pageContent.addAll(nonPriorityList.subList(0, Math.min(remaining, nonPriorityList.size())));
-            }
-        }
-
-        // 4) Total elements for proper page metadata
-        long totalElements = creditFacilityTemplateRepository.count();
-
-        Page<CreditFacilityTemplate> finalPage =
-                new org.springframework.data.domain.PageImpl<>(pageContent, pageable, totalElements);
-
-        Page<CreditFacilityTemplateDTO> dtoPage = finalPage.map(CreditFacilityTemplateDTO::new);
-
-        StandardResponse<Page<CreditFacilityTemplateDTO>> response =
-                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), dtoPage);
+        StandardResponse<Page<CftResponse>> response =
+                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), cftResponsePage);
 
         return ResponseEntity.ok(response);
     }

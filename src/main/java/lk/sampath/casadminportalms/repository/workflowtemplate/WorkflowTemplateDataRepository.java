@@ -12,6 +12,9 @@ public interface WorkflowTemplateDataRepository extends JpaRepository<WorkflowTe
     @Query(value = "SELECT SEQ_T_WORK_FLOW_DATA.NEXTVAL FROM DUAL", nativeQuery = true)
     Integer getNextSequenceValue();
 
-    @Query(value ="SELECT * FROM T_WORK_FLOW_TEMPLATE_DATA w WHERE w.APPROVE_STATUS IN ('APPROVED') AND w.WORK_FLOW_TEMPLATE_ID =:workflowTemplateId", nativeQuery = true)
+    @Query(value ="SELECT * FROM T_WORK_FLOW_TEMPLATE_DATA w " +
+            " WHERE " +
+//            " w.APPROVE_STATUS IN ('APPROVED') AND " +
+            " w.WORK_FLOW_TEMPLATE_ID =:workflowTemplateId", nativeQuery = true)
     List<WorkflowTemplateData>  findAllWorkflowTemplateData(Integer workflowTemplateId);
 }

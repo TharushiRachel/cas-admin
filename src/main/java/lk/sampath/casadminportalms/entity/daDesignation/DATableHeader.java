@@ -1,11 +1,12 @@
 package lk.sampath.casadminportalms.entity.daDesignation;
 
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.ToString;
-
-import java.util.List;
 
 @Entity
 @Table(name = "CASV3_T_DA_TABLE_HEADER")
@@ -18,6 +19,9 @@ public class DATableHeader {
 
     @Column(name = "TABLE_TYPE")
     private String tableType;
+
+    @Column(name = "PARENT_ID")
+    private Integer parentId;
 
     @Column(name = "LABEL")
     private String label;
@@ -34,12 +38,7 @@ public class DATableHeader {
     @Column(name = "ROW_SPAN")
     private Integer rowSpan;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PARENT_ID")
-    private DATableHeader parent;
-
-    @OneToMany(mappedBy = "parent")
-    @OrderBy("displayOrder ASC")
-    private List<DATableHeader> children;
+    @Column(name = "SUB_ID")
+    private Integer subId;
 }
 

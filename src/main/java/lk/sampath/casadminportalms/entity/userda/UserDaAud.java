@@ -13,12 +13,12 @@ import java.math.BigDecimal;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_USER_DA_AUD")
+@Table(name = "CASV3_T_USER_DA_AUD")
 public class UserDaAud extends ApprovableEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "SEQ_T_USER_DA_AUD")
-    @SequenceGenerator(name="SEQ_T_USER_DA_AUD",sequenceName = "SEQ_T_USER_DA_AUD",allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "CASV3_SEQ_USER_DA_AUD")
+    @SequenceGenerator(name="CASV3_SEQ_USER_DA_AUD",sequenceName = "CASV3_SEQ_USER_DA_AUD",allocationSize = 1)
     @Column(name = "ID")
     private Integer id;
     @Column(name = "USER_DA_ID", nullable = false, updatable = false)
@@ -32,4 +32,7 @@ public class UserDaAud extends ApprovableEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS")
     private Status status;
+
+    @Column(name = "CLEAN_AMOUNT")
+    private BigDecimal cleanAmount;
 }

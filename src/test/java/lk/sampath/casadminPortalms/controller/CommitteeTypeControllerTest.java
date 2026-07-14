@@ -60,7 +60,7 @@ class CommitteeTypeControllerTest {
     void testGetCommitteeTypes() throws Exception {
         List<CommitteeType> mockList = List.of(new CommitteeType(), new CommitteeType());
         StandardResponse<List<CommitteeType>> response = new StandardResponse<>(true, "Success", mockList);
-        when(committeeTypeService.getCommitteeTypes()).thenReturn(response);
+        when(committeeTypeService.getCommitteeTypes(any())).thenReturn(response);
 
         mockMvc.perform(get("/api/committeeType/getCommitteeType"))
                 .andExpect(status().isOk())

@@ -10,14 +10,14 @@ import lombok.*;
 @Setter
 @Getter
 @RequiredArgsConstructor
-@Table(name = "T_WORK_FLOW_TEMPLATE_DATA_AUD")
+@Table(name = "CASV3_T_WORK_FLOW_TEMPLATE_DATA_AUD")
 @ToString
 @AllArgsConstructor
-public class WorkflowTemplateDataAud extends ApprovableEntity {
+public class WorkflowTemplateDataAud{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_T_WORK_FLOW_DATA_AUD")
-    @SequenceGenerator(name = "SEQ_T_WORK_FLOW_DATA_AUD", sequenceName = "SEQ_T_WORK_FLOW_DATA_AUD", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CASV3_SEQ_T_WORKFLOW_DATA_AUD")
+    @SequenceGenerator(name = "CASV3_SEQ_T_WORKFLOW_DATA_AUD", sequenceName = "CASV3_SEQ_T_WORKFLOW_DATA_AUD", allocationSize = 1)
     @Column(name = "ID", nullable = false)
     private Integer id;
 

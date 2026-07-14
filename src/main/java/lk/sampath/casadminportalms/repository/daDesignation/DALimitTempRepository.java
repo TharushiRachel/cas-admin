@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DALimitTempDao extends JpaRepository<DALimitTemp, Integer> {
+public interface DALimitTempRepository extends JpaRepository<DALimitTemp, Integer> {
 
     List<DALimitTemp> findAllByDesignationIdAndStatus(Integer designationId, AppsConstants.Status status);
 
@@ -16,7 +16,6 @@ public interface DALimitTempDao extends JpaRepository<DALimitTemp, Integer> {
 
     List<DALimitTemp> findAllByStatus(AppsConstants.Status status);
 
-    List<DALimitTemp> findAllByDesignationId(Integer designationId);
-
-    void deleteAllByDesignationId(Integer designationId);
 }
+
+

@@ -8,6 +8,5 @@ import java.io.Serializable;
 public class ApproveRejectRQ implements Serializable {
 
     private Integer approveRejectDataID;
-
     private MasterDataApproveStatus approveStatus;
 }

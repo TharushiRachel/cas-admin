@@ -57,7 +57,7 @@ public class UserDaController {
         return ResponseEntity.ok().body(userDa.getBody());
     }
 
-    @PostMapping
+    @PostMapping("/saveUserDa")
     public ResponseEntity<StandardResponse<UserDaDTO>> saveUserDa(@Validated @RequestBody UserDaDTO request) throws  ApiRequestException{
         ResponseEntity<StandardResponse<UserDaDTO>> userDaTemp = userDaService.saveUserDaTemp(request);
         return ResponseEntity.ok().body(userDaTemp.getBody());

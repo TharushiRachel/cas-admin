@@ -10,12 +10,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WorkflowTemplateTempRepository extends JpaRepository<WorkflowTemplateTemp, Integer>{
 
-    @Query(value = "SELECT SEQ_T_WORKFLOW_TEMP.NEXTVAL FROM DUAL", nativeQuery = true)
+    @Query(value = "SELECT CASV3_SEQ_WORKFLOW_TEMP.NEXTVAL FROM DUAL", nativeQuery = true)
     Integer getNextSequenceValue();
 
-    @Query(value ="SELECT * FROM T_WORK_FLOW_TEMPLATE_TEMP w WHERE w.APPROVE_STATUS NOT IN ('APPROVED')", nativeQuery = true)
+    @Query(value ="SELECT * FROM CASV3_T_WORK_FLOW_TEMPLATE_TEMP w WHERE w.APPROVE_STATUS NOT IN ('APPROVED')", nativeQuery = true)
     Page<WorkflowTemplateTemp> findAllWorkflowTemplateTemp(Pageable pageable);
 
-    @Query(value = "SELECT COUNT(*) FROM T_WORK_FLOW_TEMPLATE_TEMP WHERE STATUS = 'ACT' AND WORK_FLOW_TEMPLATE_NAME = :templateName ", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM CASV3_T_WORK_FLOW_TEMPLATE_TEMP WHERE STATUS = 'ACT' AND WORK_FLOW_TEMPLATE_NAME = :templateName ", nativeQuery = true)
     Integer getWorkflowTempCountByName(String templateName);
 }
