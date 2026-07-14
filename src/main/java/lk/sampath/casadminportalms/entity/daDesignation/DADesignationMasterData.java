@@ -67,21 +67,10 @@ public class DADesignationMasterData {
 
     /**
      * One designation has many temp limit column values.
+     * Managed via DALimitTempRepository (not cascaded) to avoid LazyInitializationException.
      */
-    @OneToMany(mappedBy = "designation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "designation", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<DALimitTemp> limitTemps = new ArrayList<>();
-
-    public void addLimitTemp(DALimitTemp limitTemp) {
-        limitTemps.add(limitTemp);
-        limitTemp.setDesignation(this);
-    }
-
-    public void clearLimitTemps() {
-        for (DALimitTemp limitTemp : limitTemps) {
-            limitTemp.setDesignation(null);
-        }
-        limitTemps.clear();
-    }
 }

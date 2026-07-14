@@ -262,7 +262,6 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
         DADesignationMasterData designation = upsertDesignation(request, designationByCode);
         replaceLimitTemps(designation, isCommittee, request.getColumnValues(), columnHeadersBySubId);
-        designation = daDesignationMasterRepository.saveAndFlush(designation);
         cacheDesignation(designationByCode, designation);
 
         return buildSaveResponse(designation, tableType, isCommittee);
@@ -305,7 +304,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         }
 
         // Master is shared across committee/individual; table type lives on DA_LIMITS_TEMP.IS_COMMITTEE.
-        designation.setStatus(STATUS.ACT);
+        designation.setStatus(STATUS_ACT);
         designation.setApproveStatus(MasterDataApproveStatus.PENDING.name());
         designation.setDisplayOrder(
                 resolveDisplayOrder(request.getDisplayOrder(), designation.getDisplayOrder()));
@@ -339,7 +338,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                 return cached;
             }
             return daDesignationMasterRepository
-                    .findByDesignationCodeAndStatus(request.getDesignationCode().trim(), STATUS.ACT.name())
+                    .findByDesignationCodeAndStatus(request.getDesignationCode().trim(), STATUS_ACT)
                     .orElseGet(DADesignationMasterData::new);
         }
 
@@ -364,7 +363,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         if (existingOrder != null) {
             return existingOrder;
         }
-        return daDesignationMasterRepository.findAllByStatus(STATUS.ACT.name()).stream()
+        return daDesignationMasterRepository.findAllByStatus(STATUS_ACT).stream()
                 .map(DADesignationMasterData::getDisplayOrder)
                 .filter(Objects::nonNull)
                 .max(Integer::compareTo)
@@ -406,9 +405,8 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                                    String isCommittee,
                                    List<DAColumnValueRequest> columnValues,
                                    Map<Integer, DATableHeader> columnHeadersBySubId) {
-        // Keep opposite-table temps; replace only current table temps (Y or N) via orphanRemoval.
-        designation.getLimitTemps().removeIf(limit ->
-                limit.getIsCommittee() != null && isCommittee.equalsIgnoreCase(limit.getIsCommittee()));
+        // Avoid lazy collection access; manage temps through repository only.
+        daLimitTempRepository.deleteByDesignationIdAndIsCommittee(designation.getId(), isCommittee);
 
         String username = UserContext.getUsername();
         Date now = new Date();
@@ -418,6 +416,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
             DALimitTemp limitTemp = new DALimitTemp();
             limitTemp.setDaLimitsId(daLimitTempRepository.getCurrentSequenceValue());
+            limitTemp.setDesignation(designation);
             limitTemp.setColumnId(columnValue.getSubId());
             limitTemp.setRiskValue(columnValue.getRiskValue());
             limitTemp.setRiskRating(header.getLabel());
@@ -427,7 +426,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
             limitTemp.setCreatedBy(username);
             limitTemp.setCreatedDate(now);
 
-            designation.addLimitTemp(limitTemp);
+            daLimitTempRepository.save(limitTemp);
         }
     }
 
@@ -500,9 +499,6 @@ public class DaDesignationServiceImpl implements DaDesignationService {
             daLimitRepository.save(master);
         }
 
-        // Clear collection then delete temp rows so orphanRemoval does not conflict.
-        designation.clearLimitTemps();
-        daDesignationMasterRepository.saveAndFlush(designation);
         daLimitTempRepository.deleteByDesignationId(designation.getId());
 
         designation.setApproveStatus(MasterDataApproveStatus.APPROVED.name());
@@ -573,9 +569,10 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         response.setStatus(designation.getApproveStatus());
 
         Map<String, Double> values = new LinkedHashMap<>();
-        designation.getLimitTemps().stream()
-                .filter(limit -> limit.getIsCommittee() != null
-                        && isCommittee.equalsIgnoreCase(limit.getIsCommittee()))
+        daLimitTempRepository
+                .findAllByDesignationIdAndIsCommitteeAndStatus(
+                        designation.getId(), isCommittee, AppsConstants.Status.ACT)
+                .stream()
                 .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
                 .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
         response.setValues(values);
