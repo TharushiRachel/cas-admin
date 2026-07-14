@@ -13,16 +13,65 @@ import java.util.List;
 @Repository
 public interface DALimitRepository extends JpaRepository<DALimit, Integer> {
 
-    List<DALimit> findAllByDesignationIdAndStatus(Integer designationId, AppsConstants.Status status);
+    @Query(
+            value = """
+                    SELECT *
+                    FROM DA_LIMITS
+                    WHERE DESIGNATION_ID = :designationId
+                      AND STATUS = :status
+                    """,
+            nativeQuery = true
+    )
+    List<DALimit> findAllByDesignationIdAndStatus(@Param("designationId") Integer designationId,
+                                                  @Param("status") AppsConstants.Status status);
 
-    DALimit findByDesignationIdAndColumnIdAndStatus(Integer designationId, Integer columnId, AppsConstants.Status status);
+    @Query(
+            value = """
+                    SELECT *
+                    FROM DA_LIMITS
+                    WHERE DESIGNATION_ID = :designationId
+                      AND COLUMN_ID = :columnId
+                      AND STATUS = :status
+                    """,
+            nativeQuery = true
+    )
+    DALimit findByDesignationIdAndColumnIdAndStatus(@Param("designationId") Integer designationId,
+                                                    @Param("columnId") Integer columnId,
+                                                    @Param("status") AppsConstants.Status status);
 
-    List<DALimit> findAllByStatus(AppsConstants.Status status);
+    @Query(
+            value = """
+                    SELECT *
+                    FROM DA_LIMITS
+                    WHERE STATUS = :status
+                    """,
+            nativeQuery = true
+    )
+    List<DALimit> findAllByStatus(@Param("status") AppsConstants.Status status);
 
-    List<DALimit> findAllByDesignationIdAndIsCommitteeAndStatus(Integer designationId, String isCommittee, AppsConstants.Status status);
+    @Query(
+            value = """
+                    SELECT *
+                    FROM DA_LIMITS
+                    WHERE DESIGNATION_ID = :designationId
+                      AND IS_COMMITTEE = :isCommittee
+                      AND STATUS = :status
+                    """,
+            nativeQuery = true
+    )
+    List<DALimit> findAllByDesignationIdAndIsCommitteeAndStatus(@Param("designationId") Integer designationId,
+                                                                @Param("isCommittee") String isCommittee,
+                                                                @Param("status") AppsConstants.Status status);
 
-    @Modifying
-    @Query("delete from DALimit l where l.designationId = :designationId and l.isCommittee = :isCommittee")
+    @Modifying(clearAutomatically = true)
+    @Query(
+            value = """
+                    DELETE FROM DA_LIMITS
+                    WHERE DESIGNATION_ID = :designationId
+                      AND IS_COMMITTEE = :isCommittee
+                    """,
+            nativeQuery = true
+    )
     void deleteByDesignationIdAndIsCommittee(@Param("designationId") Integer designationId,
                                              @Param("isCommittee") String isCommittee);
 }

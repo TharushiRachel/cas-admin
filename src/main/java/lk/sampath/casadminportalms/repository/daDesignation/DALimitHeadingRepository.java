@@ -11,24 +11,38 @@ import java.util.List;
 @Repository
 public interface DALimitHeadingRepository extends JpaRepository<DATableHeader, Long> {
 
-
     @Query(
             value = """
-                SELECT h
-                FROM DATableHeader h
-                ORDER BY h.displayOrder ASC
-                """,
-            nativeQuery = false
+                    SELECT *
+                    FROM CASV3_T_DA_TABLE_HEADER
+                    ORDER BY DISPLAY_ORDER ASC
+                    """,
+            nativeQuery = true
     )
     List<DATableHeader> findAllOrderByDisplayOrderAsc();
 
-    List<DATableHeader> findByTableTypeAndSubIdIsNotNull(String tableType);
+    @Query(
+            value = """
+                    SELECT *
+                    FROM CASV3_T_DA_TABLE_HEADER
+                    WHERE TABLE_TYPE = :tableType
+                      AND SUB_ID IS NOT NULL
+                    ORDER BY DISPLAY_ORDER ASC
+                    """,
+            nativeQuery = true
+    )
+    List<DATableHeader> findByTableTypeAndSubIdIsNotNull(@Param("tableType") String tableType);
 
-    @Query("""
-            SELECT h FROM DATableHeader h
-            WHERE h.tableType = :tableType
-              AND h.subId = :subId
-            """)
+    @Query(
+            value = """
+                    SELECT *
+                    FROM CASV3_T_DA_TABLE_HEADER
+                    WHERE TABLE_TYPE = :tableType
+                      AND SUB_ID = :subId
+                    ORDER BY DISPLAY_ORDER ASC
+                    """,
+            nativeQuery = true
+    )
     List<DATableHeader> findByTableTypeAndSubId(@Param("tableType") String tableType,
                                                 @Param("subId") Integer subId);
 }
