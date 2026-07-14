@@ -17,6 +17,7 @@ public interface DADesignationMasterRepository extends JpaRepository<DADesignati
                     SELECT *
                     FROM DA_DESIGNATION
                     WHERE STATUS = :status
+                    ORDER BY DISPLAY_ORDER ASC
                     """,
             nativeQuery = true
     )
@@ -36,18 +37,20 @@ public interface DADesignationMasterRepository extends JpaRepository<DADesignati
             @Param("isCommittee") String isCommittee,
             @Param("status") String status);
 
+    /**
+     * One designation master per code (shared by committee and individual limit rows).
+     */
     @Query(
             value = """
                     SELECT *
                     FROM DA_DESIGNATION
                     WHERE DESIGNATION_CODE = :designationCode
-                      AND IS_COMMITTEE = :isCommittee
                       AND STATUS = :status
+                    FETCH FIRST 1 ROW ONLY
                     """,
             nativeQuery = true
     )
-    Optional<DADesignationMasterData> findByDesignationCodeAndIsCommitteeAndStatus(
+    Optional<DADesignationMasterData> findByDesignationCodeAndStatus(
             @Param("designationCode") String designationCode,
-            @Param("isCommittee") String isCommittee,
             @Param("status") String status);
 }
