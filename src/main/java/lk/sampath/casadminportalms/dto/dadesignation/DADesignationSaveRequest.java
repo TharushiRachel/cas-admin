@@ -9,19 +9,16 @@ import java.util.List;
 public class DADesignationSaveRequest {
 
     /**
-     * Optional. When provided, updates an existing designation row.
+     * Required. Stored as DESIGNATION_ID on DA_LIMITS_TEMP (no DA_DESIGNATION write).
      */
     private Integer designationId;
 
+    /**
+     * Optional metadata for API response only (not persisted on DA_LIMITS_TEMP).
+     */
     private String designationCode;
     private String designation;
     private String description;
-
-    /**
-     * COMMITTEE or INDIVIDUAL (same as headers split).
-     */
-    private String tableType;
-
     private Integer displayOrder;
 
     private List<DAColumnValueRequest> columnValues = new ArrayList<>();
