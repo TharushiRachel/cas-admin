@@ -16,8 +16,6 @@ import lombok.ToString;
 public class DALimitTemp extends ApprovableEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_DA_LIMITS_TEMP")
-    @SequenceGenerator(name = "SEQ_DA_LIMITS_TEMP", sequenceName = "SEQ_DA_LIMITS_TEMP", allocationSize = 1)
     @Column(name = "DA_LIMITS_ID")
     private Integer daLimitsId;
 

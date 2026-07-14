@@ -12,9 +12,11 @@ import lombok.Setter;
 @Setter
 @Table(name = "DA_LIMITS")
 public class DALimit extends ApprovableEntity {
+
+    /**
+     * Same ID as DA_LIMITS_TEMP.DA_LIMITS_ID (assigned on approve, no sequence).
+     */
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_DA_LIMITS")
-    @SequenceGenerator(name = "SEQ_DA_LIMITS", sequenceName = "SEQ_DA_LIMITS", allocationSize = 1)
     @Column(name = "DA_LIMITS_ID")
     private Integer daLimitsId;
 
@@ -39,6 +41,4 @@ public class DALimit extends ApprovableEntity {
 
     @Column(name = "IS_COMMITTEE")
     private String isCommittee;
-
-
 }

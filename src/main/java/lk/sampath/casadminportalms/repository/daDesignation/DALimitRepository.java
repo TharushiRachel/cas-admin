@@ -74,4 +74,14 @@ public interface DALimitRepository extends JpaRepository<DALimit, Integer> {
     )
     void deleteByDesignationIdAndIsCommittee(@Param("designationId") Integer designationId,
                                              @Param("isCommittee") String isCommittee);
+
+    @Modifying(clearAutomatically = true)
+    @Query(
+            value = """
+                    DELETE FROM DA_LIMITS
+                    WHERE DESIGNATION_ID = :designationId
+                    """,
+            nativeQuery = true
+    )
+    void deleteByDesignationId(@Param("designationId") Integer designationId);
 }

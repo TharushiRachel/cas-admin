@@ -1,9 +1,11 @@
 package lk.sampath.casadminportalms.service;
 
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
+import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.dadesignation.DADesignationBulkSaveRequest;
 import lk.sampath.casadminportalms.dto.dadesignation.DADesignationBulkSaveResponse;
 import lk.sampath.casadminportalms.dto.dadesignation.DADesignationCodeDTO;
+import lk.sampath.casadminportalms.dto.dadesignation.DADesignationSaveResponse;
 import lk.sampath.casadminportalms.dto.dadesignation.DATableHeaderDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import org.springframework.http.ResponseEntity;
@@ -21,5 +23,13 @@ public interface DaDesignationService {
      * Pass designationId to update; omit it (or use designationCode) to create / reuse by code.
      */
     ResponseEntity<StandardResponse<DADesignationBulkSaveResponse>> saveDaDesignationLimits(DADesignationBulkSaveRequest request)
+            throws ApiRequestException;
+
+    /**
+     * approveRejectDataID = designationId.
+     * APPROVED: move DA_LIMITS_TEMP -> DA_LIMITS (same DA_LIMITS_ID), then delete temp.
+     * REJECTED: keep rows in DA_LIMITS_TEMP.
+     */
+    ResponseEntity<StandardResponse<DADesignationSaveResponse>> approveRejectDaDesignationLimits(ApproveRejectRQ request)
             throws ApiRequestException;
 }

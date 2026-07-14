@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
+import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.dadesignation.DAColumnValueRequest;
 import lk.sampath.casadminportalms.dto.dadesignation.DADesignationBulkSaveRequest;
 import lk.sampath.casadminportalms.dto.dadesignation.DADesignationBulkSaveResponse;
@@ -15,6 +16,7 @@ import lk.sampath.casadminportalms.dto.dadesignation.DATableHeaderDTO;
 import lk.sampath.casadminportalms.dto.dadesignation.DATableHeadingResponse;
 import lk.sampath.casadminportalms.dto.userSession.UserContext;
 import lk.sampath.casadminportalms.entity.daDesignation.DADesignationMasterData;
+import lk.sampath.casadminportalms.entity.daDesignation.DALimit;
 import lk.sampath.casadminportalms.entity.daDesignation.DALimitTemp;
 import lk.sampath.casadminportalms.entity.daDesignation.DATableHeader;
 import lk.sampath.casadminportalms.enums.AppsConstants;
@@ -24,6 +26,7 @@ import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.repository.daDesignation.DADesignationMasterRepository;
 import lk.sampath.casadminportalms.repository.daDesignation.DALimitHeadingRepository;
+import lk.sampath.casadminportalms.repository.daDesignation.DALimitRepository;
 import lk.sampath.casadminportalms.repository.daDesignation.DALimitTempRepository;
 import lk.sampath.casadminportalms.service.DaDesignationService;
 import lombok.extern.log4j.Log4j2;
@@ -50,13 +53,16 @@ public class DaDesignationServiceImpl implements DaDesignationService {
     private final DALimitHeadingRepository daLimitHeadingRepository;
     private final DADesignationMasterRepository daDesignationMasterRepository;
     private final DALimitTempRepository daLimitTempRepository;
+    private final DALimitRepository daLimitRepository;
 
     public DaDesignationServiceImpl(DALimitHeadingRepository daLimitHeadingRepository,
                                     DADesignationMasterRepository daDesignationMasterRepository,
-                                    DALimitTempRepository daLimitTempRepository) {
+                                    DALimitTempRepository daLimitTempRepository,
+                                    DALimitRepository daLimitRepository) {
         this.daLimitHeadingRepository = daLimitHeadingRepository;
         this.daDesignationMasterRepository = daDesignationMasterRepository;
         this.daLimitTempRepository = daLimitTempRepository;
+        this.daLimitRepository = daLimitRepository;
     }
 
     @Override
@@ -299,7 +305,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         }
 
         // Master is shared across committee/individual; table type lives on DA_LIMITS_TEMP.IS_COMMITTEE.
-        designation.setStatus(STATUS_ACT);
+        designation.setStatus(STATUS.ACT);
         designation.setApproveStatus(MasterDataApproveStatus.PENDING.name());
         designation.setDisplayOrder(
                 resolveDisplayOrder(request.getDisplayOrder(), designation.getDisplayOrder()));
@@ -333,7 +339,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                 return cached;
             }
             return daDesignationMasterRepository
-                    .findByDesignationCodeAndStatus(request.getDesignationCode().trim(), STATUS_ACT)
+                    .findByDesignationCodeAndStatus(request.getDesignationCode().trim(), STATUS.ACT.name())
                     .orElseGet(DADesignationMasterData::new);
         }
 
@@ -358,7 +364,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         if (existingOrder != null) {
             return existingOrder;
         }
-        return daDesignationMasterRepository.findAllByStatus(STATUS_ACT).stream()
+        return daDesignationMasterRepository.findAllByStatus(STATUS.ACT.name()).stream()
                 .map(DADesignationMasterData::getDisplayOrder)
                 .filter(Objects::nonNull)
                 .max(Integer::compareTo)
@@ -411,6 +417,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
             DATableHeader header = columnHeadersBySubId.get(columnValue.getSubId());
 
             DALimitTemp limitTemp = new DALimitTemp();
+            limitTemp.setDaLimitsId(daLimitTempRepository.getCurrentSequenceValue());
             limitTemp.setColumnId(columnValue.getSubId());
             limitTemp.setRiskValue(columnValue.getRiskValue());
             limitTemp.setRiskRating(header.getLabel());
@@ -422,6 +429,134 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
             designation.addLimitTemp(limitTemp);
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseEntity<StandardResponse<DADesignationSaveResponse>> approveRejectDaDesignationLimits(
+            ApproveRejectRQ request) throws ApiRequestException {
+        log.info("START : approveRejectDaDesignationLimits | request={}", request);
+
+        if (request == null || request.getApproveRejectDataID() == null) {
+            throw new ApiRequestException("approveRejectDataID (designationId) cannot be null");
+        }
+        if (request.getApproveStatus() == null) {
+            throw new ApiRequestException("approveStatus is required (APPROVED or REJECTED)");
+        }
+
+        Integer designationId = request.getApproveRejectDataID();
+        DADesignationMasterData designation = daDesignationMasterRepository.findById(designationId)
+                .orElseThrow(() -> new ApiRequestException(
+                        "DA Designation with id " + designationId + " does not exist"));
+
+        List<DALimitTemp> tempLimits = daLimitTempRepository.findAllByDesignationId(designationId);
+        if (CollectionUtils.isEmpty(tempLimits)) {
+            throw new ApiRequestException("No DA_LIMITS_TEMP records found for designationId " + designationId);
+        }
+
+        Date now = new Date();
+        String username = UserContext.getUsername();
+        MasterDataApproveStatus approveStatus = request.getApproveStatus();
+
+        if (MasterDataApproveStatus.APPROVED.equals(approveStatus)) {
+            approveTempLimits(tempLimits, designation, now, username);
+        } else if (MasterDataApproveStatus.REJECTED.equals(approveStatus)) {
+            rejectTempLimits(tempLimits, designation, now, username);
+        } else {
+            throw new ApiRequestException("Unknown approval status: " + approveStatus);
+        }
+
+        DADesignationSaveResponse saveResponse = buildApproveRejectResponse(designation, approveStatus);
+        StandardResponse<DADesignationSaveResponse> response =
+                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), saveResponse);
+        log.info("END : approveRejectDaDesignationLimits | designationId={}, status={}", designationId, approveStatus);
+        return ResponseEntity.ok(response);
+    }
+
+    private void approveTempLimits(List<DALimitTemp> tempLimits,
+                                   DADesignationMasterData designation,
+                                   Date now,
+                                   String username) {
+        // Replace any previous master limits for this designation.
+        daLimitRepository.deleteByDesignationId(designation.getId());
+
+        for (DALimitTemp temp : tempLimits) {
+            DALimit master = new DALimit();
+            master.setDaLimitsId(temp.getDaLimitsId());
+            master.setDesignationId(designation.getId());
+            master.setColumnId(temp.getColumnId());
+            master.setRiskValue(temp.getRiskValue());
+            master.setRiskRating(temp.getRiskRating());
+            master.setIsCommittee(temp.getIsCommittee());
+            master.setStatus(temp.getStatus() != null ? temp.getStatus() : AppsConstants.Status.ACT);
+            master.setAuthorizerDisplayName(temp.getAuthorizerDisplayName());
+            master.setApproveStatus(MasterDataApproveStatus.APPROVED);
+            master.setApprovedDate(now);
+            master.setApprovedBy(username);
+            master.setCreatedBy(temp.getCreatedBy());
+            master.setCreatedDate(temp.getCreatedDate());
+            master.setModifiedBy(username);
+            master.setLastModifiedDate(now);
+            daLimitRepository.save(master);
+        }
+
+        // Clear collection then delete temp rows so orphanRemoval does not conflict.
+        designation.clearLimitTemps();
+        daDesignationMasterRepository.saveAndFlush(designation);
+        daLimitTempRepository.deleteByDesignationId(designation.getId());
+
+        designation.setApproveStatus(MasterDataApproveStatus.APPROVED.name());
+        designation.setApprovedDate(now);
+        designation.setApprovedBy(username);
+        designation.setModifiedDate(now);
+        designation.setModifiedBy(username);
+        daDesignationMasterRepository.saveAndFlush(designation);
+    }
+
+    private void rejectTempLimits(List<DALimitTemp> tempLimits,
+                                  DADesignationMasterData designation,
+                                  Date now,
+                                  String username) {
+        for (DALimitTemp temp : tempLimits) {
+            temp.setApproveStatus(MasterDataApproveStatus.REJECTED);
+            temp.setApprovedDate(now);
+            temp.setApprovedBy(username);
+            temp.setModifiedBy(username);
+            temp.setLastModifiedDate(now);
+            daLimitTempRepository.save(temp);
+        }
+
+        designation.setApproveStatus(MasterDataApproveStatus.REJECTED.name());
+        designation.setApprovedDate(now);
+        designation.setApprovedBy(username);
+        designation.setModifiedDate(now);
+        designation.setModifiedBy(username);
+        daDesignationMasterRepository.saveAndFlush(designation);
+    }
+
+    private DADesignationSaveResponse buildApproveRejectResponse(DADesignationMasterData designation,
+                                                                MasterDataApproveStatus approveStatus) {
+        DADesignationSaveResponse response = new DADesignationSaveResponse();
+        response.setDesignationId(designation.getId());
+        response.setDesignationCode(designation.getDesignationCode());
+        response.setDesignation(designation.getDesignation());
+        response.setDescription(designation.getDescription());
+        response.setDisplayOrder(designation.getDisplayOrder());
+        response.setStatus(approveStatus.name());
+        response.setIsCommittee(designation.getIsCommittee());
+
+        Map<String, Double> values = new LinkedHashMap<>();
+        if (MasterDataApproveStatus.APPROVED.equals(approveStatus)) {
+            daLimitRepository.findAllByDesignationIdAndStatus(designation.getId(), AppsConstants.Status.ACT).stream()
+                    .sorted(Comparator.comparing(DALimit::getColumnId, Comparator.nullsLast(Integer::compareTo)))
+                    .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
+        } else {
+            daLimitTempRepository.findAllByDesignationId(designation.getId()).stream()
+                    .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
+                    .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
+        }
+        response.setValues(values);
+        return response;
     }
 
     private DADesignationSaveResponse buildSaveResponse(DADesignationMasterData designation,

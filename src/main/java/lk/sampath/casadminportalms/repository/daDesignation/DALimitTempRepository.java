@@ -13,6 +13,19 @@ import java.util.List;
 @Repository
 public interface DALimitTempRepository extends JpaRepository<DALimitTemp, Integer> {
 
+    @Query(value = "SELECT SEQ_DA_LIMITS_TEMP.NEXTVAL FROM DUAL", nativeQuery = true)
+    Integer getCurrentSequenceValue();
+
+    @Query(
+            value = """
+                    SELECT *
+                    FROM DA_LIMITS_TEMP
+                    WHERE DESIGNATION_ID = :designationId
+                    """,
+            nativeQuery = true
+    )
+    List<DALimitTemp> findAllByDesignationId(@Param("designationId") Integer designationId);
+
     @Query(
             value = """
                     SELECT *
@@ -74,4 +87,14 @@ public interface DALimitTempRepository extends JpaRepository<DALimitTemp, Intege
     )
     void deleteByDesignationIdAndIsCommittee(@Param("designationId") Integer designationId,
                                              @Param("isCommittee") String isCommittee);
+
+    @Modifying(clearAutomatically = true)
+    @Query(
+            value = """
+                    DELETE FROM DA_LIMITS_TEMP
+                    WHERE DESIGNATION_ID = :designationId
+                    """,
+            nativeQuery = true
+    )
+    void deleteByDesignationId(@Param("designationId") Integer designationId);
 }
