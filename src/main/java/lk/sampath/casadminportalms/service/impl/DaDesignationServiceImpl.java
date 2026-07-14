@@ -9,11 +9,13 @@ import lk.sampath.casadminportalms.dto.dadesignation.*;
 import lk.sampath.casadminportalms.dto.userSession.UserContext;
 import lk.sampath.casadminportalms.entity.daDesignation.DADesignationData;
 import lk.sampath.casadminportalms.entity.daDesignation.DALimit;
+import lk.sampath.casadminportalms.entity.daDesignation.DALimitAud;
 import lk.sampath.casadminportalms.entity.daDesignation.DALimitTemp;
 import lk.sampath.casadminportalms.entity.daDesignation.DATableHeader;
 import lk.sampath.casadminportalms.enums.*;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.repository.daDesignation.DADesignationRepository;
+import lk.sampath.casadminportalms.repository.daDesignation.DALimitAudRepository;
 import lk.sampath.casadminportalms.repository.daDesignation.DALimitHeadingRepository;
 import lk.sampath.casadminportalms.repository.daDesignation.DALimitRepository;
 import lk.sampath.casadminportalms.repository.daDesignation.DALimitTempRepository;
@@ -45,11 +47,18 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
     private final DALimitRepository daLimitRepository;
 
-    public DaDesignationServiceImpl(DALimitHeadingRepository daLimitHeadingRepository, DALimitTempRepository daLimitTempRepository, DADesignationRepository daDesignationMasterRepository, DALimitRepository daLimitRepository) {
+    private final DALimitAudRepository daLimitAudRepository;
+
+    public DaDesignationServiceImpl(DALimitHeadingRepository daLimitHeadingRepository,
+                                    DALimitTempRepository daLimitTempRepository,
+                                    DADesignationRepository daDesignationMasterRepository,
+                                    DALimitRepository daLimitRepository,
+                                    DALimitAudRepository daLimitAudRepository) {
         this.daLimitHeadingRepository = daLimitHeadingRepository;
         this.daLimitTempRepository = daLimitTempRepository;
         this.daDesignationMasterRepository = daDesignationMasterRepository;
         this.daLimitRepository = daLimitRepository;
+        this.daLimitAudRepository = daLimitAudRepository;
     }
 
     @Override
@@ -495,7 +504,8 @@ public class DaDesignationServiceImpl implements DaDesignationService {
             master.setApprovedBy(username);
             master.setModifiedBy(username);
             master.setLastModifiedDate(now);
-            daLimitRepository.save(master);
+            DALimit savedMaster = daLimitRepository.save(master);
+            saveDaLimitAudit(savedMaster);
         }
 
         daLimitTempRepository.deleteByDesignationId(designation.getId());
@@ -510,6 +520,32 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
     private String buildLimitKey(String isCommittee, Integer columnId) {
         return (isCommittee == null ? "" : isCommittee.trim().toUpperCase(Locale.ROOT)) + "|" + columnId;
+    }
+
+    private void saveDaLimitAudit(DALimit daLimit) {
+        if (daLimit == null || daLimit.getDaLimitsId() == null) {
+            return;
+        }
+
+        DALimitAud audit = new DALimitAud();
+        audit.setId(daLimitAudRepository.getCurrentSequenceValue());
+        audit.setDaLimitsId(daLimit.getDaLimitsId());
+        audit.setDesignationId(daLimit.getDesignationId());
+        audit.setColumnId(daLimit.getColumnId());
+        audit.setRiskValue(daLimit.getRiskValue());
+        audit.setStatus(daLimit.getStatus());
+        audit.setAuthorizerDisplayName(daLimit.getAuthorizerDisplayName());
+        audit.setRiskRating(daLimit.getRiskRating());
+        audit.setIsCommittee(daLimit.getIsCommittee());
+        audit.setApproveStatus(daLimit.getApproveStatus());
+        audit.setApprovedDate(daLimit.getApprovedDate());
+        audit.setApprovedBy(daLimit.getApprovedBy());
+        audit.setCreatedBy(daLimit.getCreatedBy());
+        audit.setCreatedDate(daLimit.getCreatedDate() != null ? daLimit.getCreatedDate() : new Date());
+        audit.setModifiedBy(daLimit.getModifiedBy());
+        audit.setLastModifiedDate(daLimit.getLastModifiedDate());
+        daLimitAudRepository.save(audit);
+        log.info("Saved DA limit audit for DA_LIMITS_ID={}", daLimit.getDaLimitsId());
     }
 
     private void rejectTempLimits(List<DALimitTemp> tempLimits,
