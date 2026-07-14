@@ -432,7 +432,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<StandardResponse<DADesignationSaveResponse>> approveRejectDaDesignationLimits(
+    public ResponseEntity<StandardResponse<DADesignationBulkSaveResponse>> approveRejectDaDesignationLimits(
             ApproveRejectRQ request) throws ApiRequestException {
         log.info("START : approveRejectDaDesignationLimits | request={}", request);
 
@@ -465,9 +465,9 @@ public class DaDesignationServiceImpl implements DaDesignationService {
             throw new ApiRequestException("Unknown approval status: " + approveStatus);
         }
 
-        DADesignationSaveResponse saveResponse = buildApproveRejectResponse(designation, approveStatus);
-        StandardResponse<DADesignationSaveResponse> response =
-                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), saveResponse);
+        DADesignationBulkSaveResponse bulkResponse = buildApproveRejectBulkResponse(designation, approveStatus);
+        StandardResponse<DADesignationBulkSaveResponse> response =
+                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), bulkResponse);
         log.info("END : approveRejectDaDesignationLimits | designationId={}, status={}", designationId, approveStatus);
         return ResponseEntity.ok(response);
     }
@@ -530,27 +530,68 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         daDesignationMasterRepository.saveAndFlush(designation);
     }
 
-    private DADesignationSaveResponse buildApproveRejectResponse(DADesignationMasterData designation,
-                                                                MasterDataApproveStatus approveStatus) {
+    private DADesignationBulkSaveResponse buildApproveRejectBulkResponse(DADesignationMasterData designation,
+                                                                         MasterDataApproveStatus approveStatus) {
+        DADesignationBulkSaveResponse bulkResponse = new DADesignationBulkSaveResponse();
+
+        String committeeFlag = AppsConstants.YesNo.Y.name();
+        String individualFlag = AppsConstants.YesNo.N.name();
+
+        Map<String, Double> committeeValues = loadValuesForApproveReject(designation.getId(), committeeFlag, approveStatus);
+        Map<String, Double> individualValues = loadValuesForApproveReject(designation.getId(), individualFlag, approveStatus);
+
+        if (!committeeValues.isEmpty()) {
+            bulkResponse.getCommittee().add(
+                    buildRowResponse(designation, DaTableType.COMMITTEE, committeeFlag, approveStatus.name(), committeeValues));
+        }
+        if (!individualValues.isEmpty()) {
+            bulkResponse.getIndividual().add(
+                    buildRowResponse(designation, DaTableType.INDIVIDUAL, individualFlag, approveStatus.name(), individualValues));
+        }
+
+        // If no split values found, still return designation under both empty lists only when nothing exists.
+        if (bulkResponse.getCommittee().isEmpty() && bulkResponse.getIndividual().isEmpty()) {
+            bulkResponse.getCommittee().add(
+                    buildRowResponse(designation, DaTableType.COMMITTEE, committeeFlag, approveStatus.name(), new LinkedHashMap<>()));
+        }
+
+        return bulkResponse;
+    }
+
+    private Map<String, Double> loadValuesForApproveReject(Integer designationId,
+                                                           String isCommittee,
+                                                           MasterDataApproveStatus approveStatus) {
+        Map<String, Double> values = new LinkedHashMap<>();
+        if (MasterDataApproveStatus.APPROVED.equals(approveStatus)) {
+            daLimitRepository
+                    .findAllByDesignationIdAndIsCommitteeAndStatus(designationId, isCommittee, AppsConstants.Status.ACT)
+                    .stream()
+                    .sorted(Comparator.comparing(DALimit::getColumnId, Comparator.nullsLast(Integer::compareTo)))
+                    .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
+        } else {
+            daLimitTempRepository
+                    .findAllByDesignationIdAndIsCommitteeAndStatus(designationId, isCommittee, AppsConstants.Status.ACT)
+                    .stream()
+                    .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
+                    .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
+        }
+        return values;
+    }
+
+    private DADesignationSaveResponse buildRowResponse(DADesignationMasterData designation,
+                                                       DaTableType tableType,
+                                                       String isCommittee,
+                                                       String status,
+                                                       Map<String, Double> values) {
         DADesignationSaveResponse response = new DADesignationSaveResponse();
         response.setDesignationId(designation.getId());
         response.setDesignationCode(designation.getDesignationCode());
         response.setDesignation(designation.getDesignation());
         response.setDescription(designation.getDescription());
+        response.setTableType(tableType.name());
+        response.setIsCommittee(isCommittee);
         response.setDisplayOrder(designation.getDisplayOrder());
-        response.setStatus(approveStatus.name());
-        response.setIsCommittee(designation.getIsCommittee());
-
-        Map<String, Double> values = new LinkedHashMap<>();
-        if (MasterDataApproveStatus.APPROVED.equals(approveStatus)) {
-            daLimitRepository.findAllByDesignationIdAndStatus(designation.getId(), AppsConstants.Status.ACT).stream()
-                    .sorted(Comparator.comparing(DALimit::getColumnId, Comparator.nullsLast(Integer::compareTo)))
-                    .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
-        } else {
-            daLimitTempRepository.findAllByDesignationId(designation.getId()).stream()
-                    .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
-                    .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
-        }
+        response.setStatus(status);
         response.setValues(values);
         return response;
     }

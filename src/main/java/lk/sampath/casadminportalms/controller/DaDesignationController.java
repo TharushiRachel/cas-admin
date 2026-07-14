@@ -5,7 +5,6 @@ import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.dadesignation.DADesignationBulkSaveRequest;
 import lk.sampath.casadminportalms.dto.dadesignation.DADesignationBulkSaveResponse;
 import lk.sampath.casadminportalms.dto.dadesignation.DADesignationCodeDTO;
-import lk.sampath.casadminportalms.dto.dadesignation.DADesignationSaveResponse;
 import lk.sampath.casadminportalms.dto.dadesignation.DATableHeaderDTO;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.service.DaDesignationService;
@@ -48,7 +47,7 @@ public class DaDesignationController {
     }
 
     @PostMapping("/approveReject")
-    public ResponseEntity<StandardResponse<DADesignationSaveResponse>> approveRejectDaDesignationLimits(
+    public ResponseEntity<StandardResponse<DADesignationBulkSaveResponse>> approveRejectDaDesignationLimits(
             @Validated @RequestBody ApproveRejectRQ request) throws ApiRequestException {
         return daDesignationService.approveRejectDaDesignationLimits(request);
     }
