@@ -1,6 +1,5 @@
 package lk.sampath.casadminportalms.repository.daDesignation;
 
-import lk.sampath.casadminportalms.entity.daDesignation.DALimit;
 import lk.sampath.casadminportalms.entity.daDesignation.DALimitTemp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -51,16 +50,16 @@ public interface DALimitTempRepository extends JpaRepository<DALimitTemp, Intege
     @Query(
             value = """
                     SELECT *
-                    FROM DA_LIMITS
+                    FROM DA_LIMITS_TEMP
                     WHERE DESIGNATION_ID = :designationId
                       AND IS_COMMITTEE = :isCommittee
                       AND STATUS = :status
                     """,
             nativeQuery = true
     )
-    List<DALimit> findAllByDesignationIdAndIsCommitteeAndStatus(@Param("designationId") Integer designationId,
-                                                                @Param("isCommittee") String isCommittee,
-                                                                @Param("status") String status);
+    List<DALimitTemp> findAllByDesignationIdAndIsCommitteeAndStatus(@Param("designationId") Integer designationId,
+                                                                    @Param("isCommittee") String isCommittee,
+                                                                    @Param("status") String status);
 
 }
 
