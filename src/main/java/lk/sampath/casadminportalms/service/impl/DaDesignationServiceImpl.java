@@ -5,26 +5,15 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
-import lk.sampath.casadminportalms.dto.dadesignation.DAColumnValueRequest;
-import lk.sampath.casadminportalms.dto.dadesignation.DADesignationBulkSaveRequest;
-import lk.sampath.casadminportalms.dto.dadesignation.DADesignationBulkSaveResponse;
-import lk.sampath.casadminportalms.dto.dadesignation.DADesignationCodeDTO;
-import lk.sampath.casadminportalms.dto.dadesignation.DADesignationSaveRequest;
-import lk.sampath.casadminportalms.dto.dadesignation.DADesignationSaveResponse;
-import lk.sampath.casadminportalms.dto.dadesignation.DAHeaderResponse;
-import lk.sampath.casadminportalms.dto.dadesignation.DATableHeaderDTO;
-import lk.sampath.casadminportalms.dto.dadesignation.DATableHeadingResponse;
+import lk.sampath.casadminportalms.dto.dadesignation.*;
 import lk.sampath.casadminportalms.dto.userSession.UserContext;
-import lk.sampath.casadminportalms.entity.daDesignation.DADesignationMasterData;
+import lk.sampath.casadminportalms.entity.daDesignation.DADesignationData;
 import lk.sampath.casadminportalms.entity.daDesignation.DALimit;
 import lk.sampath.casadminportalms.entity.daDesignation.DALimitTemp;
 import lk.sampath.casadminportalms.entity.daDesignation.DATableHeader;
-import lk.sampath.casadminportalms.enums.AppsConstants;
-import lk.sampath.casadminportalms.enums.DaTableType;
-import lk.sampath.casadminportalms.enums.ErrorEnums;
-import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
+import lk.sampath.casadminportalms.enums.*;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
-import lk.sampath.casadminportalms.repository.daDesignation.DADesignationMasterRepository;
+import lk.sampath.casadminportalms.repository.daDesignation.DADesignationRepository;
 import lk.sampath.casadminportalms.repository.daDesignation.DALimitHeadingRepository;
 import lk.sampath.casadminportalms.repository.daDesignation.DALimitRepository;
 import lk.sampath.casadminportalms.repository.daDesignation.DALimitTempRepository;
@@ -45,23 +34,21 @@ import java.util.stream.Collectors;
 @Log4j2
 public class DaDesignationServiceImpl implements DaDesignationService {
 
-    private static final String STATUS_ACT = "ACT";
-
     @Value("${load.designations}")
     private String loadDesignations;
 
     private final DALimitHeadingRepository daLimitHeadingRepository;
-    private final DADesignationMasterRepository daDesignationMasterRepository;
+
     private final DALimitTempRepository daLimitTempRepository;
+
+    private final DADesignationRepository daDesignationMasterRepository;
+
     private final DALimitRepository daLimitRepository;
 
-    public DaDesignationServiceImpl(DALimitHeadingRepository daLimitHeadingRepository,
-                                    DADesignationMasterRepository daDesignationMasterRepository,
-                                    DALimitTempRepository daLimitTempRepository,
-                                    DALimitRepository daLimitRepository) {
+    public DaDesignationServiceImpl(DALimitHeadingRepository daLimitHeadingRepository, DALimitTempRepository daLimitTempRepository, DADesignationRepository daDesignationMasterRepository, DALimitRepository daLimitRepository) {
         this.daLimitHeadingRepository = daLimitHeadingRepository;
-        this.daDesignationMasterRepository = daDesignationMasterRepository;
         this.daLimitTempRepository = daLimitTempRepository;
+        this.daDesignationMasterRepository = daDesignationMasterRepository;
         this.daLimitRepository = daLimitRepository;
     }
 
@@ -224,7 +211,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
         DADesignationBulkSaveResponse bulkResponse = new DADesignationBulkSaveResponse();
         // Same designationCode (e.g. MD) in committee + individual reuses one DA_DESIGNATION row.
-        Map<String, DADesignationMasterData> designationByCode = new HashMap<>();
+        Map<String, DADesignationData> designationByCode = new HashMap<>();
 
         if (!CollectionUtils.isEmpty(request.getCommittee())) {
             for (DADesignationSaveRequest row : request.getCommittee()) {
@@ -249,7 +236,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
     private DADesignationSaveResponse saveOrUpdateSingleRow(DADesignationSaveRequest request,
                                                             DaTableType tableType,
-                                                            Map<String, DADesignationMasterData> designationByCode) {
+                                                            Map<String, DADesignationData> designationByCode) {
         validateSaveRequest(request, tableType);
 
         String dbTableType = tableType.name();
@@ -260,8 +247,9 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         Map<Integer, DATableHeader> columnHeadersBySubId = loadValidColumns(dbTableType);
         validateColumnValues(request.getColumnValues(), columnHeadersBySubId, tableType);
 
-        DADesignationMasterData designation = upsertDesignation(request, designationByCode);
+        DADesignationData designation = upsertDesignation(request, designationByCode);
         replaceLimitTemps(designation, isCommittee, request.getColumnValues(), columnHeadersBySubId);
+        designation = daDesignationMasterRepository.saveAndFlush(designation);
         cacheDesignation(designationByCode, designation);
 
         return buildSaveResponse(designation, tableType, isCommittee);
@@ -282,12 +270,12 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         }
     }
 
-    private DADesignationMasterData upsertDesignation(DADesignationSaveRequest request,
-                                                     Map<String, DADesignationMasterData> designationByCode) {
+    private DADesignationData upsertDesignation(DADesignationSaveRequest request,
+                                                Map<String, DADesignationData> designationByCode) {
         Date now = new Date();
         String username = UserContext.getUsername();
 
-        DADesignationMasterData designation = resolveExistingDesignation(request, designationByCode);
+        DADesignationData designation = resolveExistingDesignation(request, designationByCode);
         boolean isNew = designation.getId() == null;
 
         if (StringUtils.hasText(request.getDesignation())) {
@@ -304,7 +292,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         }
 
         // Master is shared across committee/individual; table type lives on DA_LIMITS_TEMP.IS_COMMITTEE.
-        designation.setStatus(STATUS_ACT);
+        designation.setStatus(Status.ACT);
         designation.setApproveStatus(MasterDataApproveStatus.PENDING.name());
         designation.setDisplayOrder(
                 resolveDisplayOrder(request.getDisplayOrder(), designation.getDisplayOrder()));
@@ -321,10 +309,10 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         return designation;
     }
 
-    private DADesignationMasterData resolveExistingDesignation(DADesignationSaveRequest request,
-                                                              Map<String, DADesignationMasterData> designationByCode) {
+    private DADesignationData resolveExistingDesignation(DADesignationSaveRequest request,
+                                                         Map<String, DADesignationData> designationByCode) {
         if (request.getDesignationId() != null) {
-            DADesignationMasterData byId = daDesignationMasterRepository.findById(request.getDesignationId())
+            DADesignationData byId = daDesignationMasterRepository.findById(request.getDesignationId())
                     .orElseThrow(() -> new ApiRequestException(
                             "DA Designation with id " + request.getDesignationId() + " does not exist"));
             cacheDesignation(designationByCode, byId);
@@ -333,20 +321,20 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
         if (StringUtils.hasText(request.getDesignationCode())) {
             String codeKey = normalizeCode(request.getDesignationCode());
-            DADesignationMasterData cached = designationByCode.get(codeKey);
+            DADesignationData cached = designationByCode.get(codeKey);
             if (cached != null) {
                 return cached;
             }
             return daDesignationMasterRepository
-                    .findByDesignationCodeAndStatus(request.getDesignationCode().trim(), STATUS_ACT)
-                    .orElseGet(DADesignationMasterData::new);
+                    .findByDesignationCodeAndStatus(request.getDesignationCode().trim(), Status.ACT.name())
+                    .orElseGet(DADesignationData::new);
         }
 
-        return new DADesignationMasterData();
+        return new DADesignationData();
     }
 
-    private void cacheDesignation(Map<String, DADesignationMasterData> designationByCode,
-                                  DADesignationMasterData designation) {
+    private void cacheDesignation(Map<String, DADesignationData> designationByCode,
+                                  DADesignationData designation) {
         if (designation != null && StringUtils.hasText(designation.getDesignationCode())) {
             designationByCode.put(normalizeCode(designation.getDesignationCode()), designation);
         }
@@ -363,8 +351,8 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         if (existingOrder != null) {
             return existingOrder;
         }
-        return daDesignationMasterRepository.findAllByStatus(STATUS_ACT).stream()
-                .map(DADesignationMasterData::getDisplayOrder)
+        return daDesignationMasterRepository.findAllByStatus(Status.ACT.name()).stream()
+                .map(DADesignationData::getDisplayOrder)
                 .filter(Objects::nonNull)
                 .max(Integer::compareTo)
                 .orElse(0) + 1;
@@ -401,7 +389,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         }
     }
 
-    private void replaceLimitTemps(DADesignationMasterData designation,
+    private void replaceLimitTemps(DADesignationData designation,
                                    String isCommittee,
                                    List<DAColumnValueRequest> columnValues,
                                    Map<Integer, DATableHeader> columnHeadersBySubId) {
@@ -444,7 +432,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         }
 
         Integer designationId = request.getApproveRejectDataID();
-        DADesignationMasterData designation = daDesignationMasterRepository.findById(designationId)
+        DADesignationData designation = daDesignationMasterRepository.findById(designationId)
                 .orElseThrow(() -> new ApiRequestException(
                         "DA Designation with id " + designationId + " does not exist"));
 
@@ -473,16 +461,29 @@ public class DaDesignationServiceImpl implements DaDesignationService {
     }
 
     private void approveTempLimits(List<DALimitTemp> tempLimits,
-                                   DADesignationMasterData designation,
+                                   DADesignationData designation,
                                    Date now,
                                    String username) {
-        // Replace any previous master limits for this designation.
-        daLimitRepository.deleteByDesignationId(designation.getId());
+        List<DALimit> existingMasters = daLimitRepository
+                .findAllByDesignationIdAndStatus(designation.getId(), AppsConstants.Status.ACT.name());
+        Map<String, DALimit> existingByKey = new HashMap<>();
+        for (DALimit existing : existingMasters) {
+            existingByKey.put(buildLimitKey(existing.getIsCommittee(), existing.getColumnId()), existing);
+        }
 
         for (DALimitTemp temp : tempLimits) {
-            DALimit master = new DALimit();
-            master.setDaLimitsId(temp.getDaLimitsId());
-            master.setDesignationId(designation.getId());
+            String key = buildLimitKey(temp.getIsCommittee(), temp.getColumnId());
+            DALimit master = existingByKey.get(key);
+            boolean isNew = (master == null);
+
+            if (isNew) {
+                master = new DALimit();
+                master.setDaLimitsId(temp.getDaLimitsId());
+                master.setDesignationId(designation.getId());
+                master.setCreatedBy(temp.getCreatedBy());
+                master.setCreatedDate(temp.getCreatedDate());
+            }
+
             master.setColumnId(temp.getColumnId());
             master.setRiskValue(temp.getRiskValue());
             master.setRiskRating(temp.getRiskRating());
@@ -492,8 +493,6 @@ public class DaDesignationServiceImpl implements DaDesignationService {
             master.setApproveStatus(MasterDataApproveStatus.APPROVED);
             master.setApprovedDate(now);
             master.setApprovedBy(username);
-            master.setCreatedBy(temp.getCreatedBy());
-            master.setCreatedDate(temp.getCreatedDate());
             master.setModifiedBy(username);
             master.setLastModifiedDate(now);
             daLimitRepository.save(master);
@@ -509,8 +508,12 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         daDesignationMasterRepository.saveAndFlush(designation);
     }
 
+    private String buildLimitKey(String isCommittee, Integer columnId) {
+        return (isCommittee == null ? "" : isCommittee.trim().toUpperCase(Locale.ROOT)) + "|" + columnId;
+    }
+
     private void rejectTempLimits(List<DALimitTemp> tempLimits,
-                                  DADesignationMasterData designation,
+                                  DADesignationData designation,
                                   Date now,
                                   String username) {
         for (DALimitTemp temp : tempLimits) {
@@ -530,7 +533,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         daDesignationMasterRepository.saveAndFlush(designation);
     }
 
-    private DADesignationBulkSaveResponse buildApproveRejectBulkResponse(DADesignationMasterData designation,
+    private DADesignationBulkSaveResponse buildApproveRejectBulkResponse(DADesignationData designation,
                                                                          MasterDataApproveStatus approveStatus) {
         DADesignationBulkSaveResponse bulkResponse = new DADesignationBulkSaveResponse();
 
@@ -549,7 +552,6 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                     buildRowResponse(designation, DaTableType.INDIVIDUAL, individualFlag, approveStatus.name(), individualValues));
         }
 
-        // If no split values found, still return designation under both empty lists only when nothing exists.
         if (bulkResponse.getCommittee().isEmpty() && bulkResponse.getIndividual().isEmpty()) {
             bulkResponse.getCommittee().add(
                     buildRowResponse(designation, DaTableType.COMMITTEE, committeeFlag, approveStatus.name(), new LinkedHashMap<>()));
@@ -562,41 +564,42 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                                                            String isCommittee,
                                                            MasterDataApproveStatus approveStatus) {
         Map<String, Double> values = new LinkedHashMap<>();
+
         if (MasterDataApproveStatus.APPROVED.equals(approveStatus)) {
-            daLimitRepository
-                    .findAllByDesignationIdAndIsCommitteeAndStatus(designationId, isCommittee, AppsConstants.Status.ACT)
-                    .stream()
+                daLimitRepository.findAllByDesignationIdAndStatus(designationId, AppsConstants.Status.ACT.name()).stream()
+                    .filter(limit -> isCommittee.equalsIgnoreCase(limit.getIsCommittee()))
                     .sorted(Comparator.comparing(DALimit::getColumnId, Comparator.nullsLast(Integer::compareTo)))
                     .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
         } else {
-            daLimitTempRepository
-                    .findAllByDesignationIdAndIsCommitteeAndStatus(designationId, isCommittee, AppsConstants.Status.ACT)
-                    .stream()
-                    .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
+            daLimitTempRepository.findAllByDesignationId(designationId).stream()
+                .filter(limit -> isCommittee.equalsIgnoreCase(limit.getIsCommittee()))
+                .filter(limit -> AppsConstants.Status.ACT.equals(limit.getStatus()))
+                .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
                     .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
         }
+
         return values;
     }
 
-    private DADesignationSaveResponse buildRowResponse(DADesignationMasterData designation,
+    private DADesignationSaveResponse buildRowResponse(DADesignationData designation,
                                                        DaTableType tableType,
                                                        String isCommittee,
                                                        String status,
                                                        Map<String, Double> values) {
-        DADesignationSaveResponse response = new DADesignationSaveResponse();
-        response.setDesignationId(designation.getId());
-        response.setDesignationCode(designation.getDesignationCode());
-        response.setDesignation(designation.getDesignation());
-        response.setDescription(designation.getDescription());
-        response.setTableType(tableType.name());
-        response.setIsCommittee(isCommittee);
-        response.setDisplayOrder(designation.getDisplayOrder());
-        response.setStatus(status);
-        response.setValues(values);
-        return response;
+        DADesignationSaveResponse row = new DADesignationSaveResponse();
+        row.setDesignationId(designation.getId());
+        row.setDesignationCode(designation.getDesignationCode());
+        row.setDesignation(designation.getDesignation());
+        row.setDescription(designation.getDescription());
+        row.setTableType(tableType.name());
+        row.setIsCommittee(isCommittee);
+        row.setDisplayOrder(designation.getDisplayOrder());
+        row.setStatus(status);
+        row.setValues(values);
+        return row;
     }
 
-    private DADesignationSaveResponse buildSaveResponse(DADesignationMasterData designation,
+    private DADesignationSaveResponse buildSaveResponse(DADesignationData designation,
                                                         DaTableType tableType,
                                                         String isCommittee) {
         DADesignationSaveResponse response = new DADesignationSaveResponse();
@@ -611,12 +614,17 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
         Map<String, Double> values = new LinkedHashMap<>();
         daLimitTempRepository
-                .findAllByDesignationIdAndIsCommitteeAndStatus(
-                        designation.getId(), isCommittee, AppsConstants.Status.ACT)
+        .findAllByDesignationIdAndIsCommitteeAndStatus(
+            designation.getId(), isCommittee, AppsConstants.Status.ACT.name())
                 .stream()
-                .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
+                .sorted(Comparator.comparing(
+                        limit -> limit.getColumnId(),
+                        Comparator.nullsLast(Integer::compareTo)))
                 .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
+
         response.setValues(values);
         return response;
     }
+
+
 }

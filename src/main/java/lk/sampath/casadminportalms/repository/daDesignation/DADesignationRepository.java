@@ -1,6 +1,6 @@
 package lk.sampath.casadminportalms.repository.daDesignation;
 
-import lk.sampath.casadminportalms.entity.daDesignation.DADesignationMasterData;
+import lk.sampath.casadminportalms.entity.daDesignation.DADesignationData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,8 +9,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+
 @Repository
-public interface DADesignationMasterRepository extends JpaRepository<DADesignationMasterData, Integer> {
+public interface DADesignationRepository extends JpaRepository<DADesignationData,Integer> {
 
     @Query(
             value = """
@@ -21,7 +22,7 @@ public interface DADesignationMasterRepository extends JpaRepository<DADesignati
                     """,
             nativeQuery = true
     )
-    List<DADesignationMasterData> findAllByStatus(@Param("status") String status);
+    List<DADesignationData> findAllByStatus(@Param("status") String status);
 
     @Query(
             value = """
@@ -33,7 +34,7 @@ public interface DADesignationMasterRepository extends JpaRepository<DADesignati
                     """,
             nativeQuery = true
     )
-    List<DADesignationMasterData> findAllByIsCommitteeAndStatusOrderByDisplayOrderAsc(
+    List<DADesignationData> findAllByIsCommitteeAndStatusOrderByDisplayOrderAsc(
             @Param("isCommittee") String isCommittee,
             @Param("status") String status);
 
@@ -50,7 +51,7 @@ public interface DADesignationMasterRepository extends JpaRepository<DADesignati
                     """,
             nativeQuery = true
     )
-    Optional<DADesignationMasterData> findByDesignationCodeAndStatus(
+    Optional<DADesignationData> findByDesignationCodeAndStatus(
             @Param("designationCode") String designationCode,
             @Param("status") String status);
 }

@@ -23,7 +23,7 @@ public class DALimitTemp extends ApprovableEntity {
     @JoinColumn(name = "DESIGNATION_ID", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private DADesignationMasterData designation;
+    private DADesignationData designation;
 
     @Column(name = "COLUMN_ID")
     private Integer columnId;
@@ -43,4 +43,5 @@ public class DALimitTemp extends ApprovableEntity {
 
     @Column(name = "IS_COMMITTEE")
     private String isCommittee;
+
 }

@@ -17,8 +17,5 @@ public class DADesignationSaveResponse {
     private Integer displayOrder;
     private String status;
 
-    /**
-     * subId (as string) -> riskValue for each saved column.
-     */
     private Map<String, Double> values = new LinkedHashMap<>();
 }

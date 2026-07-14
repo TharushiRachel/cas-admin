@@ -32,8 +32,6 @@ public interface CreditFacilityTypeRepository extends JpaRepository<CreditFacili
 
     boolean existsByFacilityTypeName(String facilityTypeName);
 
-    boolean existsByCreditFacilityTypeID(Integer creditFacilityTypeID);
-
     @Query( value = "SELECT * FROM T_CREDIT_FACILITY_TYPE  WHERE FACILITY_TYPE_NAME = :facilityTypeName", nativeQuery = true)
     CreditFacilityType findCreditFacilityTypeByName( String facilityTypeName);
 

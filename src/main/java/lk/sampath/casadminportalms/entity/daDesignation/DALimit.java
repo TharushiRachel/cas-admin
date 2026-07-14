@@ -13,9 +13,6 @@ import lombok.Setter;
 @Table(name = "DA_LIMITS")
 public class DALimit extends ApprovableEntity {
 
-    /**
-     * Same ID as DA_LIMITS_TEMP.DA_LIMITS_ID (assigned on approve, no sequence).
-     */
     @Id
     @Column(name = "DA_LIMITS_ID")
     private Integer daLimitsId;
@@ -41,4 +38,6 @@ public class DALimit extends ApprovableEntity {
 
     @Column(name = "IS_COMMITTEE")
     private String isCommittee;
+
+
 }

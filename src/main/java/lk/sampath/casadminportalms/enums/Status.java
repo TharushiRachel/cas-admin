@@ -3,8 +3,8 @@ package lk.sampath.casadminportalms.enums;
 import org.springframework.util.StringUtils;
 
 public enum Status {
-        ACT("Active", "A"),
-        INA("Inactive", "I");
+        ACT("ACT", "A"),
+        INA("INA", "I");
 
         private String label;
         private String value;
