@@ -9,13 +9,10 @@ import java.util.List;
 public class DADesignationSaveRequest {
 
     /**
-     * Required. Stored as DESIGNATION_ID on DA_LIMITS_TEMP (no DA_DESIGNATION write).
+     * Optional. When provided, updates existing DA_DESIGNATION row.
      */
     private Integer designationId;
 
-    /**
-     * Optional metadata for API response only (not persisted on DA_LIMITS_TEMP).
-     */
     private String designationCode;
     private String designation;
     private String description;

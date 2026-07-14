@@ -3,8 +3,10 @@ package lk.sampath.casadminportalms.entity.daDesignation;
 import jakarta.persistence.*;
 import lk.sampath.casadminportalms.entity.common.ApprovableEntity;
 import lk.sampath.casadminportalms.enums.AppsConstants;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 
 @Entity
@@ -12,14 +14,18 @@ import lombok.Setter;
 @Setter
 @Table(name = "DA_LIMITS_TEMP")
 public class DALimitTemp extends ApprovableEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_DA_LIMITS_TEMP")
     @SequenceGenerator(name = "SEQ_DA_LIMITS_TEMP", sequenceName = "SEQ_DA_LIMITS_TEMP", allocationSize = 1)
     @Column(name = "DA_LIMITS_ID")
     private Integer daLimitsId;
 
-    @Column(name = "DESIGNATION_ID")
-    private Integer designationId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "DESIGNATION_ID", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private DADesignationMasterData designation;
 
     @Column(name = "COLUMN_ID")
     private Integer columnId;
@@ -39,5 +45,4 @@ public class DALimitTemp extends ApprovableEntity {
 
     @Column(name = "IS_COMMITTEE")
     private String isCommittee;
-
 }

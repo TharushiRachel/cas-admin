@@ -13,18 +13,29 @@ import java.util.List;
 @Repository
 public interface DALimitTempRepository extends JpaRepository<DALimitTemp, Integer> {
 
-    List<DALimitTemp> findAllByDesignationIdAndStatus(Integer designationId, AppsConstants.Status status);
+    @Query("select l from DALimitTemp l where l.designation.id = :designationId and l.status = :status")
+    List<DALimitTemp> findAllByDesignationIdAndStatus(@Param("designationId") Integer designationId,
+                                                      @Param("status") AppsConstants.Status status);
 
-    DALimitTemp findByDesignationIdAndColumnIdAndStatus(Integer designationId, Integer columnId, AppsConstants.Status status);
+    @Query("select l from DALimitTemp l where l.designation.id = :designationId and l.columnId = :columnId and l.status = :status")
+    DALimitTemp findByDesignationIdAndColumnIdAndStatus(@Param("designationId") Integer designationId,
+                                                        @Param("columnId") Integer columnId,
+                                                        @Param("status") AppsConstants.Status status);
 
     List<DALimitTemp> findAllByStatus(AppsConstants.Status status);
 
-    List<DALimitTemp> findAllByDesignationIdAndIsCommitteeAndStatus(Integer designationId,
-                                                                    String isCommittee,
-                                                                    AppsConstants.Status status);
+    @Query("""
+            select l from DALimitTemp l
+            where l.designation.id = :designationId
+              and l.isCommittee = :isCommittee
+              and l.status = :status
+            """)
+    List<DALimitTemp> findAllByDesignationIdAndIsCommitteeAndStatus(@Param("designationId") Integer designationId,
+                                                                    @Param("isCommittee") String isCommittee,
+                                                                    @Param("status") AppsConstants.Status status);
 
     @Modifying
-    @Query("delete from DALimitTemp l where l.designationId = :designationId and l.isCommittee = :isCommittee")
+    @Query("delete from DALimitTemp l where l.designation.id = :designationId and l.isCommittee = :isCommittee")
     void deleteByDesignationIdAndIsCommittee(@Param("designationId") Integer designationId,
                                              @Param("isCommittee") String isCommittee);
 }
