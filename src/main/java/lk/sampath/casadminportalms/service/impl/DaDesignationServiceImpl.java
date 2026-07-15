@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @Service
@@ -654,71 +655,30 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<DATableDataResponse>> getDaTable() throws ApiRequestException {
+    public ResponseEntity<StandardResponse<DATableApprovalResponse>> getDaTable() throws ApiRequestException {
         log.info("START : DaDesignationServiceImpl | getDaTable");
 
-        DATableHeaderDTO headers = buildHeaderResponse();
         List<DADesignationData> designations =
                 daDesignationMasterRepository.findAllByStatus(Status.ACT.name());
 
-        String committeeFlag = AppsConstants.YesNo.Y.name();
-        String individualFlag = AppsConstants.YesNo.N.name();
+        DATableApprovalResponse approvalResponse = new DATableApprovalResponse();
+        approvalResponse.setApproved(buildTableData(designations, false, this::loadApprovedValues));
+        approvalResponse.setPending(buildTableData(designations, false, this::loadPendingValues));
+        populateDesignationLists(approvalResponse, designations);
 
-        DATableDataResponse tableData = new DATableDataResponse();
-        tableData.setCommitteeTableHeaders(headers.getCommitteeTableHeaders());
-        tableData.setIndividualTableHeaders(headers.getIndividualTableHeaders());
-
-        for (DADesignationData designation : designations) {
-            Map<Integer, Double> committeeValues = loadTableValues(designation.getId(), committeeFlag);
-            if (!committeeValues.isEmpty()) {
-                tableData.getCommitteeRows().add(
-                        buildRowResponseForTable(designation, DaTableType.COMMITTEE, committeeFlag,
-                                designation.getApproveStatus(), committeeValues));
-            }
-
-            Map<Integer, Double> individualValues = loadTableValues(designation.getId(), individualFlag);
-            if (!individualValues.isEmpty()) {
-                tableData.getIndividualRows().add(
-                        buildRowResponseForTable(designation, DaTableType.INDIVIDUAL, individualFlag,
-                                designation.getApproveStatus(), individualValues));
-            }
-        }
-
-        tableData.getCommitteeRows().sort(Comparator.comparing(
-                DADesignationTableDTO::getDisplayOrder, Comparator.nullsLast(Integer::compareTo)));
-        tableData.getIndividualRows().sort(Comparator.comparing(
-                DADesignationTableDTO::getDisplayOrder, Comparator.nullsLast(Integer::compareTo)));
-        applyHeaderValues(tableData.getCommitteeTableHeaders(), tableData.getCommitteeRows());
-
-        StandardResponse<DATableDataResponse> response =
-                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), tableData);
-        log.info("END : getDaTable | committeeRows={}, individualRows={}",
-                tableData.getCommitteeRows().size(), tableData.getIndividualRows().size());
+        StandardResponse<DATableApprovalResponse> response =
+                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), approvalResponse);
+        log.info("END : getDaTable | committeeDesignations={}, individualDesignations={}, approvedCommitteeRows={}, pendingCommitteeRows={}",
+                approvalResponse.getCommitteeDesignationList().size(),
+                approvalResponse.getIndividualDesignationList().size(),
+                approvalResponse.getApproved().getCommitteeRows().size(),
+                approvalResponse.getPending().getCommitteeRows().size());
         return ResponseEntity.ok(response);
-    }
-
-    private DADesignationTableDTO buildRowResponseForTable(DADesignationData designation,
-                                                       DaTableType tableType,
-                                                       String isCommittee,
-                                                       MasterDataApproveStatus approveStatus,
-                                                       Map<Integer, Double> values) {
-        DADesignationTableDTO row = new DADesignationTableDTO();
-        row.setDesignationId(designation.getId());
-        row.setDesignationCode(designation.getDesignationCode());
-        row.setDesignation(designation.getDesignation());
-        row.setDescription(designation.getDescription());
-        row.setTableType(tableType.name());
-        row.setIsCommittee(isCommittee);
-        row.setDisplayOrder(designation.getDisplayOrder());
-        row.setStatus(designation.getStatus());
-        row.setApproveStatus(approveStatus);
-        row.setTableValues(values);
-        return row;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<DATableDataResponse>> getDaTableById(Integer designationId)
+    public ResponseEntity<StandardResponse<DATableApprovalResponse>> getDaTableById(Integer designationId)
             throws ApiRequestException {
         log.info("START : DaDesignationServiceImpl | getDaTableById | designationId={}", designationId);
 
@@ -730,113 +690,103 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                 .orElseThrow(() -> new ApiRequestException(
                         "DA Designation with id " + designationId + " does not exist"));
 
-        DATableHeaderDTO headers = buildHeaderResponse();
-        String committeeFlag = AppsConstants.YesNo.Y.name();
-        String individualFlag = AppsConstants.YesNo.N.name();
+        List<DADesignationData> designations = Collections.singletonList(designation);
 
-        DATableDataResponse tableData = new DATableDataResponse();
-        tableData.setCommitteeTableHeaders(headers.getCommitteeTableHeaders());
-        tableData.setIndividualTableHeaders(headers.getIndividualTableHeaders());
+        DATableApprovalResponse approvalResponse = new DATableApprovalResponse();
+        approvalResponse.setApproved(buildTableData(designations, true, this::loadApprovedValues));
+        approvalResponse.setPending(buildTableData(designations, true, this::loadPendingValues));
+        populateDesignationLists(approvalResponse, designations);
 
-        Map<Integer, Double> committeeValues = loadTableValues(designation.getId(), committeeFlag);
-        tableData.getCommitteeRows().add(
-                buildRowResponseforTable(designation, DaTableType.COMMITTEE, committeeFlag,
-                        designation.getApproveStatus(), committeeValues));
-
-        Map<Integer, Double> individualValues = loadTableValues(designation.getId(), individualFlag);
-        tableData.getIndividualRows().add(
-                buildRowResponseforTable(designation, DaTableType.INDIVIDUAL, individualFlag,
-                        designation.getApproveStatus(), individualValues));
-        applyHeaderValues(tableData.getCommitteeTableHeaders(), tableData.getCommitteeRows());
-
-        StandardResponse<DATableDataResponse> response =
-                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), tableData);
+        StandardResponse<DATableApprovalResponse> response =
+                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), approvalResponse);
         log.info("END : getDaTableById | designationId={}", designationId);
         return ResponseEntity.ok(response);
     }
 
-    private Map<Integer, Double> loadTableValues(Integer designationId, String isCommittee) {
-        Map<Integer, Double> tableValues = new LinkedHashMap<>();
+    /**
+     * Splits designations into committee/individual lists based on whether they appear
+     * in the committee or individual rows of either the approved or pending table data.
+     */
+    private void populateDesignationLists(DATableApprovalResponse approvalResponse,
+                                          List<DADesignationData> designations) {
+        Set<Integer> committeeIds = new HashSet<>();
+        Set<Integer> individualIds = new HashSet<>();
 
-        List<DALimit> masterLimits = daLimitRepository.findAllByDesignationIdAndIsCommitteeAndStatus(
-                designationId, isCommittee, AppsConstants.Status.ACT.name());
-        if (!CollectionUtils.isEmpty(masterLimits)) {
-            masterLimits.stream()
-                    .sorted(Comparator.comparing(DALimit::getColumnId, Comparator.nullsLast(Integer::compareTo)))
-                    .forEach(limit -> tableValues.put(limit.getDesignationId(), limit.getRiskValue()));
-            return tableValues;
+        for (DATableDataResponse tableData : Arrays.asList(approvalResponse.getApproved(), approvalResponse.getPending())) {
+            tableData.getCommitteeRows().stream()
+                    .map(DADesignationTableDTO::getDesignationId)
+                    .filter(Objects::nonNull)
+                    .forEach(committeeIds::add);
+            tableData.getIndividualRows().stream()
+                    .map(DADesignationTableDTO::getDesignationId)
+                    .filter(Objects::nonNull)
+                    .forEach(individualIds::add);
         }
 
-//        List<DALimitTemp> tempLimits = daLimitTempRepository.findAllByDesignationIdAndIsCommitteeAndStatus(
-//                designationId, isCommittee, AppsConstants.Status.ACT.name());
-//        tempLimits.stream()
-//                .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
-//                .forEach(limit -> tableValues.put(limit.getColumnId(), limit.getRiskValue()));
-        return tableValues;
+        String committeeFlag = AppsConstants.YesNo.Y.name();
+        String individualFlag = AppsConstants.YesNo.N.name();
+
+        List<DADesignationListDTO> committeeList = designations.stream()
+                .filter(designation -> committeeIds.contains(designation.getId()))
+                .map(designation -> new DADesignationListDTO(designation, committeeFlag))
+                .sorted(Comparator.comparing(DADesignationListDTO::getDisplayOrder, Comparator.nullsLast(Integer::compareTo)))
+                .collect(Collectors.toList());
+
+        List<DADesignationListDTO> individualList = designations.stream()
+                .filter(designation -> individualIds.contains(designation.getId()))
+                .map(designation -> new DADesignationListDTO(designation, individualFlag))
+                .sorted(Comparator.comparing(DADesignationListDTO::getDisplayOrder, Comparator.nullsLast(Integer::compareTo)))
+                .collect(Collectors.toList());
+
+        approvalResponse.setCommitteeDesignationList(committeeList);
+        approvalResponse.setIndividualDesignationList(individualList);
     }
 
-    private void applyHeaderValues(List<DATableHeadingResponse> headers,
-                                   List<DADesignationTableDTO> rows) {
-        if (CollectionUtils.isEmpty(headers) || CollectionUtils.isEmpty(rows)) {
-            return;
-        }
+    /**
+     * Builds table response. Leaf headers carry tableValues as designationId -> riskValue.
+     * Rows carry tableValues as column subId -> riskValue.
+     */
+    private DATableDataResponse buildTableData(List<DADesignationData> designations,
+                                               boolean includeEmptyRows,
+                                               BiFunction<Integer, String, Map<Integer, Double>> valuesLoader) {
+        DATableHeaderDTO headers = buildHeaderResponse();
+        DATableDataResponse tableData = new DATableDataResponse();
+        tableData.setCommitteeTableHeaders(headers.getCommitteeTableHeaders());
+        tableData.setIndividualTableHeaders(headers.getIndividualTableHeaders());
 
-        Map<Integer, DATableHeadingResponse> leafBySubId = new HashMap<>();
-        collectLeafHeaders(headers, leafBySubId);
+        Map<Integer, DATableHeadingResponse> committeeLeaves = indexLeafHeaders(tableData.getCommitteeTableHeaders());
+        Map<Integer, DATableHeadingResponse> individualLeaves = indexLeafHeaders(tableData.getIndividualTableHeaders());
 
-        for (DADesignationTableDTO row : rows) {
-            if (row == null || CollectionUtils.isEmpty(row.getTableValues())) {
-                continue;
+        String committeeFlag = AppsConstants.YesNo.Y.name();
+        String individualFlag = AppsConstants.YesNo.N.name();
+
+        for (DADesignationData designation : designations) {
+            Map<Integer, Double> committeeValues = valuesLoader.apply(designation.getId(), committeeFlag);
+            if (includeEmptyRows || !committeeValues.isEmpty()) {
+                tableData.getCommitteeRows().add(
+                        buildRowResponse(designation, DaTableType.COMMITTEE, committeeFlag, committeeValues));
+                putDesignationValuesOnHeaders(committeeLeaves, designation.getId(), committeeValues);
             }
 
-            Integer rowKey = resolveRowKey(row);
-            for (Map.Entry<Integer, Double> valueEntry : row.getTableValues().entrySet()) {
-                Integer subId;
-                try {
-                    subId = Integer.valueOf(valueEntry.getKey());
-                } catch (NumberFormatException ex) {
-                    continue;
-                }
-
-                DATableHeadingResponse header = leafBySubId.get(subId);
-                if (header != null && valueEntry.getValue() != null) {
-                    header.getTableValues().put(rowKey, valueEntry.getValue());
-                }
+            Map<Integer, Double> individualValues = valuesLoader.apply(designation.getId(), individualFlag);
+            if (includeEmptyRows || !individualValues.isEmpty()) {
+                tableData.getIndividualRows().add(
+                        buildRowResponse(designation, DaTableType.INDIVIDUAL, individualFlag, individualValues));
+                putDesignationValuesOnHeaders(individualLeaves, designation.getId(), individualValues);
             }
         }
+
+        tableData.getCommitteeRows().sort(Comparator.comparing(
+                DADesignationTableDTO::getDisplayOrder, Comparator.nullsLast(Integer::compareTo)));
+        tableData.getIndividualRows().sort(Comparator.comparing(
+                DADesignationTableDTO::getDisplayOrder, Comparator.nullsLast(Integer::compareTo)));
+        return tableData;
     }
 
-    private void collectLeafHeaders(List<DATableHeadingResponse> headers,
-                                    Map<Integer, DATableHeadingResponse> leafBySubId) {
-        for (DATableHeadingResponse header : headers) {
-            if (header == null) {
-                continue;
-            }
-
-            if (CollectionUtils.isEmpty(header.getSubHeadings())) {
-                if (header.getSubId() != null) {
-                    leafBySubId.put(header.getSubId(), header);
-                }
-                continue;
-            }
-
-            collectLeafHeaders(header.getSubHeadings(), leafBySubId);
-        }
-    }
-
-    private Integer resolveRowKey(DADesignationTableDTO row) {
-        if (row.getDesignationId() != null) {
-            return row.getDesignationId();
-        }
-
-        return null;
-    }
-
-    private DADesignationTableDTO buildRowResponseforTable(DADesignationData designation,
-                                                       DaTableType tableType,
-                                                       String isCommittee,
-                                                       MasterDataApproveStatus approveStatus,
-                                                       Map<Integer, Double> values) {
+    private DADesignationTableDTO buildRowResponse(DADesignationData designation,
+                                                    DaTableType tableType,
+                                                    String isCommittee,
+                                                    Map<Integer, Double> values) {
         DADesignationTableDTO row = new DADesignationTableDTO();
         row.setDesignationId(designation.getId());
         row.setDesignationCode(designation.getDesignationCode());
@@ -846,9 +796,71 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         row.setIsCommittee(isCommittee);
         row.setDisplayOrder(designation.getDisplayOrder());
         row.setStatus(designation.getStatus());
-        row.setApproveStatus(approveStatus);
+        row.setApproveStatus(designation.getApproveStatus());
         row.setTableValues(values);
         return row;
+    }
+
+    /** Approved values only, from DA_LIMITS. Keys are column subId. */
+    private Map<Integer, Double> loadApprovedValues(Integer designationId, String isCommittee) {
+        Map<Integer, Double> tableValues = new LinkedHashMap<>();
+        daLimitRepository.findAllByDesignationIdAndIsCommitteeAndStatus(
+                        designationId, isCommittee, AppsConstants.Status.ACT.name())
+                .stream()
+                .sorted(Comparator.comparing(DALimit::getColumnId, Comparator.nullsLast(Integer::compareTo)))
+                .forEach(limit -> tableValues.put(limit.getColumnId(), limit.getRiskValue()));
+        return tableValues;
+    }
+
+    /** Pending values only, from DA_LIMITS_TEMP. Keys are column subId. */
+    private Map<Integer, Double> loadPendingValues(Integer designationId, String isCommittee) {
+        Map<Integer, Double> tableValues = new LinkedHashMap<>();
+        daLimitTempRepository.findAllByDesignationIdAndIsCommitteeAndStatus(
+                        designationId, isCommittee, AppsConstants.Status.ACT.name())
+                .stream()
+                .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
+                .forEach(limit -> tableValues.put(limit.getColumnId(), limit.getRiskValue()));
+        return tableValues;
+    }
+
+    /** Puts designationId -> riskValue onto each leaf header for the matching subId. */
+    private void putDesignationValuesOnHeaders(Map<Integer, DATableHeadingResponse> leafBySubId,
+                                               Integer designationId,
+                                               Map<Integer, Double> valuesBySubId) {
+        if (designationId == null || CollectionUtils.isEmpty(valuesBySubId)) {
+            return;
+        }
+        for (Map.Entry<Integer, Double> entry : valuesBySubId.entrySet()) {
+            DATableHeadingResponse leaf = leafBySubId.get(entry.getKey());
+            if (leaf != null && entry.getValue() != null) {
+                leaf.getTableValues().put(designationId, entry.getValue());
+            }
+        }
+    }
+
+    private Map<Integer, DATableHeadingResponse> indexLeafHeaders(List<DATableHeadingResponse> headers) {
+        Map<Integer, DATableHeadingResponse> leafBySubId = new HashMap<>();
+        collectLeafHeaders(headers, leafBySubId);
+        return leafBySubId;
+    }
+
+    private void collectLeafHeaders(List<DATableHeadingResponse> headers,
+                                    Map<Integer, DATableHeadingResponse> leafBySubId) {
+        if (CollectionUtils.isEmpty(headers)) {
+            return;
+        }
+        for (DATableHeadingResponse header : headers) {
+            if (header == null) {
+                continue;
+            }
+            if (CollectionUtils.isEmpty(header.getSubHeadings())) {
+                if (header.getSubId() != null) {
+                    leafBySubId.put(header.getSubId(), header);
+                }
+            } else {
+                collectLeafHeaders(header.getSubHeadings(), leafBySubId);
+            }
+        }
     }
 
 }
