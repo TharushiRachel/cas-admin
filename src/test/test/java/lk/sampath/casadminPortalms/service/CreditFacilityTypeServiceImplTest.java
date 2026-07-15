@@ -104,24 +104,24 @@ class CreditFacilityTypeServiceImplTest {
 
     when(creditFacilityTypeTempRepository.getCurrentSequenceValue()).thenReturn(2);
     when(creditFacilityTypeTempRepository.save(any(CreditFacilityTypeTemp.class)))
-        .thenReturn(new CreditFacilityTypeTemp());
+            .thenReturn(new CreditFacilityTypeTemp());
     when(creditFacilityTypeTempRepository.existsByFacilityTypeName(
             tempCreditFacilityTypeDTO.getFacilityTypeName()))
-        .thenReturn(false);
+            .thenReturn(false);
     when(creditFacilityTypeRepository.existsByFacilityTypeName(
             tempCreditFacilityTypeDTO.getFacilityTypeName()))
-        .thenReturn(false);
+            .thenReturn(false);
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.saveCreditFacilityTypeTemp(tempCreditFacilityTypeDTO);
+            creditFacilityTypeService.saveCreditFacilityTypeTemp(tempCreditFacilityTypeDTO);
 
     CreditFacilityTypeDTO responseDto =
-        (CreditFacilityTypeDTO) Objects.requireNonNull(response.getBody()).getResponse();
+            (CreditFacilityTypeDTO) Objects.requireNonNull(response.getBody()).getResponse();
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Success", response.getBody().getMessage());
     assertEquals(
-        tempCreditFacilityTypeDTO.getFacilityTypeName(), responseDto.getFacilityTypeName());
+            tempCreditFacilityTypeDTO.getFacilityTypeName(), responseDto.getFacilityTypeName());
   }
 
   @Test
@@ -130,11 +130,11 @@ class CreditFacilityTypeServiceImplTest {
     CreditFacilityTypeDTO tempCreditFacilityTypeDTOWithOutName = tempCreditFacilityTypeDTO;
     tempCreditFacilityTypeDTOWithOutName.setFacilityTypeName(null);
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.saveCreditFacilityTypeTemp(
-                    tempCreditFacilityTypeDTOWithOutName));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.saveCreditFacilityTypeTemp(
+                                    tempCreditFacilityTypeDTOWithOutName));
 
     assertEquals("Facility Type Name Cannot be null or empty", exception.getMessage());
   }
@@ -144,17 +144,17 @@ class CreditFacilityTypeServiceImplTest {
 
     when(creditFacilityTypeTempRepository.existsByFacilityTypeName(
             tempCreditFacilityTypeDTO.getFacilityTypeName()))
-        .thenReturn(true);
+            .thenReturn(true);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.saveCreditFacilityTypeTemp(tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.saveCreditFacilityTypeTemp(tempCreditFacilityTypeDTO));
     String expectedMessage =
-        (CREDIT_FACILITY_TYPE_WITH
-            + tempCreditFacilityTypeDTO.getFacilityTypeName()
-            + ALL_READY_EXISTS
-            + TEMP_TABLE);
+            (CREDIT_FACILITY_TYPE_WITH
+                    + tempCreditFacilityTypeDTO.getFacilityTypeName()
+                    + ALL_READY_EXISTS
+                    + TEMP_TABLE);
     assertEquals(expectedMessage, exception.getMessage());
   }
 
@@ -163,33 +163,33 @@ class CreditFacilityTypeServiceImplTest {
 
     when(creditFacilityTypeTempRepository.existsByFacilityTypeName(
             tempCreditFacilityTypeDTO.getFacilityTypeName()))
-        .thenReturn(false);
+            .thenReturn(false);
     when(creditFacilityTypeRepository.existsByFacilityTypeName(
             tempCreditFacilityTypeDTO.getFacilityTypeName()))
-        .thenReturn(true);
+            .thenReturn(true);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.saveCreditFacilityTypeTemp(tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.saveCreditFacilityTypeTemp(tempCreditFacilityTypeDTO));
 
     String expectedMessage =
-        (CREDIT_FACILITY_TYPE_WITH
-            + tempCreditFacilityTypeDTO.getFacilityTypeName()
-            + ALL_READY_EXISTS
-            + MASTER_TABLE);
+            (CREDIT_FACILITY_TYPE_WITH
+                    + tempCreditFacilityTypeDTO.getFacilityTypeName()
+                    + ALL_READY_EXISTS
+                    + MASTER_TABLE);
     assertEquals(expectedMessage, exception.getMessage());
   }
 
   @Test
   void testSaveCreditFacilityTypeTemp_Failure_UnhandledException() {
     when(creditFacilityTypeTempRepository.getCurrentSequenceValue())
-        .thenThrow(new RuntimeException("Database error"));
+            .thenThrow(new RuntimeException("Database error"));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.saveCreditFacilityTypeTemp(tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.saveCreditFacilityTypeTemp(tempCreditFacilityTypeDTO));
 
     assertEquals("Unable to Add Credit Facility Type", exception.getMessage());
   }
@@ -199,10 +199,10 @@ class CreditFacilityTypeServiceImplTest {
   void testFindCreditFacilityTypeTempByID_Success() throws ApiRequestException {
 
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.findCreditFacilityTypeTempByID(1);
+            creditFacilityTypeService.findCreditFacilityTypeTempByID(1);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -218,9 +218,9 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeTempRepository.findById(2)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.findCreditFacilityTypeTempByID(2));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.findCreditFacilityTypeTempByID(2));
 
     assertEquals((CREDIT_FACILITY_TYPE_WITH + "2" + DOES_NOT_EXISTS), exception.getMessage());
   }
@@ -229,32 +229,32 @@ class CreditFacilityTypeServiceImplTest {
   void testFindCreditFacilityTypeTempByID_UnhandledException() {
 
     when(creditFacilityTypeTempRepository.findById(anyInt()))
-        .thenThrow(new RuntimeException("Database error"));
+            .thenThrow(new RuntimeException("Database error"));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.findCreditFacilityTypeTempByID(1));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.findCreditFacilityTypeTempByID(1));
 
     assertEquals("Unable to Fetch Credit Facility Type", exception.getMessage());
   }
 
   @Test
   void testFindCreditFacilityTypeTempByID_Success_VerifiesAllMappedFields()
-      throws ApiRequestException {
+          throws ApiRequestException {
 
     when(creditFacilityTypeTempRepository.findById(30))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.findCreditFacilityTypeTempByID(30);
+            creditFacilityTypeService.findCreditFacilityTypeTempByID(30);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     CreditFacilityTypeDTO responseDto =
-        (CreditFacilityTypeDTO) Objects.requireNonNull(response.getBody()).getResponse();
+            (CreditFacilityTypeDTO) Objects.requireNonNull(response.getBody()).getResponse();
     assertEquals(
-        creditFacilityTypeTemp.getCreditFacilityTypeID(), responseDto.getCreditFacilityTypeID());
+            creditFacilityTypeTemp.getCreditFacilityTypeID(), responseDto.getCreditFacilityTypeID());
     assertEquals(creditFacilityTypeTemp.getDescription(), responseDto.getDescription());
     assertEquals(creditFacilityTypeTemp.getApproveStatus(), responseDto.getApproveStatus());
     assertEquals(creditFacilityTypeTemp.getStatus(), responseDto.getStatus());
@@ -274,12 +274,12 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeTempRepository.findById(99)).thenReturn(Optional.of(anotherTemp));
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.findCreditFacilityTypeTempByID(99);
+            creditFacilityTypeService.findCreditFacilityTypeTempByID(99);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     CreditFacilityTypeDTO responseDto =
-        (CreditFacilityTypeDTO) Objects.requireNonNull(response.getBody()).getResponse();
+            (CreditFacilityTypeDTO) Objects.requireNonNull(response.getBody()).getResponse();
     assertEquals("Overdraft", responseDto.getFacilityTypeName());
     assertEquals(99, responseDto.getCreditFacilityTypeID());
     verify(creditFacilityTypeTempRepository, never()).findById(30);
@@ -290,12 +290,12 @@ class CreditFacilityTypeServiceImplTest {
   void testUpdateCreditFacilityTempType_Success() throws ApiRequestException {
 
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
     when(creditFacilityTypeTempRepository.existsByFacilityTypeName("Temp DTO")).thenReturn(false);
     when(creditFacilityTypeRepository.findCreditFacilityTypeByName("Temp DTO")).thenReturn(null);
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.updateCreditFacilityTempType(1, tempCreditFacilityTypeDTO);
+            creditFacilityTypeService.updateCreditFacilityTempType(1, tempCreditFacilityTypeDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -312,11 +312,11 @@ class CreditFacilityTypeServiceImplTest {
     tempCreditFacilityTypeDTO.setFacilityTypeName("");
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.updateCreditFacilityTempType(
-                    1, tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.updateCreditFacilityTempType(
+                                    1, tempCreditFacilityTypeDTO));
 
     assertEquals("Facility Type Name Cannot be null", exception.getMessage());
   }
@@ -327,11 +327,11 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeTempRepository.findById(1)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.updateCreditFacilityTempType(
-                    1, tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.updateCreditFacilityTempType(
+                                    1, tempCreditFacilityTypeDTO));
 
     assertEquals("Credit Facility type with ID 1 does not exist", exception.getMessage());
   }
@@ -340,15 +340,15 @@ class CreditFacilityTypeServiceImplTest {
   void testUpdateCreditFacilityTempType_Failure_NameInTemporaryRecords() {
 
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
     when(creditFacilityTypeTempRepository.existsByFacilityTypeName("Temp DTO")).thenReturn(true);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.updateCreditFacilityTempType(
-                    1, tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.updateCreditFacilityTempType(
+                                    1, tempCreditFacilityTypeDTO));
 
     assertEquals("Credit Facility Type Name Already in Temporary Records", exception.getMessage());
   }
@@ -359,11 +359,11 @@ class CreditFacilityTypeServiceImplTest {
     creditFacilityTypeTemp.setFacilityTypeName("Temp DTO");
 
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
     when(creditFacilityTypeTempRepository.existsByFacilityTypeName("Temp DTO")).thenReturn(true);
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.updateCreditFacilityTempType(1, tempCreditFacilityTypeDTO);
+            creditFacilityTypeService.updateCreditFacilityTempType(1, tempCreditFacilityTypeDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -382,17 +382,17 @@ class CreditFacilityTypeServiceImplTest {
     masterRecord.setFacilityTypeName("Temp DTO");
 
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
     when(creditFacilityTypeTempRepository.existsByFacilityTypeName("Temp DTO")).thenReturn(false);
     when(creditFacilityTypeRepository.findCreditFacilityTypeByName("Temp DTO"))
-        .thenReturn(masterRecord);
+            .thenReturn(masterRecord);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.updateCreditFacilityTempType(
-                    1, tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.updateCreditFacilityTempType(
+                                    1, tempCreditFacilityTypeDTO));
 
     assertEquals("Credit Facility Type Name Already in Master Records", exception.getMessage());
   }
@@ -405,13 +405,13 @@ class CreditFacilityTypeServiceImplTest {
     masterRecord.setFacilityTypeName("Temp DTO");
 
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
     when(creditFacilityTypeTempRepository.existsByFacilityTypeName("Temp DTO")).thenReturn(false);
     when(creditFacilityTypeRepository.findCreditFacilityTypeByName("Temp DTO"))
-        .thenReturn(masterRecord);
+            .thenReturn(masterRecord);
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.updateCreditFacilityTempType(1, tempCreditFacilityTypeDTO);
+            creditFacilityTypeService.updateCreditFacilityTempType(1, tempCreditFacilityTypeDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -426,14 +426,14 @@ class CreditFacilityTypeServiceImplTest {
   void testUpdateCreditFacilityTempType_Failure_UnhandledException() {
 
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenThrow(new RuntimeException("Database error"));
+            .thenThrow(new RuntimeException("Database error"));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.updateCreditFacilityTempType(
-                    1, tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.updateCreditFacilityTempType(
+                                    1, tempCreditFacilityTypeDTO));
 
     assertEquals("Unable to Update Credit Facility Type", exception.getMessage());
   }
@@ -444,14 +444,14 @@ class CreditFacilityTypeServiceImplTest {
 
     creditFacilityType.setCreditFacilityTypeID(1);
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
     when(creditFacilityTypeRepository.findById(1)).thenReturn(Optional.empty());
     when(creditFacilityTypeRepository.save(any(CreditFacilityType.class)))
-        .thenReturn(creditFacilityType);
+            .thenReturn(creditFacilityType);
     when(creditFacilityTypeAudRepository.save(any(CreditFacilityTypeAud.class))).thenReturn(audit);
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ);
+            creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -471,15 +471,15 @@ class CreditFacilityTypeServiceImplTest {
     approveRejectRQ.setApproveRejectDataID(1);
     creditFacilityTypeTemp.setCreditFacilityTypeID(1);
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
     when(creditFacilityTypeRepository.findById(1))
-        .thenReturn(Optional.ofNullable(creditFacilityType));
+            .thenReturn(Optional.ofNullable(creditFacilityType));
     when(creditFacilityTypeRepository.save(any(CreditFacilityType.class)))
-        .thenReturn(creditFacilityType);
+            .thenReturn(creditFacilityType);
     when(creditFacilityTypeAudRepository.save(any(CreditFacilityTypeAud.class))).thenReturn(audit);
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ);
+            creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -500,15 +500,15 @@ class CreditFacilityTypeServiceImplTest {
     approveRejectRQ.setApproveRejectDataID(1);
     creditFacilityTypeTemp.setCreditFacilityTypeID(1);
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
     when(creditFacilityTypeRepository.findById(1))
-        .thenReturn(Optional.ofNullable(creditFacilityType));
+            .thenReturn(Optional.ofNullable(creditFacilityType));
     when(creditFacilityTypeRepository.save(any(CreditFacilityType.class)))
-        .thenReturn(creditFacilityType);
+            .thenReturn(creditFacilityType);
     when(creditFacilityTypeAudRepository.save(any(CreditFacilityTypeAud.class))).thenReturn(audit);
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ);
+            creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -526,17 +526,17 @@ class CreditFacilityTypeServiceImplTest {
     approveRejectRQ.setApproveStatus(MasterDataApproveStatus.REJECTED);
 
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
     when(creditFacilityTypeAudRepository.save(any(CreditFacilityTypeAud.class)))
-        .thenAnswer(
-            invocation -> {
-              audit = invocation.getArgument(0);
-              audit.setId(1);
-              return audit;
-            });
+            .thenAnswer(
+                    invocation -> {
+                      audit = invocation.getArgument(0);
+                      audit.setId(1);
+                      return audit;
+                    });
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ);
+            creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -548,7 +548,7 @@ class CreditFacilityTypeServiceImplTest {
     verify(creditFacilityTypeAudRepository, times(1)).save(any(CreditFacilityTypeAud.class));
 
     ArgumentCaptor<CreditFacilityTypeAud> auditCaptor =
-        ArgumentCaptor.forClass(CreditFacilityTypeAud.class);
+            ArgumentCaptor.forClass(CreditFacilityTypeAud.class);
     verify(creditFacilityTypeAudRepository, times(1)).save(auditCaptor.capture());
 
     CreditFacilityTypeAud capturedAudit = auditCaptor.getValue();
@@ -556,7 +556,7 @@ class CreditFacilityTypeServiceImplTest {
     assertNotNull(capturedAudit);
     assertEquals(1, capturedAudit.getId());
     assertEquals(
-        creditFacilityTypeTemp.getCreditFacilityTypeID(), capturedAudit.getCreditFacilityTypeID());
+            creditFacilityTypeTemp.getCreditFacilityTypeID(), capturedAudit.getCreditFacilityTypeID());
     assertEquals(creditFacilityTypeTemp.getStatus(), capturedAudit.getStatus());
     assertEquals(creditFacilityTypeTemp.getApproveStatus(), capturedAudit.getApproveStatus());
     assertEquals(creditFacilityTypeTemp.getFacilityTypeName(), capturedAudit.getFacilityTypeName());
@@ -567,13 +567,13 @@ class CreditFacilityTypeServiceImplTest {
   void testApproveRejectCreditFacilityType_InvalidRequest() {
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.approveRejectCreditFacilityType(null));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.approveRejectCreditFacilityType(null));
 
     assertEquals(
-        "Invalid ApproveRejectRQ for creditfacilitytype: CreditFacilityTypeID cannot be null",
-        exception.getMessage());
+            "Invalid ApproveRejectRQ for creditfacilitytype: CreditFacilityTypeID cannot be null",
+            exception.getMessage());
   }
 
   @Test
@@ -581,12 +581,12 @@ class CreditFacilityTypeServiceImplTest {
 
     approveRejectRQ.setApproveStatus(MasterDataApproveStatus.DRAFT);
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
 
     assertEquals("Not a valid approval status", exception.getMessage());
   }
@@ -596,13 +596,13 @@ class CreditFacilityTypeServiceImplTest {
 
     approveRejectRQ.setApproveRejectDataID(null);
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
 
     assertEquals(
-        "Invalid ApproveRejectRQ for creditfacilitytype: CreditFacilityTypeID cannot be null",
-        exception.getMessage());
+            "Invalid ApproveRejectRQ for creditfacilitytype: CreditFacilityTypeID cannot be null",
+            exception.getMessage());
   }
 
   @Test
@@ -611,9 +611,9 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeTempRepository.findById(1)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
 
     assertEquals("Credit Facility Type with ID 1 does not exists", exception.getMessage());
   }
@@ -622,12 +622,12 @@ class CreditFacilityTypeServiceImplTest {
   void testApproveRejectCreditFacilityType_UnhandledException() {
 
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenThrow(new RuntimeException("Database error"));
+            .thenThrow(new RuntimeException("Database error"));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
 
     assertEquals(APPROVE_REJECT_FAIL, exception.getMessage());
   }
@@ -637,18 +637,18 @@ class CreditFacilityTypeServiceImplTest {
 
     creditFacilityType.setCreditFacilityTypeID(1);
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
     when(creditFacilityTypeRepository.findById(1)).thenReturn(Optional.empty());
     when(creditFacilityTypeRepository.save(any(CreditFacilityType.class)))
-        .thenReturn(creditFacilityType);
+            .thenReturn(creditFacilityType);
 
     when(creditFacilityTypeAudRepository.save(any(CreditFacilityTypeAud.class)))
-        .thenThrow(new RuntimeException("Database error"));
+            .thenThrow(new RuntimeException("Database error"));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
 
     assertEquals(APPROVE_REJECT_FAIL, exception.getMessage());
   }
@@ -659,14 +659,14 @@ class CreditFacilityTypeServiceImplTest {
     approveRejectRQ.setApproveStatus(MasterDataApproveStatus.REJECTED);
 
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
     when(creditFacilityTypeAudRepository.save(any(CreditFacilityTypeAud.class)))
-        .thenThrow(new RuntimeException("Database error"));
+            .thenThrow(new RuntimeException("Database error"));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.approveRejectCreditFacilityType(approveRejectRQ));
 
     assertEquals(APPROVE_REJECT_FAIL, exception.getMessage());
   }
@@ -683,7 +683,7 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeRepository.existsByFacilityTypeName("Temp DTO")).thenReturn(false);
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.updateApprovedCreditFacilityType(1, tempCreditFacilityTypeDTO);
+            creditFacilityTypeService.updateApprovedCreditFacilityType(1, tempCreditFacilityTypeDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -701,11 +701,11 @@ class CreditFacilityTypeServiceImplTest {
     tempCreditFacilityTypeDTO.setFacilityTypeName("");
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.updateApprovedCreditFacilityType(
-                    1, tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.updateApprovedCreditFacilityType(
+                                    1, tempCreditFacilityTypeDTO));
 
     assertEquals("Facility Type Name Cannot be null", exception.getMessage());
   }
@@ -716,11 +716,11 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeRepository.findById(1)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.updateApprovedCreditFacilityType(
-                    1, tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.updateApprovedCreditFacilityType(
+                                    1, tempCreditFacilityTypeDTO));
 
     assertEquals("Credit Facility Type with ID 1 does not exists", exception.getMessage());
   }
@@ -733,11 +733,11 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeTempRepository.existsByCreditFacilityTypeID(1)).thenReturn(true);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.updateApprovedCreditFacilityType(
-                    1, tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.updateApprovedCreditFacilityType(
+                                    1, tempCreditFacilityTypeDTO));
 
     assertEquals("Credit Facility Type Already in Temporary Records", exception.getMessage());
   }
@@ -750,11 +750,11 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeTempRepository.existsByFacilityTypeName("Temp DTO")).thenReturn(true);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.updateApprovedCreditFacilityType(
-                    1, tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.updateApprovedCreditFacilityType(
+                                    1, tempCreditFacilityTypeDTO));
 
     assertEquals("Credit Facility Type Name Already in Temporary Records", exception.getMessage());
   }
@@ -767,11 +767,11 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeRepository.existsByFacilityTypeName("Temp DTO")).thenReturn(true);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.updateApprovedCreditFacilityType(
-                    1, tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.updateApprovedCreditFacilityType(
+                                    1, tempCreditFacilityTypeDTO));
 
     assertEquals("Credit Facility Type Name Already in Master Records", exception.getMessage());
   }
@@ -780,14 +780,14 @@ class CreditFacilityTypeServiceImplTest {
   void testUpdateApprovedCreditFacilityType_Failure_UnhandledException() {
 
     when(creditFacilityTypeRepository.findById(1))
-        .thenThrow(new RuntimeException("Database error"));
+            .thenThrow(new RuntimeException("Database error"));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.updateApprovedCreditFacilityType(
-                    1, tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.updateApprovedCreditFacilityType(
+                                    1, tempCreditFacilityTypeDTO));
 
     assertEquals("Unable to Update Credit Facility Type", exception.getMessage());
   }
@@ -803,7 +803,7 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeRepository.existsByFacilityTypeName("Temp DTO")).thenReturn(true);
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.updateApprovedCreditFacilityType(1, tempCreditFacilityTypeDTO);
+            creditFacilityTypeService.updateApprovedCreditFacilityType(1, tempCreditFacilityTypeDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -821,18 +821,18 @@ class CreditFacilityTypeServiceImplTest {
 
     Pageable pageable = PageRequest.of(0, 10);
     Page<CreditFacilityType> creditFacilityTypePage =
-        new PageImpl<>(Collections.singletonList(creditFacilityType));
+            new PageImpl<>(Collections.singletonList(creditFacilityType));
     when(creditFacilityTypeRepository.findAll(pageable)).thenReturn(creditFacilityTypePage);
 
     ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
-        creditFacilityTypeService.searchCreditFacilityTypes(pageable);
+            creditFacilityTypeService.searchCreditFacilityTypes(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Success", Objects.requireNonNull(response.getBody()).getMessage());
 
     Page<CreditFacilityType> responsePage =
-        (Page<CreditFacilityType>) response.getBody().getResponse();
+            (Page<CreditFacilityType>) response.getBody().getResponse();
 
     assertNotNull(responsePage);
     assertEquals("Loan", responsePage.getContent().get(0).getFacilityTypeName());
@@ -843,16 +843,16 @@ class CreditFacilityTypeServiceImplTest {
 
     Pageable pageable = PageRequest.of(0, 10);
     when(creditFacilityTypeRepository.findAll(pageable))
-        .thenReturn(new PageImpl<>(new ArrayList<>()));
+            .thenReturn(new PageImpl<>(new ArrayList<>()));
 
     ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
-        creditFacilityTypeService.searchCreditFacilityTypes(pageable);
+            creditFacilityTypeService.searchCreditFacilityTypes(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Success", response.getBody().getMessage());
     Page<CreditFacilityType> responsePage =
-        (Page<CreditFacilityType>) response.getBody().getResponse();
+            (Page<CreditFacilityType>) response.getBody().getResponse();
     assertEquals(0, responsePage.getContent().size());
   }
 
@@ -861,23 +861,23 @@ class CreditFacilityTypeServiceImplTest {
 
     Pageable pageable = PageRequest.of(0, 10);
     when(creditFacilityTypeRepository.findAll(pageable))
-        .thenThrow(new RuntimeException("Database error"));
+            .thenThrow(new RuntimeException("Database error"));
 
     RuntimeException exception =
-        assertThrows(
-            RuntimeException.class,
-            () -> creditFacilityTypeService.searchCreditFacilityTypes(pageable));
+            assertThrows(
+                    RuntimeException.class,
+                    () -> creditFacilityTypeService.searchCreditFacilityTypes(pageable));
 
     assertEquals("Database error", exception.getMessage());
   }
 
   @Test
   void testSearchCreditFacilityTypes_VerifiesRepositoryCalledWithGivenPageable()
-      throws ApiRequestException {
+          throws ApiRequestException {
 
     Pageable pageable = PageRequest.of(2, 5);
     Page<CreditFacilityType> creditFacilityTypePage =
-        new PageImpl<>(Collections.singletonList(creditFacilityType));
+            new PageImpl<>(Collections.singletonList(creditFacilityType));
     when(creditFacilityTypeRepository.findAll(pageable)).thenReturn(creditFacilityTypePage);
 
     creditFacilityTypeService.searchCreditFacilityTypes(pageable);
@@ -895,14 +895,14 @@ class CreditFacilityTypeServiceImplTest {
 
     Pageable pageable = PageRequest.of(0, 10);
     Page<CreditFacilityType> creditFacilityTypePage =
-        new PageImpl<>(Arrays.asList(creditFacilityType, secondType));
+            new PageImpl<>(Arrays.asList(creditFacilityType, secondType));
     when(creditFacilityTypeRepository.findAll(pageable)).thenReturn(creditFacilityTypePage);
 
     ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
-        creditFacilityTypeService.searchCreditFacilityTypes(pageable);
+            creditFacilityTypeService.searchCreditFacilityTypes(pageable);
 
     Page<CreditFacilityType> responsePage =
-        (Page<CreditFacilityType>) Objects.requireNonNull(response.getBody()).getResponse();
+            (Page<CreditFacilityType>) Objects.requireNonNull(response.getBody()).getResponse();
 
     assertEquals(2, responsePage.getContent().size());
     assertEquals("Overdraft", responsePage.getContent().get(1).getFacilityTypeName());
@@ -918,7 +918,7 @@ class CreditFacilityTypeServiceImplTest {
     when(modelMapper.map(creditFacilityType, CreditFacilityTypeDTO.class)).thenReturn(expectedDTO);
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.findCreditFacilityTypeByID(1);
+            creditFacilityTypeService.findCreditFacilityTypeByID(1);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -933,9 +933,9 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeRepository.findById(1)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.findCreditFacilityTypeByID(1));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.findCreditFacilityTypeByID(1));
 
     assertEquals("Credit Facility Type with ID 1 does not exists", exception.getMessage());
   }
@@ -944,19 +944,19 @@ class CreditFacilityTypeServiceImplTest {
   void testFindCreditFacilityTypeByID_UnhandledException() {
 
     when(creditFacilityTypeRepository.findById(1))
-        .thenThrow(new RuntimeException("Database error"));
+            .thenThrow(new RuntimeException("Database error"));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.findCreditFacilityTypeByID(1));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.findCreditFacilityTypeByID(1));
 
     assertEquals("Unable to Fetch Credit Facility Type", exception.getMessage());
   }
 
   @Test
   void testFindCreditFacilityTypeByID_VerifiesModelMapperInvokedWithCorrectArguments()
-      throws ApiRequestException {
+          throws ApiRequestException {
 
     creditFacilityType.setCreditFacilityTypeID(30);
     CreditFacilityTypeDTO expectedDTO = new CreditFacilityTypeDTO(creditFacilityType);
@@ -982,12 +982,12 @@ class CreditFacilityTypeServiceImplTest {
     when(modelMapper.map(anotherType, CreditFacilityTypeDTO.class)).thenReturn(expectedDTO);
 
     ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
-        creditFacilityTypeService.findCreditFacilityTypeByID(42);
+            creditFacilityTypeService.findCreditFacilityTypeByID(42);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     CreditFacilityTypeDTO responseDTO =
-        (CreditFacilityTypeDTO) Objects.requireNonNull(response.getBody()).getResponse();
+            (CreditFacilityTypeDTO) Objects.requireNonNull(response.getBody()).getResponse();
     assertEquals("Term Loan", responseDTO.getFacilityTypeName());
     assertEquals(42, responseDTO.getCreditFacilityTypeID());
   }
@@ -998,20 +998,20 @@ class CreditFacilityTypeServiceImplTest {
 
     Pageable pageable = PageRequest.of(0, 10);
     Page<CreditFacilityTypeTemp> creditFacilityTypeTempPage =
-        new PageImpl<>(Collections.singletonList(creditFacilityTypeTemp));
+            new PageImpl<>(Collections.singletonList(creditFacilityTypeTemp));
 
     when(creditFacilityTypeTempRepository.findAll(pageable))
-        .thenReturn(creditFacilityTypeTempPage);
+            .thenReturn(creditFacilityTypeTempPage);
 
     ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
-        creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
+            creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Success", response.getBody().getMessage());
 
     Page<CreditFacilityTypeTemp> responsePage =
-        (Page<CreditFacilityTypeTemp>) response.getBody().getResponse();
+            (Page<CreditFacilityTypeTemp>) response.getBody().getResponse();
     assertEquals("Loan", responsePage.getContent().get(0).getFacilityTypeName());
   }
 
@@ -1020,16 +1020,16 @@ class CreditFacilityTypeServiceImplTest {
 
     Pageable pageable = PageRequest.of(0, 10);
     when(creditFacilityTypeTempRepository.findAll(pageable))
-        .thenReturn(new PageImpl<>(new ArrayList<>()));
+            .thenReturn(new PageImpl<>(new ArrayList<>()));
 
     ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
-        creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
+            creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Success", response.getBody().getMessage());
     Page<CreditFacilityTypeTemp> responsePage =
-        (Page<CreditFacilityTypeTemp>) response.getBody().getResponse();
+            (Page<CreditFacilityTypeTemp>) response.getBody().getResponse();
     assertEquals(0, responsePage.getContent().size());
   }
 
@@ -1038,26 +1038,26 @@ class CreditFacilityTypeServiceImplTest {
 
     Pageable pageable = PageRequest.of(0, 10);
     when(creditFacilityTypeTempRepository.findAll(pageable))
-        .thenThrow(new RuntimeException("Database error"));
+            .thenThrow(new RuntimeException("Database error"));
 
     RuntimeException exception =
-        assertThrows(
-            RuntimeException.class,
-            () -> creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable));
+            assertThrows(
+                    RuntimeException.class,
+                    () -> creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable));
 
     assertEquals("Database error", exception.getMessage());
   }
 
   @Test
   void testFindAllCreditFacilityTypeTempList_VerifiesRepositoryCalledWithGivenPageable()
-      throws ApiRequestException {
+          throws ApiRequestException {
 
     Pageable pageable = PageRequest.of(1, 20);
     Page<CreditFacilityTypeTemp> creditFacilityTypeTempPage =
-        new PageImpl<>(Collections.singletonList(creditFacilityTypeTemp));
+            new PageImpl<>(Collections.singletonList(creditFacilityTypeTemp));
 
     when(creditFacilityTypeTempRepository.findAll(pageable))
-        .thenReturn(creditFacilityTypeTempPage);
+            .thenReturn(creditFacilityTypeTempPage);
 
     creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
 
@@ -1074,16 +1074,16 @@ class CreditFacilityTypeServiceImplTest {
 
     Pageable pageable = PageRequest.of(0, 10);
     Page<CreditFacilityTypeTemp> creditFacilityTypeTempPage =
-        new PageImpl<>(Arrays.asList(creditFacilityTypeTemp, secondTemp));
+            new PageImpl<>(Arrays.asList(creditFacilityTypeTemp, secondTemp));
 
     when(creditFacilityTypeTempRepository.findAll(pageable))
-        .thenReturn(creditFacilityTypeTempPage);
+            .thenReturn(creditFacilityTypeTempPage);
 
     ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
-        creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
+            creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
 
     Page<CreditFacilityTypeTemp> responsePage =
-        (Page<CreditFacilityTypeTemp>) Objects.requireNonNull(response.getBody()).getResponse();
+            (Page<CreditFacilityTypeTemp>) Objects.requireNonNull(response.getBody()).getResponse();
 
     assertEquals(2, responsePage.getContent().size());
     assertEquals("Overdraft Temp", responsePage.getContent().get(1).getFacilityTypeName());
@@ -1095,10 +1095,10 @@ class CreditFacilityTypeServiceImplTest {
 
     creditFacilityTypeTemp.setCreditFacilityTypeID(1);
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenReturn(Optional.of(creditFacilityTypeTemp));
+            .thenReturn(Optional.of(creditFacilityTypeTemp));
 
     ResponseEntity<StandardResponse<Integer>> response =
-        creditFacilityTypeService.deleteCreditFacilityTypeTemp(tempCreditFacilityTypeDTO);
+            creditFacilityTypeService.deleteCreditFacilityTypeTemp(tempCreditFacilityTypeDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -1115,10 +1115,10 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeTempRepository.findById(1)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.deleteCreditFacilityTypeTemp(tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.deleteCreditFacilityTypeTemp(tempCreditFacilityTypeDTO));
 
     assertEquals("Credit Facility Type with ID 1 does not exists", exception.getMessage());
 
@@ -1129,13 +1129,13 @@ class CreditFacilityTypeServiceImplTest {
   void testDeleteCreditFacilityTypeTemp_UnhandledException() {
 
     when(creditFacilityTypeTempRepository.findById(1))
-        .thenThrow(new RuntimeException("Database error"));
+            .thenThrow(new RuntimeException("Database error"));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                creditFacilityTypeService.deleteCreditFacilityTypeTemp(tempCreditFacilityTypeDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            creditFacilityTypeService.deleteCreditFacilityTypeTemp(tempCreditFacilityTypeDTO));
 
     assertEquals("Deletion failed", exception.getMessage());
 
@@ -1144,7 +1144,7 @@ class CreditFacilityTypeServiceImplTest {
 
   @Test
   void testDeleteCreditFacilityTypeTemp_VerifyCorrectIdUsedForDeletion()
-      throws ApiRequestException {
+          throws ApiRequestException {
 
     CreditFacilityTypeTemp anotherTemp = new CreditFacilityTypeTemp();
     anotherTemp.setCreditFacilityTypeID(77);
@@ -1156,7 +1156,7 @@ class CreditFacilityTypeServiceImplTest {
     when(creditFacilityTypeTempRepository.findById(77)).thenReturn(Optional.of(anotherTemp));
 
     ResponseEntity<StandardResponse<Integer>> response =
-        creditFacilityTypeService.deleteCreditFacilityTypeTemp(deleteDto);
+            creditFacilityTypeService.deleteCreditFacilityTypeTemp(deleteDto);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -1171,9 +1171,9 @@ class CreditFacilityTypeServiceImplTest {
   void testDeleteCreditFacilityTypeTemp_NullDTO_ThrowsApiRequestException() {
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.deleteCreditFacilityTypeTemp(null));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> creditFacilityTypeService.deleteCreditFacilityTypeTemp(null));
 
     assertEquals("Deletion failed", exception.getMessage());
 

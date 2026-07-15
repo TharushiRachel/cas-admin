@@ -86,7 +86,7 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionTempRepository.findAll(pageable)).thenReturn(upcSectionPage);
 
     ResponseEntity<StandardResponse<List<UpcSectionDTO>>> response =
-        upcSectionService.findAllUpcSectionTempList(pageable);
+            upcSectionService.findAllUpcSectionTempList(pageable);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
   }
@@ -98,7 +98,7 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionTempRepository.findAll(pageable)).thenReturn(upcSectionPage);
 
     ResponseEntity<StandardResponse<List<UpcSectionDTO>>> response =
-        upcSectionService.findAllUpcSectionTempList(pageable);
+            upcSectionService.findAllUpcSectionTempList(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -110,7 +110,7 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionTempRepository.findAll(pageable)).thenReturn(null);
 
     ResponseEntity<StandardResponse<List<UpcSectionDTO>>> response =
-        upcSectionService.findAllUpcSectionTempList(pageable);
+            upcSectionService.findAllUpcSectionTempList(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -128,21 +128,21 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionTempRepository.findAll(pageable)).thenReturn(upcSectionPage);
 
     ResponseEntity<StandardResponse<List<UpcSectionDTO>>> response =
-        upcSectionService.findAllUpcSectionTempList(pageable);
+            upcSectionService.findAllUpcSectionTempList(pageable);
 
     assertEquals("Success", response.getBody().getMessage());
   }
 
   @Test
   void testFindAllUpcSectionTempList_VerifiesRepositoryInvokedWithGivenPageable()
-      throws ApiRequestException {
+          throws ApiRequestException {
     Pageable customPageable = PageRequest.of(2, 5);
     Page<UpcSectionTemp> upcSectionPage = new PageImpl<>(Collections.emptyList());
 
     Mockito.when(upcSectionTempRepository.findAll(customPageable)).thenReturn(upcSectionPage);
 
     ResponseEntity<StandardResponse<List<UpcSectionDTO>>> response =
-        upcSectionService.findAllUpcSectionTempList(customPageable);
+            upcSectionService.findAllUpcSectionTempList(customPageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -159,10 +159,10 @@ class UpcSectionServiceImplTest {
     upcSectionTemp.setUpcSectionDescription("Test Description");
 
     Mockito.when(upcSectionTempRepository.findById(upcSectionID))
-        .thenReturn(Optional.of(upcSectionTemp));
+            .thenReturn(Optional.of(upcSectionTemp));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.findUpcSectionTempByID(upcSectionID);
+            upcSectionService.findUpcSectionTempByID(upcSectionID);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -175,10 +175,10 @@ class UpcSectionServiceImplTest {
     upcSectionTemp.setUpcSectionID(upcSectionID);
 
     Mockito.when(upcSectionTempRepository.findById(upcSectionID))
-        .thenReturn(Optional.of(upcSectionTemp));
+            .thenReturn(Optional.of(upcSectionTemp));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.findUpcSectionTempByID(upcSectionID);
+            upcSectionService.findUpcSectionTempByID(upcSectionID);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
   }
@@ -190,9 +190,9 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionTempRepository.findById(upcSectionID)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.findUpcSectionTempByID(upcSectionID));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.findUpcSectionTempByID(upcSectionID));
 
     assertEquals("UPC Section with TEMP 99 does not exists", exception.getMessage());
   }
@@ -203,10 +203,10 @@ class UpcSectionServiceImplTest {
     upcSectionTemp.setUpcSectionID(upcSectionID);
 
     Mockito.when(upcSectionTempRepository.findById(upcSectionID))
-        .thenReturn(Optional.of(upcSectionTemp));
+            .thenReturn(Optional.of(upcSectionTemp));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.findUpcSectionTempByID(upcSectionID);
+            upcSectionService.findUpcSectionTempByID(upcSectionID);
 
     assertEquals(ErrorEnums.SUCCESS_CODE.getLabel(), response.getBody().getMessage());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
@@ -218,7 +218,7 @@ class UpcSectionServiceImplTest {
     upcSectionTemp.setUpcSectionID(upcSectionID);
 
     Mockito.when(upcSectionTempRepository.findById(upcSectionID))
-        .thenReturn(Optional.of(upcSectionTemp));
+            .thenReturn(Optional.of(upcSectionTemp));
 
     upcSectionService.findUpcSectionTempByID(upcSectionID);
 
@@ -236,7 +236,7 @@ class UpcSectionServiceImplTest {
 
     // Act
     ResponseEntity<StandardResponse<List<UpcSectionDTO>>> response =
-        upcSectionService.findAllApprovedUpcSection(pageable);
+            upcSectionService.findAllApprovedUpcSection(pageable);
 
     // Assert
     assertNotNull(response);
@@ -263,7 +263,7 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionRepository.findAll(pageable)).thenReturn(upcSectionPage);
 
     ResponseEntity<StandardResponse<List<UpcSectionDTO>>> response =
-        upcSectionService.findAllApprovedUpcSection(pageable);
+            upcSectionService.findAllApprovedUpcSection(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -282,7 +282,7 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionRepository.findAll(pageable)).thenReturn(upcSectionPage);
 
     ResponseEntity<StandardResponse<List<UpcSectionDTO>>> response =
-        upcSectionService.findAllApprovedUpcSection(pageable);
+            upcSectionService.findAllApprovedUpcSection(pageable);
 
     assertEquals("Success", response.getBody().getMessage());
   }
@@ -299,7 +299,7 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionRepository.findAll(pageable)).thenReturn(upcSectionPage);
 
     ResponseEntity<StandardResponse<List<UpcSectionDTO>>> response =
-        upcSectionService.findAllApprovedUpcSection(pageable);
+            upcSectionService.findAllApprovedUpcSection(pageable);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
   }
@@ -312,7 +312,7 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionRepository.findAll(customPageable)).thenReturn(upcSectionPage);
 
     ResponseEntity<StandardResponse<List<UpcSectionDTO>>> response =
-        upcSectionService.findAllApprovedUpcSection(customPageable);
+            upcSectionService.findAllApprovedUpcSection(customPageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -330,7 +330,7 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionRepository.findById(upcSectionID)).thenReturn(Optional.of(upcSection));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.findApprovedUpcSectionByID(upcSectionID);
+            upcSectionService.findApprovedUpcSectionByID(upcSectionID);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
   }
@@ -345,7 +345,7 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionRepository.findById(upcSectionID)).thenReturn(Optional.of(upcSection));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.findApprovedUpcSectionByID(upcSectionID);
+            upcSectionService.findApprovedUpcSectionByID(upcSectionID);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -362,7 +362,7 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionRepository.findById(upcSectionID)).thenReturn(Optional.of(upcSection));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.findApprovedUpcSectionByID(upcSectionID);
+            upcSectionService.findApprovedUpcSectionByID(upcSectionID);
 
     assertNotNull(response);
     assertNotNull(response.getBody());
@@ -375,9 +375,9 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionRepository.findById(upcSectionID)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.findApprovedUpcSectionByID(upcSectionID));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.findApprovedUpcSectionByID(upcSectionID));
 
     assertEquals("UPC Section with 99 does not exists", exception.getMessage());
   }
@@ -408,13 +408,13 @@ class UpcSectionServiceImplTest {
     upcSectionTemp.setStatus(Status.ACT);
 
     Mockito.when(upcSectionTempRepository.findAll(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
     Mockito.when(upcSectionTempRepository.getCurrentSequenceValue()).thenReturn(1);
     Mockito.when(upcSectionTempRepository.saveAndFlush(Mockito.any(UpcSectionTemp.class)))
-        .thenReturn(upcSectionTemp);
+            .thenReturn(upcSectionTemp);
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.saveUpcSectionTemp(upcSectionDTO);
+            upcSectionService.saveUpcSectionTemp(upcSectionDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -429,7 +429,7 @@ class UpcSectionServiceImplTest {
     existingUpcSectionTemp.setUpcSectionName("Duplicate Section");
 
     Mockito.when(upcSectionTempRepository.findAll(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(Collections.singletonList(existingUpcSectionTemp));
+            .thenReturn(Collections.singletonList(existingUpcSectionTemp));
 
     try {
       upcSectionService.saveUpcSectionTemp(upcSectionDTO);
@@ -442,8 +442,8 @@ class UpcSectionServiceImplTest {
   @Test
   void testSaveUpcSectionTemp_NullDTO_ThrowsException() {
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class, () -> upcSectionService.saveUpcSectionTemp(null));
+            assertThrows(
+                    ApiRequestException.class, () -> upcSectionService.saveUpcSectionTemp(null));
 
     assertEquals("Upc Section name cannot be empty or null.", exception.getMessage());
     verify(upcSectionTempRepository, never()).saveAndFlush(any(UpcSectionTemp.class));
@@ -454,8 +454,8 @@ class UpcSectionServiceImplTest {
     upcSectionDTO.setUpcSectionName("   ");
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class, () -> upcSectionService.saveUpcSectionTemp(upcSectionDTO));
+            assertThrows(
+                    ApiRequestException.class, () -> upcSectionService.saveUpcSectionTemp(upcSectionDTO));
 
     assertEquals("Upc Section name cannot be empty or null.", exception.getMessage());
     verify(upcSectionTempRepository, never()).saveAndFlush(any(UpcSectionTemp.class));
@@ -466,8 +466,8 @@ class UpcSectionServiceImplTest {
     upcSectionDTO.setUpcSectionName(null);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class, () -> upcSectionService.saveUpcSectionTemp(upcSectionDTO));
+            assertThrows(
+                    ApiRequestException.class, () -> upcSectionService.saveUpcSectionTemp(upcSectionDTO));
 
     assertEquals("Upc Section name cannot be empty or null.", exception.getMessage());
   }
@@ -482,13 +482,13 @@ class UpcSectionServiceImplTest {
     upcSectionDTO.setStatus(Status.ACT);
 
     Mockito.when(upcSectionTempRepository.findAll(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
     Mockito.when(upcSectionTempRepository.getCurrentSequenceValue()).thenReturn(5);
     Mockito.when(upcSectionTempRepository.saveAndFlush(Mockito.any(UpcSectionTemp.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.saveUpcSectionTemp(upcSectionDTO);
+            upcSectionService.saveUpcSectionTemp(upcSectionDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -522,12 +522,12 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionTempRepository.findById(1)).thenReturn(Optional.of(upcSectionTemp));
     Mockito.when(upcSectionRepository.findById(1)).thenReturn(Optional.of(upcSection));
     Mockito.when(upcSectionRepository.saveAndFlush(Mockito.any(UpcSection.class)))
-        .thenReturn(upcSection);
+            .thenReturn(upcSection);
     Mockito.doNothing().when(upcSectionTempRepository).delete(upcSectionTemp);
     Mockito.when(upcSectionAudRepository.save(Mockito.any(UpcSectionAud.class))).thenReturn(null);
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.approveRejectUpcSection(approveRejectRQ);
+            upcSectionService.approveRejectUpcSection(approveRejectRQ);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -545,11 +545,11 @@ class UpcSectionServiceImplTest {
 
     Mockito.when(upcSectionTempRepository.findById(2)).thenReturn(Optional.of(upcSectionTemp));
     Mockito.when(upcSectionTempRepository.saveAndFlush(Mockito.any(UpcSectionTemp.class)))
-        .thenReturn(upcSectionTemp);
+            .thenReturn(upcSectionTemp);
     Mockito.when(upcSectionAudRepository.save(Mockito.any(UpcSectionAud.class))).thenReturn(null);
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.approveRejectUpcSection(approveRejectRQ);
+            upcSectionService.approveRejectUpcSection(approveRejectRQ);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -558,8 +558,8 @@ class UpcSectionServiceImplTest {
   @Test
   void testApproveRejectUpcSection_NullRequest_ThrowsException() {
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class, () -> upcSectionService.approveRejectUpcSection(null));
+            assertThrows(
+                    ApiRequestException.class, () -> upcSectionService.approveRejectUpcSection(null));
 
     assertEquals("Invalid ApproveRejectRQ: DataID cannot be null", exception.getMessage());
   }
@@ -569,9 +569,9 @@ class UpcSectionServiceImplTest {
     ApproveRejectRQ invalidRequest = new ApproveRejectRQ();
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.approveRejectUpcSection(invalidRequest));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.approveRejectUpcSection(invalidRequest));
 
     assertEquals("Invalid ApproveRejectRQ: DataID cannot be null", exception.getMessage());
   }
@@ -583,9 +583,9 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionTempRepository.findById(99)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.approveRejectUpcSection(approveRejectRQ));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.approveRejectUpcSection(approveRejectRQ));
 
     assertEquals("UPC Section with TEMP 99 does not exists", exception.getMessage());
   }
@@ -595,12 +595,12 @@ class UpcSectionServiceImplTest {
     approveRejectRQ.setApproveStatus(null);
 
     Mockito.when(upcSectionTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
-        .thenReturn(Optional.of(upcSectionTemp));
+            .thenReturn(Optional.of(upcSectionTemp));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.approveRejectUpcSection(approveRejectRQ));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.approveRejectUpcSection(approveRejectRQ));
 
     assertTrue(exception.getMessage().contains("Unknown approval status"));
   }
@@ -625,12 +625,12 @@ class UpcSectionServiceImplTest {
 
     Mockito.when(upcSectionRepository.findById(upcSectionID)).thenReturn(Optional.of(upcSection));
     Mockito.when(upcSectionTempRepository.exists(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(false);
+            .thenReturn(false);
     Mockito.when(upcSectionTempRepository.saveAndFlush(Mockito.any(UpcSectionTemp.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO);
+            upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -645,9 +645,9 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionRepository.findById(upcSectionID)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO));
     assertEquals("UPC Section with 1 does not exists", exception.getMessage());
   }
 
@@ -662,14 +662,14 @@ class UpcSectionServiceImplTest {
 
     Mockito.when(upcSectionRepository.findById(upcSectionID)).thenReturn(Optional.of(upcSection));
     Mockito.when(upcSectionTempRepository.exists(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(true);
+            .thenReturn(true);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO));
     assertEquals(
-        "UPC Section Name 'Duplicate Name' already exists in the system.", exception.getMessage());
+            "UPC Section Name 'Duplicate Name' already exists in the system.", exception.getMessage());
   }
 
   @Test
@@ -684,16 +684,16 @@ class UpcSectionServiceImplTest {
 
     Mockito.when(upcSectionRepository.findById(upcSectionID)).thenReturn(Optional.of(upcSection));
     Mockito.when(upcSectionTempRepository.exists(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(false);
+            .thenReturn(false);
     Mockito.when(upcSectionRepository.exists(Mockito.any(BooleanBuilder.class))).thenReturn(true);
 
     // Act & Assert
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO));
     assertEquals(
-        "UPC Section Name 'Duplicate Name' already exists in the system.", exception.getMessage());
+            "UPC Section Name 'Duplicate Name' already exists in the system.", exception.getMessage());
   }
 
   @Test
@@ -704,9 +704,9 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionRepository.findById(upcSectionID)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO));
 
     assertEquals("UPC Section with 1 does not exists", exception.getMessage());
     verify(upcSectionTempRepository, never()).saveAndFlush(any(UpcSectionTemp.class));
@@ -728,11 +728,11 @@ class UpcSectionServiceImplTest {
 
     Mockito.when(upcSectionRepository.findById(upcSectionID)).thenReturn(Optional.of(upcSection));
     Mockito.when(upcSectionTempRepository.exists(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(false);
+            .thenReturn(false);
     Mockito.when(upcSectionRepository.exists(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(false);
+            .thenReturn(false);
     Mockito.when(upcSectionTempRepository.saveAndFlush(Mockito.any(UpcSectionTemp.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
     upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO);
 
@@ -766,14 +766,14 @@ class UpcSectionServiceImplTest {
     existingUpcSectionTemp.setUpcSectionName("Original Section");
 
     Mockito.when(upcSectionTempRepository.findById(upcSectionID))
-        .thenReturn(Optional.of(existingUpcSectionTemp));
+            .thenReturn(Optional.of(existingUpcSectionTemp));
     Mockito.when(upcSectionTempRepository.findAll(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
     Mockito.when(upcSectionTempRepository.saveAndFlush(Mockito.any(UpcSectionTemp.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO);
+            upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -788,9 +788,9 @@ class UpcSectionServiceImplTest {
     Mockito.when(upcSectionTempRepository.findById(upcSectionID)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO));
     assertEquals("UPC Section with TEMP 1 does not exists", exception.getMessage());
   }
 
@@ -809,14 +809,14 @@ class UpcSectionServiceImplTest {
     duplicateUpcSectionTemp.setUpcSectionName("Duplicate Name");
 
     Mockito.when(upcSectionTempRepository.findById(upcSectionID))
-        .thenReturn(Optional.of(existingUpcSectionTemp));
+            .thenReturn(Optional.of(existingUpcSectionTemp));
     Mockito.when(upcSectionTempRepository.findAll(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(Collections.singletonList(duplicateUpcSectionTemp));
+            .thenReturn(Collections.singletonList(duplicateUpcSectionTemp));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO));
     assertEquals("UPC Section with TEMP Duplicate Name Already Exists", exception.getMessage());
   }
 
@@ -832,14 +832,14 @@ class UpcSectionServiceImplTest {
     existingUpcSectionTemp.setUpcSectionName("Original Section");
 
     Mockito.when(upcSectionTempRepository.findById(upcSectionID))
-        .thenReturn(Optional.of(existingUpcSectionTemp));
+            .thenReturn(Optional.of(existingUpcSectionTemp));
     Mockito.when(upcSectionTempRepository.findAll(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
     Mockito.when(upcSectionTempRepository.saveAndFlush(Mockito.any(UpcSectionTemp.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO);
+            upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -857,14 +857,14 @@ class UpcSectionServiceImplTest {
     existingUpcSectionTemp.setUpcSectionName("");
 
     Mockito.when(upcSectionTempRepository.findById(upcSectionID))
-        .thenReturn(Optional.of(existingUpcSectionTemp));
+            .thenReturn(Optional.of(existingUpcSectionTemp));
     Mockito.when(upcSectionTempRepository.findAll(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO));
 
     assertEquals("Upc Section name cannot be empty or null.", exception.getMessage());
   }
@@ -885,11 +885,11 @@ class UpcSectionServiceImplTest {
     existingUpcSectionTemp.setUpcSectionName("Original Section");
 
     Mockito.when(upcSectionTempRepository.findById(upcSectionID))
-        .thenReturn(Optional.of(existingUpcSectionTemp));
+            .thenReturn(Optional.of(existingUpcSectionTemp));
     Mockito.when(upcSectionTempRepository.findAll(Mockito.any(BooleanBuilder.class)))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
     Mockito.when(upcSectionTempRepository.saveAndFlush(Mockito.any(UpcSectionTemp.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
     upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO);
 
@@ -913,7 +913,7 @@ class UpcSectionServiceImplTest {
     Mockito.doNothing().when(upcSectionTempRepository).deleteById(upcSectionID);
 
     ResponseEntity<StandardResponse<Void>> response =
-        upcSectionService.deleteUpcSectionFormTemp(upcSectionID);
+            upcSectionService.deleteUpcSectionFormTemp(upcSectionID);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -928,12 +928,12 @@ class UpcSectionServiceImplTest {
     Integer upcSectionID = 1;
 
     Mockito.doThrow(new RuntimeException("Database Error"))
-        .when(upcSectionTempRepository)
-        .deleteById(upcSectionID);
+            .when(upcSectionTempRepository)
+            .deleteById(upcSectionID);
 
     RuntimeException exception =
-        assertThrows(
-            RuntimeException.class, () -> upcSectionService.deleteUpcSectionFormTemp(upcSectionID));
+            assertThrows(
+                    RuntimeException.class, () -> upcSectionService.deleteUpcSectionFormTemp(upcSectionID));
     assertEquals("Database Error", exception.getMessage());
   }
 
@@ -944,7 +944,7 @@ class UpcSectionServiceImplTest {
     Mockito.doNothing().when(upcSectionTempRepository).deleteById(upcSectionID);
 
     ResponseEntity<StandardResponse<Void>> response =
-        upcSectionService.deleteUpcSectionFormTemp(upcSectionID);
+            upcSectionService.deleteUpcSectionFormTemp(upcSectionID);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -966,13 +966,13 @@ class UpcSectionServiceImplTest {
   @Test
   void testDeleteUpcSectionFormTemp_NullID_ThrowsException() {
     Mockito.doThrow(new IllegalArgumentException("The given id must not be null"))
-        .when(upcSectionTempRepository)
-        .deleteById(null);
+            .when(upcSectionTempRepository)
+            .deleteById(null);
 
     IllegalArgumentException exception =
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> upcSectionService.deleteUpcSectionFormTemp(null));
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> upcSectionService.deleteUpcSectionFormTemp(null));
 
     assertEquals("The given id must not be null", exception.getMessage());
   }
@@ -980,14 +980,14 @@ class UpcSectionServiceImplTest {
   @Test
   void testHandleApproval_CallsMapUpcSection_ForNewUser() throws ApiRequestException {
     when(upcSectionTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
-        .thenReturn(Optional.of(upcSectionTemp));
+            .thenReturn(Optional.of(upcSectionTemp));
     when(upcSectionRepository.findById(upcSectionTemp.getUpcSectionID()))
-        .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
     when(upcSectionRepository.saveAndFlush(any(UpcSection.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.approveRejectUpcSection(approveRejectRQ);
+            upcSectionService.approveRejectUpcSection(approveRejectRQ);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -998,16 +998,16 @@ class UpcSectionServiceImplTest {
 
   @Test
   void testHandleApproval_CallsUpdateUpcSectionToMaster_ForExistingUser()
-      throws ApiRequestException {
+          throws ApiRequestException {
     when(upcSectionTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
-        .thenReturn(Optional.of(upcSectionTemp));
+            .thenReturn(Optional.of(upcSectionTemp));
     when(upcSectionRepository.findById(upcSectionTemp.getUpcSectionID()))
-        .thenReturn(Optional.of(upcSection));
+            .thenReturn(Optional.of(upcSection));
     when(upcSectionRepository.saveAndFlush(any(UpcSection.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.approveRejectUpcSection(approveRejectRQ);
+            upcSectionService.approveRejectUpcSection(approveRejectRQ);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -1021,18 +1021,18 @@ class UpcSectionServiceImplTest {
     approveRejectRQ.setApproveStatus(MasterDataApproveStatus.REJECTED);
 
     when(upcSectionTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
-        .thenReturn(Optional.of(upcSectionTemp));
+            .thenReturn(Optional.of(upcSectionTemp));
 
     when(upcSectionAudRepository.save(any(UpcSectionAud.class)))
-        .thenAnswer(
-            invocation -> {
-              UpcSectionAud audit = invocation.getArgument(0);
-              audit.setId(1);
-              return audit;
-            });
+            .thenAnswer(
+                    invocation -> {
+                      UpcSectionAud audit = invocation.getArgument(0);
+                      audit.setId(1);
+                      return audit;
+                    });
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.approveRejectUpcSection(approveRejectRQ);
+            upcSectionService.approveRejectUpcSection(approveRejectRQ);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -1052,7 +1052,7 @@ class UpcSectionServiceImplTest {
     assertEquals(upcSectionTemp.getStatus(), capturedAudit.getStatus());
     assertEquals(upcSectionTemp.getApproveStatus(), capturedAudit.getApproveStatus());
     assertEquals(
-        upcSectionTemp.getUpcSectionDescription(), capturedAudit.getUpcSectionDescription());
+            upcSectionTemp.getUpcSectionDescription(), capturedAudit.getUpcSectionDescription());
     assertEquals(upcSectionTemp.getUpcSectionName(), capturedAudit.getUpcSectionName());
   }
 
@@ -1067,12 +1067,12 @@ class UpcSectionServiceImplTest {
     section.setApproveStatus(MasterDataApproveStatus.APPROVED);
 
     Mockito.when(
-            upcSectionRepository.findByStatusAndApproveStatus(
-                Status.ACT, MasterDataApproveStatus.APPROVED))
-        .thenReturn(Collections.singletonList(section));
+                    upcSectionRepository.findByStatusAndApproveStatus(
+                            Status.ACT, MasterDataApproveStatus.APPROVED))
+            .thenReturn(Collections.singletonList(section));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.approvedActiveList();
+            upcSectionService.approvedActiveList();
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -1082,12 +1082,12 @@ class UpcSectionServiceImplTest {
   @Test
   void testApprovedActiveList_EmptyList() {
     Mockito.when(
-            upcSectionRepository.findByStatusAndApproveStatus(
-                Status.ACT, MasterDataApproveStatus.APPROVED))
-        .thenReturn(Collections.emptyList());
+                    upcSectionRepository.findByStatusAndApproveStatus(
+                            Status.ACT, MasterDataApproveStatus.APPROVED))
+            .thenReturn(Collections.emptyList());
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.approvedActiveList();
+            upcSectionService.approvedActiveList();
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -1098,14 +1098,14 @@ class UpcSectionServiceImplTest {
   @Test
   void testApprovedActiveList_VerifiesRepositoryCalledWithCorrectParameters() {
     Mockito.when(
-            upcSectionRepository.findByStatusAndApproveStatus(
-                Mockito.any(Status.class), Mockito.any(MasterDataApproveStatus.class)))
-        .thenReturn(Collections.emptyList());
+                    upcSectionRepository.findByStatusAndApproveStatus(
+                            Mockito.any(Status.class), Mockito.any(MasterDataApproveStatus.class)))
+            .thenReturn(Collections.emptyList());
 
     upcSectionService.approvedActiveList();
 
     verify(upcSectionRepository, times(1))
-        .findByStatusAndApproveStatus(Status.ACT, MasterDataApproveStatus.APPROVED);
+            .findByStatusAndApproveStatus(Status.ACT, MasterDataApproveStatus.APPROVED);
   }
 
   @Test
@@ -1119,12 +1119,12 @@ class UpcSectionServiceImplTest {
     section.setApproveStatus(MasterDataApproveStatus.APPROVED);
 
     Mockito.when(
-            upcSectionRepository.findByStatusAndApproveStatus(
-                Status.ACT, MasterDataApproveStatus.APPROVED))
-        .thenReturn(Collections.singletonList(section));
+                    upcSectionRepository.findByStatusAndApproveStatus(
+                            Status.ACT, MasterDataApproveStatus.APPROVED))
+            .thenReturn(Collections.singletonList(section));
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.approvedActiveList();
+            upcSectionService.approvedActiveList();
 
     List<UpcSectionDTO> resultList = (List<UpcSectionDTO>) response.getBody().getResponse();
 
@@ -1137,12 +1137,12 @@ class UpcSectionServiceImplTest {
   @Test
   void testApprovedActiveList_ResponseMessageAndSuccessFlag() {
     Mockito.when(
-            upcSectionRepository.findByStatusAndApproveStatus(
-                Status.ACT, MasterDataApproveStatus.APPROVED))
-        .thenReturn(Collections.emptyList());
+                    upcSectionRepository.findByStatusAndApproveStatus(
+                            Status.ACT, MasterDataApproveStatus.APPROVED))
+            .thenReturn(Collections.emptyList());
 
     ResponseEntity<StandardResponse<UpcSectionDTO>> response =
-        upcSectionService.approvedActiveList();
+            upcSectionService.approvedActiveList();
 
     assertEquals(ErrorEnums.SUCCESS_CODE.getLabel(), response.getBody().getMessage());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());

@@ -74,7 +74,7 @@ class CommitteeTypeServiceImplTest {
     when(committeeTypeRepository.findAll()).thenReturn(List.of(committeeType));
 
     ResponseEntity<StandardResponse<List<CommitteeTypeDTO>>> response =
-        committeeTypeServiceImpl.getCommitteeTypes();
+            committeeTypeServiceImpl.getCommitteeTypes();
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -96,7 +96,7 @@ class CommitteeTypeServiceImplTest {
     when(committeeTypeRepository.findAll()).thenReturn(Collections.emptyList());
 
     ResponseEntity<StandardResponse<List<CommitteeTypeDTO>>> response =
-        committeeTypeServiceImpl.getCommitteeTypes();
+            committeeTypeServiceImpl.getCommitteeTypes();
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -121,7 +121,7 @@ class CommitteeTypeServiceImplTest {
     when(committeeTypeRepository.findAll()).thenReturn(List.of(committeeType, second));
 
     ResponseEntity<StandardResponse<List<CommitteeTypeDTO>>> response =
-        committeeTypeServiceImpl.getCommitteeTypes();
+            committeeTypeServiceImpl.getCommitteeTypes();
 
     assertNotNull(response.getBody());
     @SuppressWarnings("unchecked")
@@ -138,11 +138,11 @@ class CommitteeTypeServiceImplTest {
     when(committeeTypeRepository.findAll()).thenThrow(new RuntimeException("DB is down"));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> {
-              committeeTypeServiceImpl.getCommitteeTypes();
-            });
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> {
+                      committeeTypeServiceImpl.getCommitteeTypes();
+                    });
 
     assertEquals("Failed to retrieve committee types", exception.getMessage());
 
@@ -156,7 +156,7 @@ class CommitteeTypeServiceImplTest {
     when(committeeTypeRepository.findAll()).thenReturn(List.of(committeeType));
 
     ResponseEntity<StandardResponse<List<CommitteeTypeDTO>>> response =
-        committeeTypeServiceImpl.getCommitteeTypes();
+            committeeTypeServiceImpl.getCommitteeTypes();
 
     @SuppressWarnings("unchecked")
     List<CommitteeTypeDTO> resultList = (List<CommitteeTypeDTO>) response.getBody().getResponse();
@@ -175,11 +175,11 @@ class CommitteeTypeServiceImplTest {
   void testSaveCommitteeType_Success_ReturnsSuccessResponseWithAllCommitteeTypes() {
     when(committeeTypeRepository.findByCommitteeType("bcc")).thenReturn(Collections.emptyList());
     when(committeeTypeRepository.save(any(CommitteeType.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
     when(committeeTypeRepository.findAll()).thenReturn(List.of(committeeType));
 
     ResponseEntity<StandardResponse<List<CommitteeTypeDTO>>> response =
-        committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
+            committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -196,11 +196,11 @@ class CommitteeTypeServiceImplTest {
     when(committeeTypeRepository.findByCommitteeType("bcc")).thenReturn(List.of(committeeType));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> {
-              committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
-            });
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> {
+                      committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
+                    });
 
     assertEquals("Committee Type is already exists.", exception.getMessage());
 
@@ -214,7 +214,7 @@ class CommitteeTypeServiceImplTest {
 
     when(committeeTypeRepository.findByCommitteeType("bcc")).thenReturn(Collections.emptyList());
     when(committeeTypeRepository.save(any(CommitteeType.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
     when(committeeTypeRepository.findAll()).thenReturn(List.of(committeeType));
 
     committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
@@ -226,7 +226,7 @@ class CommitteeTypeServiceImplTest {
   void testSaveCommitteeType_CapturesCorrectFieldsOnSavedEntity() {
     when(committeeTypeRepository.findByCommitteeType("bcc")).thenReturn(Collections.emptyList());
     when(committeeTypeRepository.save(any(CommitteeType.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
     when(committeeTypeRepository.findAll()).thenReturn(Collections.emptyList());
 
     committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
@@ -246,12 +246,12 @@ class CommitteeTypeServiceImplTest {
   void testSaveCommitteeType_SavesAuditRecordWithMatchingData() {
     when(committeeTypeRepository.findByCommitteeType("bcc")).thenReturn(Collections.emptyList());
     when(committeeTypeRepository.save(any(CommitteeType.class)))
-        .thenAnswer(
-            invocation -> {
-              CommitteeType saved = invocation.getArgument(0);
-              saved.setCommitteeTypeId(5);
-              return saved;
-            });
+            .thenAnswer(
+                    invocation -> {
+                      CommitteeType saved = invocation.getArgument(0);
+                      saved.setCommitteeTypeId(5);
+                      return saved;
+                    });
     when(committeeTypeRepository.findAll()).thenReturn(Collections.emptyList());
 
     committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
@@ -272,14 +272,14 @@ class CommitteeTypeServiceImplTest {
   void testSaveCommitteeType_RepositorySaveThrowsApiRequestExceptionWithEmptyMessage_UsesFallbackMessage() {
     when(committeeTypeRepository.findByCommitteeType("bcc")).thenReturn(Collections.emptyList());
     when(committeeTypeRepository.save(any(CommitteeType.class)))
-        .thenThrow(new ApiRequestException(""));
+            .thenThrow(new ApiRequestException(""));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> {
-              committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
-            });
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> {
+                      committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
+                    });
 
     assertEquals("Committee Type saving has been failed.", exception.getMessage());
 
@@ -291,11 +291,11 @@ class CommitteeTypeServiceImplTest {
   void testUpdateCommitteeType_Success_ReturnsUpdatedList() {
     when(committeeTypeRepository.findById(1)).thenReturn(Optional.of(committeeType));
     when(committeeTypeRepository.save(any(CommitteeType.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
     when(committeeTypeRepository.findAll()).thenReturn(List.of(committeeType));
 
     ResponseEntity<StandardResponse<List<CommitteeTypeDTO>>> response =
-        committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
+            committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -313,11 +313,11 @@ class CommitteeTypeServiceImplTest {
     when(committeeTypeRepository.findById(99)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> {
-              committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
-            });
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> {
+                      committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
+                    });
 
     assertEquals("Committee Type with ID 99 does not exist", exception.getMessage());
 
@@ -334,7 +334,7 @@ class CommitteeTypeServiceImplTest {
 
     when(committeeTypeRepository.findById(1)).thenReturn(Optional.of(committeeType));
     when(committeeTypeRepository.save(any(CommitteeType.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
     when(committeeTypeRepository.findAll()).thenReturn(Collections.emptyList());
 
     committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
@@ -356,7 +356,7 @@ class CommitteeTypeServiceImplTest {
 
     when(committeeTypeRepository.findById(1)).thenReturn(Optional.of(committeeType));
     when(committeeTypeRepository.save(any(CommitteeType.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
     when(committeeTypeRepository.findAll()).thenReturn(Collections.emptyList());
 
     committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
@@ -376,7 +376,7 @@ class CommitteeTypeServiceImplTest {
 
     when(committeeTypeRepository.findById(1)).thenReturn(Optional.of(committeeType));
     when(committeeTypeRepository.save(any(CommitteeType.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
     when(committeeTypeRepository.findAll()).thenReturn(Collections.emptyList());
 
     committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
@@ -391,14 +391,14 @@ class CommitteeTypeServiceImplTest {
   void testUpdateCommitteeType_SaveThrowsApiRequestExceptionWithEmptyMessage_UsesFallbackMessage() {
     when(committeeTypeRepository.findById(1)).thenReturn(Optional.of(committeeType));
     when(committeeTypeRepository.save(any(CommitteeType.class)))
-        .thenThrow(new ApiRequestException(""));
+            .thenThrow(new ApiRequestException(""));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> {
-              committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
-            });
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> {
+                      committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
+                    });
 
     assertEquals("Committee Type update has been failed.", exception.getMessage());
 

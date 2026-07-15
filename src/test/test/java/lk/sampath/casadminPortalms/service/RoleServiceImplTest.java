@@ -56,10 +56,10 @@ class RoleServiceImplTest {
     when(privilegeCategoryRepository.findAll()).thenReturn(Collections.emptyList());
 
     ResponseEntity<StandardResponse<List<PrivilegeCategory>>> response =
-        roleService.findAllPrivilegeCategories();
+            roleService.findAllPrivilegeCategories();
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertTrue(ObjectUtils.isEmpty(response.getBody().getResponse()));
   }
 
@@ -71,13 +71,13 @@ class RoleServiceImplTest {
 
     when(privilegeCategoryRepository.findAll()).thenReturn(Collections.singletonList(category));
     when(privilegeRepository.findByPrivilegeCategoryPrivilegeCategoryID(1))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
 
     ResponseEntity<StandardResponse<List<PrivilegeCategory>>> response =
-        roleService.findAllPrivilegeCategories();
+            roleService.findAllPrivilegeCategories();
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertTrue(ObjectUtils.isEmpty(response.getBody().getResponse().getClass().getFields()));
   }
 
@@ -105,20 +105,20 @@ class RoleServiceImplTest {
 
     when(privilegeCategoryRepository.findAll()).thenReturn(categories);
     when(privilegeRepository.findByPrivilegeCategoryPrivilegeCategoryID(anyInt()))
-        .thenReturn(privileges);
+            .thenReturn(privileges);
 
     ResponseEntity<StandardResponse<List<PrivilegeCategory>>> response =
-        roleService.findAllPrivilegeCategories();
+            roleService.findAllPrivilegeCategories();
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
 
     StandardResponse<?> standardResponse = response.getBody();
     assertNotNull(standardResponse);
     assertNotNull(standardResponse.getResponse());
 
     Map<String, List<Privilege>> responseMap =
-        (Map<String, List<Privilege>>) standardResponse.getResponse();
+            (Map<String, List<Privilege>>) standardResponse.getResponse();
     assertEquals(1000, responseMap.size());
   }
 
@@ -126,13 +126,13 @@ class RoleServiceImplTest {
   void testFindAllPrivilegeCategories_PassesPageableToRepository() {
     Pageable pageable = PageRequest.of(2, 5);
     when(privilegeCategoryRepository.findAll(any(Pageable.class)))
-        .thenReturn(new PageImpl<>(Collections.emptyList()));
+            .thenReturn(new PageImpl<>(Collections.emptyList()));
 
     ResponseEntity<StandardResponse<List<PrivilegeCategory>>> response =
-        roleService.findAllPrivilegeCategories(pageable);
+            roleService.findAllPrivilegeCategories(pageable);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
 
     ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
     verify(privilegeCategoryRepository).findAll(pageableCaptor.capture());
@@ -153,16 +153,16 @@ class RoleServiceImplTest {
     privilege.setStatus(Status.ACT);
 
     when(privilegeCategoryRepository.findAll(any(Pageable.class)))
-        .thenReturn(new PageImpl<>(List.of(category)));
+            .thenReturn(new PageImpl<>(List.of(category)));
     when(privilegeRepository.findByPrivilegeCategoryPrivilegeCategoryID(5))
-        .thenReturn(List.of(privilege));
+            .thenReturn(List.of(privilege));
 
     ResponseEntity<StandardResponse<List<PrivilegeCategory>>> response =
-        roleService.findAllPrivilegeCategories(PageRequest.of(0, 10));
+            roleService.findAllPrivilegeCategories(PageRequest.of(0, 10));
 
     assertNotNull(response);
     Map<String, List<Privilege>> responseMap =
-        (Map<String, List<Privilege>>) response.getBody().getResponse();
+            (Map<String, List<Privilege>>) response.getBody().getResponse();
     List<Privilege> mappedPrivileges = responseMap.get("Security");
     assertEquals(1, mappedPrivileges.size());
 
@@ -200,7 +200,7 @@ class RoleServiceImplTest {
     ResponseEntity<StandardResponse<Object>> response = roleService.findRolesTempByID(roleID);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertNotNull(response.getBody());
 
     StandardResponse<Object> standardResponse = response.getBody();
@@ -225,11 +225,11 @@ class RoleServiceImplTest {
     when(roleTempRepository.findById(roleID)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> {
-              roleService.findRolesTempByID(roleID);
-            });
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> {
+                      roleService.findRolesTempByID(roleID);
+                    });
 
     assertEquals("Role Temp with" + roleID + "Does not exists", exception.getMessage());
     verify(roleTempRepository, times(1)).findById(roleID);
@@ -256,7 +256,7 @@ class RoleServiceImplTest {
     ResponseEntity<StandardResponse<Object>> response = roleService.findRolesTempByID(roleID);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
 
     RoleDTO roleTempDTO = (RoleDTO) response.getBody().getResponse();
     assertEquals(2, roleTempDTO.getPrivileges().size());
@@ -327,7 +327,7 @@ class RoleServiceImplTest {
     ResponseEntity<StandardResponse<List<RoleDTO>>> response = roleService.findAllRolesTempList();
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertNotNull(response.getBody());
 
     StandardResponse<List<RoleDTO>> standardResponse = response.getBody();
@@ -355,7 +355,7 @@ class RoleServiceImplTest {
     ResponseEntity<StandardResponse<List<RoleDTO>>> response = roleService.findAllRolesTempList();
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertNotNull(response.getBody());
 
     StandardResponse<List<RoleDTO>> standardResponse = response.getBody();
@@ -377,13 +377,13 @@ class RoleServiceImplTest {
 
     Pageable pageable = PageRequest.of(0, 10);
     when(roleTempRepository.findAll(pageable))
-        .thenReturn(new PageImpl<>(List.of(roleTemp), pageable, 1));
+            .thenReturn(new PageImpl<>(List.of(roleTemp), pageable, 1));
 
     ResponseEntity<StandardResponse<List<RoleDTO>>> response =
-        roleService.findAllRolesTempList(pageable);
+            roleService.findAllRolesTempList(pageable);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
 
     List<RoleDTO> roleDTOList = (List<RoleDTO>) response.getBody().getResponse();
     assertEquals(1, roleDTOList.size());
@@ -394,10 +394,10 @@ class RoleServiceImplTest {
   void testFindAllRolesTempList_WithPageable_EmptyList() {
     Pageable pageable = PageRequest.of(0, 10);
     when(roleTempRepository.findAll(pageable))
-        .thenReturn(new PageImpl<>(Collections.emptyList()));
+            .thenReturn(new PageImpl<>(Collections.emptyList()));
 
     ResponseEntity<StandardResponse<List<RoleDTO>>> response =
-        roleService.findAllRolesTempList(pageable);
+            roleService.findAllRolesTempList(pageable);
 
     assertNotNull(response);
     List<RoleDTO> roleDTOList = (List<RoleDTO>) response.getBody().getResponse();
@@ -408,86 +408,13 @@ class RoleServiceImplTest {
   void testFindAllRolesTempList_VerifiesPageableIsPassedToRepository() {
     Pageable pageable = PageRequest.of(3, 20);
     when(roleTempRepository.findAll(any(Pageable.class)))
-        .thenReturn(new PageImpl<>(Collections.emptyList()));
+            .thenReturn(new PageImpl<>(Collections.emptyList()));
 
     roleService.findAllRolesTempList(pageable);
 
     ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
     verify(roleTempRepository).findAll(pageableCaptor.capture());
     assertEquals(pageable, pageableCaptor.getValue());
-  }
-
-  /** Test when the findAllApprovedRoles() */
-  @Test
-  void testFindAllApprovedRoles_Success() {
-
-    List<Role> roleList = new ArrayList<>();
-
-    for (int i = 0; i < 3; i++) {
-      Role role = new Role();
-      role.setRoleID(i);
-      role.setRoleName("Role " + i);
-      role.setUpmPrivilegeCode("UPM" + i);
-      role.setStatus(Status.ACT);
-      role.setApproveStatus(MasterDataApproveStatus.APPROVED);
-      role.setApprovedDate(new Date());
-      role.setApprovedBy("Admin");
-      role.setCreatedDate(new Date());
-      role.setCreatedBy("Admin");
-      role.setLastModifiedDate(new Date());
-      role.setModifiedBy("Admin");
-
-      Privilege privilege = new Privilege();
-      privilege.setPrivilegeID(100 + i);
-      role.setPrivileges(Set.of(privilege));
-
-      roleList.add(role);
-    }
-
-    when(roleRepository.findAll()).thenReturn(roleList);
-
-    ResponseEntity<StandardResponse<List<RoleDTO>>> response = roleService.findAllApprovedRoles();
-
-    assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
-    assertNotNull(response.getBody());
-
-    StandardResponse<List<RoleDTO>> standardResponse = response.getBody();
-    assertTrue(standardResponse.getSuccess());
-    assertNotNull(standardResponse.getResponse());
-
-    List<RoleDTO> roleDTOList = (List<RoleDTO>) standardResponse.getResponse();
-    assertEquals(3, roleDTOList.size());
-
-    for (int i = 0; i < 3; i++) {
-      RoleDTO roleDTO = roleDTOList.get(i);
-      assertEquals(i, roleDTO.getRoleID());
-      assertEquals("Role " + i, roleDTO.getRoleName());
-      assertEquals("UPM" + i, roleDTO.getUpmPrivilegeCode());
-      assertEquals(Status.ACT, roleDTO.getStatus());
-      assertEquals(MasterDataApproveStatus.APPROVED, roleDTO.getApproveStatus());
-      assertEquals(1, roleDTO.getPrivileges().size());
-      assertEquals(100 + i, roleDTO.getPrivileges().get(0));
-    }
-  }
-
-  @Test
-  void testFindAllApprovedRoles_EmptyList() {
-
-    when(roleRepository.findAll()).thenReturn(Collections.emptyList());
-
-    ResponseEntity<StandardResponse<List<RoleDTO>>> response = roleService.findAllApprovedRoles();
-
-    assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
-    assertNotNull(response.getBody());
-
-    StandardResponse<List<RoleDTO>> standardResponse = response.getBody();
-    assertTrue(standardResponse.getSuccess());
-    assertNotNull(standardResponse.getResponse());
-
-    List<RoleDTO> roleDTOList = (List<RoleDTO>) standardResponse.getResponse();
-    assertTrue(roleDTOList.isEmpty());
   }
 
   @Test
@@ -503,10 +430,10 @@ class RoleServiceImplTest {
     when(roleRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(role), pageable, 1));
 
     ResponseEntity<StandardResponse<Page<RoleDTO>>> response =
-        roleService.findAllApprovedRoles(pageable);
+            roleService.findAllApprovedRoles(pageable);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
 
     Page<RoleDTO> dtoPage = (Page<RoleDTO>) response.getBody().getResponse();
     assertEquals(1, dtoPage.getContent().size());
@@ -519,7 +446,7 @@ class RoleServiceImplTest {
     when(roleRepository.findAll(pageable)).thenReturn(new PageImpl<>(Collections.emptyList()));
 
     ResponseEntity<StandardResponse<Page<RoleDTO>>> response =
-        roleService.findAllApprovedRoles(pageable);
+            roleService.findAllApprovedRoles(pageable);
 
     assertNotNull(response);
     Page<RoleDTO> dtoPage = (Page<RoleDTO>) response.getBody().getResponse();
@@ -532,7 +459,7 @@ class RoleServiceImplTest {
     when(roleRepository.findAll(pageable)).thenThrow(new RuntimeException("DB error"));
 
     ApiRequestException exception =
-        assertThrows(ApiRequestException.class, () -> roleService.findAllApprovedRoles(pageable));
+            assertThrows(ApiRequestException.class, () -> roleService.findAllApprovedRoles(pageable));
 
     assertEquals("Failed to retrieve approved roles.", exception.getMessage());
   }
@@ -564,7 +491,7 @@ class RoleServiceImplTest {
     ResponseEntity<StandardResponse<Object>> response = roleService.findApprovedRoleById(roleID);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertNotNull(response.getBody());
 
     StandardResponse<Object> standardResponse = response.getBody();
@@ -588,11 +515,11 @@ class RoleServiceImplTest {
     when(roleRepository.findById(roleID)).thenReturn(Optional.empty());
 
     ApiRequestException thrown =
-        assertThrows(
-            ApiRequestException.class,
-            () -> {
-              roleService.findApprovedRoleById(roleID);
-            });
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> {
+                      roleService.findApprovedRoleById(roleID);
+                    });
 
     assertEquals(" Role with1Does not exists", thrown.getMessage());
   }
@@ -773,14 +700,14 @@ class RoleServiceImplTest {
     RoleDTO roleDTO = null;
 
     NullPointerException exception =
-        assertThrows(
-            NullPointerException.class,
-            () -> {
-              roleService.saveRoleTemp(roleDTO);
-            });
+            assertThrows(
+                    NullPointerException.class,
+                    () -> {
+                      roleService.saveRoleTemp(roleDTO);
+                    });
     assertEquals(
-        "Cannot invoke \"lk.sampath.casadminportalms.dto.role.RoleDTO.getRoleName()\" because \"roleDTO\" is null",
-        exception.getMessage());
+            "Cannot invoke \"lk.sampath.casadminportalms.dto.role.RoleDTO.getRoleName()\" because \"roleDTO\" is null",
+            exception.getMessage());
   }
 
   @Test
@@ -790,11 +717,11 @@ class RoleServiceImplTest {
     roleDTO.setRoleName(null);
 
     IllegalArgumentException exception =
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-              roleService.saveRoleTemp(roleDTO);
-            });
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> {
+                      roleService.saveRoleTemp(roleDTO);
+                    });
 
     assertEquals("eq(null) is not allowed. Use isNull() instead", exception.getMessage());
   }
@@ -806,9 +733,9 @@ class RoleServiceImplTest {
     roleDTO.setRoleName("Upc Template cannot be empty or null");
 
     assertDoesNotThrow(
-        () -> {
-          roleService.saveRoleTemp(roleDTO);
-        });
+            () -> {
+              roleService.saveRoleTemp(roleDTO);
+            });
   }
 
   /** Test when the updateRoleTemp() */
@@ -859,7 +786,7 @@ class RoleServiceImplTest {
     when(roleTempRepository.findById(roleID)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(ApiRequestException.class, () -> roleService.updateRoleTemp(roleID, roleDTO));
+            assertThrows(ApiRequestException.class, () -> roleService.updateRoleTemp(roleID, roleDTO));
     assertEquals("Role with ID 1 does not exist", exception.getMessage());
   }
 
@@ -921,7 +848,7 @@ class RoleServiceImplTest {
     when(roleTempRepository.findById(roleID)).thenReturn(Optional.of(roleDb));
 
     ApiRequestException exception =
-        assertThrows(ApiRequestException.class, () -> roleService.updateRoleTemp(roleID, roleDTO));
+            assertThrows(ApiRequestException.class, () -> roleService.updateRoleTemp(roleID, roleDTO));
 
     assertEquals("NOT_NUL", exception.getMessage());
     verify(roleTempRepository, never()).save(any(RoleTemp.class));
@@ -1179,7 +1106,7 @@ class RoleServiceImplTest {
     existingRole.setRoleName("Existing Role");
 
     ResponseEntity<StandardResponse<Object>> response =
-        roleService.handleApproval(roleTemp, existingRole);
+            roleService.handleApproval(roleTemp, existingRole);
 
     assertNotNull(response);
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
@@ -1202,7 +1129,7 @@ class RoleServiceImplTest {
     anotherRole.setRoleName("Another Role");
 
     ResponseEntity<StandardResponse<Object>> response =
-        roleService.handleApproval(roleTemp, anotherRole);
+            roleService.handleApproval(roleTemp, anotherRole);
 
     assertNotNull(response);
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
@@ -1244,7 +1171,7 @@ class RoleServiceImplTest {
     ResponseEntity<StandardResponse<Object>> response = roleService.handleRejection(roleTemp);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
     assertTrue(response.getBody().getResponse() instanceof RoleDTO);
@@ -1321,15 +1248,15 @@ class RoleServiceImplTest {
     existingRole.setRoleName("Existing Role");
 
     when(roleTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
-        .thenReturn(Optional.of(roleTemp));
+            .thenReturn(Optional.of(roleTemp));
     when(roleRepository.findById(roleTemp.getRoleID())).thenReturn(Optional.of(existingRole));
     when(roleTempRepository.saveAndFlush(any(RoleTemp.class))).thenReturn(roleTemp);
 
     ResponseEntity<StandardResponse<Object>> response =
-        roleService.approveRejectRole(approveRejectRQ);
+            roleService.approveRejectRole(approveRejectRQ);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
 
     verify(roleTempRepository).findById(approveRejectRQ.getApproveRejectDataID());
@@ -1355,14 +1282,14 @@ class RoleServiceImplTest {
     existingRole.setRoleName("Existing Role");
 
     when(roleTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
-        .thenReturn(Optional.of(roleTemp));
+            .thenReturn(Optional.of(roleTemp));
     when(roleTempRepository.saveAndFlush(any(RoleTemp.class))).thenReturn(roleTemp);
 
     ResponseEntity<StandardResponse<Object>> response =
-        roleService.approveRejectRole(approveRejectRQ);
+            roleService.approveRejectRole(approveRejectRQ);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
 
     verify(roleTempRepository).findById(approveRejectRQ.getApproveRejectDataID());
@@ -1373,7 +1300,7 @@ class RoleServiceImplTest {
   void testApproveRejectRole_WithNullRequest() {
 
     ApiRequestException exception =
-        assertThrows(ApiRequestException.class, () -> roleService.approveRejectRole(null));
+            assertThrows(ApiRequestException.class, () -> roleService.approveRejectRole(null));
 
     assertEquals("Invalid ApproveRejectRQ: DataID cannot be null", exception.getMessage());
   }
@@ -1385,8 +1312,8 @@ class RoleServiceImplTest {
     approveRejectRQ.setApproveStatus(MasterDataApproveStatus.REJECTED);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class, () -> roleService.approveRejectRole(approveRejectRQ));
+            assertThrows(
+                    ApiRequestException.class, () -> roleService.approveRejectRole(approveRejectRQ));
 
     assertEquals("Invalid ApproveRejectRQ: DataID cannot be null", exception.getMessage());
   }
@@ -1399,11 +1326,11 @@ class RoleServiceImplTest {
     approveRejectRQ.setApproveStatus(MasterDataApproveStatus.APPROVED);
 
     when(roleTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
-        .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class, () -> roleService.approveRejectRole(approveRejectRQ));
+            assertThrows(
+                    ApiRequestException.class, () -> roleService.approveRejectRole(approveRejectRQ));
 
     assertEquals("Role with ID 1Does not exists", exception.getMessage());
   }
@@ -1422,15 +1349,15 @@ class RoleServiceImplTest {
     roleTemp.setPrivileges(Set.of());
 
     when(roleTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
-        .thenReturn(Optional.of(roleTemp));
+            .thenReturn(Optional.of(roleTemp));
     when(roleRepository.findById(roleTemp.getRoleID())).thenReturn(Optional.empty());
     when(roleTempRepository.saveAndFlush(any(RoleTemp.class))).thenReturn(roleTemp);
 
     ResponseEntity<StandardResponse<Object>> response =
-        roleService.approveRejectRole(approveRejectRQ);
+            roleService.approveRejectRole(approveRejectRQ);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
   }
 
@@ -1447,12 +1374,12 @@ class RoleServiceImplTest {
     roleTemp.setPrivileges(Set.of());
 
     when(roleTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
-        .thenReturn(Optional.of(roleTemp));
+            .thenReturn(Optional.of(roleTemp));
     when(roleTempRepository.saveAndFlush(any(RoleTemp.class))).thenReturn(roleTemp);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class, () -> roleService.approveRejectRole(approveRejectRQ));
+            assertThrows(
+                    ApiRequestException.class, () -> roleService.approveRejectRole(approveRejectRQ));
 
     assertEquals("Unknown approval status: DRAFT", exception.getMessage());
   }
@@ -1477,12 +1404,12 @@ class RoleServiceImplTest {
     when(roleRepository.exists(any(BooleanBuilder.class))).thenReturn(true);
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> roleService.validateRoleNameUniqueness("DuplicateRoleName", 1));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> roleService.validateRoleNameUniqueness("DuplicateRoleName", 1));
 
     assertEquals(
-        "Role name 'DuplicateRoleName' already exists in the system.", exception.getMessage());
+            "Role name 'DuplicateRoleName' already exists in the system.", exception.getMessage());
 
     verify(roleTempRepository).exists(any(BooleanBuilder.class));
     verify(roleRepository).exists(any(BooleanBuilder.class));
@@ -1497,8 +1424,8 @@ class RoleServiceImplTest {
     when(roleRepository.findById(roleId)).thenReturn(Optional.empty());
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class, () -> roleService.updateApprovedRole(roleId, roleDTO));
+            assertThrows(
+                    ApiRequestException.class, () -> roleService.updateApprovedRole(roleId, roleDTO));
 
     assertEquals("Role with ID 1Does not exists", exception.getMessage());
     verify(roleRepository).findById(roleId);
@@ -1543,7 +1470,7 @@ class RoleServiceImplTest {
     when(privilegeRepository.findByPrivilegeIDIn(List.of(2))).thenReturn(deletedPrivileges);
 
     ResponseEntity<StandardResponse<Object>> response =
-        roleService.updateApprovedRole(roleId, roleDTO);
+            roleService.updateApprovedRole(roleId, roleDTO);
 
     assertNotNull(response);
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
@@ -1581,7 +1508,7 @@ class RoleServiceImplTest {
     when(privilegeRepository.findByPrivilegeIDIn(List.of(1))).thenReturn(deletedPrivileges);
 
     ResponseEntity<StandardResponse<Object>> response =
-        roleService.updateApprovedRole(roleId, roleDTO);
+            roleService.updateApprovedRole(roleId, roleDTO);
 
     assertNotNull(response);
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
@@ -1602,8 +1529,8 @@ class RoleServiceImplTest {
     when(roleRepository.findById(roleId)).thenReturn(Optional.of(existingRole));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class, () -> roleService.updateApprovedRole(roleId, roleDTO));
+            assertThrows(
+                    ApiRequestException.class, () -> roleService.updateApprovedRole(roleId, roleDTO));
 
     assertEquals("Upc Template cannot be empty or null", exception.getMessage());
     verify(roleTempRepository, never()).save(any(RoleTemp.class));
@@ -1649,7 +1576,7 @@ class RoleServiceImplTest {
     ResponseEntity<StandardResponse<List<Privilege>>> response = roleService.findAllPrivileges();
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
     assertEquals(privileges, response.getBody().getResponse());
@@ -1665,7 +1592,7 @@ class RoleServiceImplTest {
     ResponseEntity<StandardResponse<List<Privilege>>> response = roleService.findAllPrivileges();
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
 
@@ -1676,10 +1603,10 @@ class RoleServiceImplTest {
   void testFindAllPrivileges_WhenRepositoryThrowsException() {
 
     when(privilegeRepository.findAll())
-        .thenThrow(new RuntimeException("Database connection error"));
+            .thenThrow(new RuntimeException("Database connection error"));
 
     RuntimeException exception =
-        assertThrows(RuntimeException.class, () -> roleService.findAllPrivileges());
+            assertThrows(RuntimeException.class, () -> roleService.findAllPrivileges());
 
     assertEquals("Database connection error", exception.getMessage());
     verify(privilegeRepository).findAll();
@@ -1692,10 +1619,10 @@ class RoleServiceImplTest {
     when(privilegeRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(privileges));
 
     ResponseEntity<StandardResponse<List<Privilege>>> response =
-        roleService.findAllPrivileges(1, 3);
+            roleService.findAllPrivileges(1, 3);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
     assertEquals(privileges, response.getBody().getResponse());
   }
@@ -1704,7 +1631,7 @@ class RoleServiceImplTest {
   void testFindAllPrivileges_VerifiesPageableConstructedFromPageAndSize() {
 
     when(privilegeRepository.findAll(any(Pageable.class)))
-        .thenReturn(new PageImpl<>(Collections.emptyList()));
+            .thenReturn(new PageImpl<>(Collections.emptyList()));
 
     roleService.findAllPrivileges(2, 15);
 
@@ -1723,7 +1650,7 @@ class RoleServiceImplTest {
     ResponseEntity<StandardResponse<Void>> response = roleService.deleteRoleTempById(roleID);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
     assertEquals(roleID, response.getBody().getResponse());
@@ -1736,11 +1663,11 @@ class RoleServiceImplTest {
 
     int roleID = 1;
     doThrow(new IllegalArgumentException("RoleTemp with ID " + roleID + " does not exist"))
-        .when(roleTempRepository)
-        .deleteById(roleID);
+            .when(roleTempRepository)
+            .deleteById(roleID);
 
     IllegalArgumentException exception =
-        assertThrows(IllegalArgumentException.class, () -> roleService.deleteRoleTempById(roleID));
+            assertThrows(IllegalArgumentException.class, () -> roleService.deleteRoleTempById(roleID));
 
     assertEquals("RoleTemp with ID " + roleID + " does not exist", exception.getMessage());
 
@@ -1754,7 +1681,7 @@ class RoleServiceImplTest {
     doThrow(new RuntimeException("Database error")).when(roleTempRepository).deleteById(roleID);
 
     RuntimeException exception =
-        assertThrows(RuntimeException.class, () -> roleService.deleteRoleTempById(roleID));
+            assertThrows(RuntimeException.class, () -> roleService.deleteRoleTempById(roleID));
 
     assertEquals("Database error", exception.getMessage());
 
@@ -1769,7 +1696,7 @@ class RoleServiceImplTest {
     ResponseEntity<StandardResponse<Void>> response = roleService.deleteRoleTempById(roleID);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     verify(roleTempRepository, times(1)).deleteById(roleID);
   }
 
@@ -1801,15 +1728,15 @@ class RoleServiceImplTest {
     when(roleJdbc.getUserPrivilegesByUMPCode("100")).thenReturn(List.of(privilegeDTO));
 
     ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> response =
-        roleService.getUserPrivilegesByUMPCode(groupCode);
+            roleService.getUserPrivilegesByUMPCode(groupCode);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
 
     List<UpmRolePrivilegeDTO> privileges =
-        (List<UpmRolePrivilegeDTO>) response.getBody().getResponse();
+            (List<UpmRolePrivilegeDTO>) response.getBody().getResponse();
     assertEquals(1, privileges.size());
     assertEquals("PRIV_CODE", privileges.get(0).getCode());
   }
@@ -1821,12 +1748,12 @@ class RoleServiceImplTest {
     when(roleJdbc.getUserPrivilegesByUMPCode("200")).thenReturn(Collections.emptyList());
 
     ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> response =
-        roleService.getUserPrivilegesByUMPCode(groupCode);
+            roleService.getUserPrivilegesByUMPCode(groupCode);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     List<UpmRolePrivilegeDTO> privileges =
-        (List<UpmRolePrivilegeDTO>) response.getBody().getResponse();
+            (List<UpmRolePrivilegeDTO>) response.getBody().getResponse();
     assertTrue(privileges.isEmpty());
   }
 
@@ -1850,10 +1777,10 @@ class RoleServiceImplTest {
     when(roleJdbc.getUserPrivilegesByUMPCode("-1")).thenReturn(Collections.emptyList());
 
     ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> response =
-        roleService.getUserPrivilegesByUMPCode(groupCode);
+            roleService.getUserPrivilegesByUMPCode(groupCode);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(200, response.getStatusCode());
     verify(roleJdbc, times(1)).getUserPrivilegesByUMPCode("-1");
   }
 
@@ -1872,13 +1799,13 @@ class RoleServiceImplTest {
     privilegeDTO2.setRestrictedSolIds("40");
 
     when(roleJdbc.getUserPrivilegesByUMPCode("400"))
-        .thenReturn(List.of(privilegeDTO1, privilegeDTO2));
+            .thenReturn(List.of(privilegeDTO1, privilegeDTO2));
 
     ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> response =
-        roleService.getUserPrivilegesByUMPCode(groupCode);
+            roleService.getUserPrivilegesByUMPCode(groupCode);
 
     List<UpmRolePrivilegeDTO> privileges =
-        (List<UpmRolePrivilegeDTO>) response.getBody().getResponse();
+            (List<UpmRolePrivilegeDTO>) response.getBody().getResponse();
     assertEquals(2, privileges.size());
     assertEquals("CODE_A", privileges.get(0).getCode());
     assertEquals("10", privileges.get(0).getAllowedSolIds());

@@ -75,35 +75,35 @@ class WorkflowTemplateServiceImplTest {
     MockitoAnnotations.openMocks(this);
 
     newWorkflowTemplateDTO =
-        WorkflowTemplateDTO.builder()
-            .workFlowTemplateId(null)
-            .workFlowTemplateName("New Template")
-            .code("T-NEW")
-            .description("")
-            .workFlowTemplateDataDTOList(new ArrayList<>())
-            .build();
+            WorkflowTemplateDTO.builder()
+                    .workFlowTemplateId(null)
+                    .workFlowTemplateName("New Template")
+                    .code("T-NEW")
+                    .description("")
+                    .workFlowTemplateDataDTOList(new ArrayList<>())
+                    .build();
 
     existingWorkflowTemplateDTO =
-        WorkflowTemplateDTO.builder()
-            .workFlowTemplateId(1)
-            .workFlowTemplateName("Existing Template")
-            .code("T-EXIST")
-            .description("")
-            .workFlowTemplateDataDTOList(new ArrayList<>())
-            .build();
+            WorkflowTemplateDTO.builder()
+                    .workFlowTemplateId(1)
+                    .workFlowTemplateName("Existing Template")
+                    .code("T-EXIST")
+                    .description("")
+                    .workFlowTemplateDataDTOList(new ArrayList<>())
+                    .build();
 
     workFlowTemplateDataDTO =
-        WorkFlowTemplateDataDTO.builder()
-            .workFlowTemplateDataId(1)
-            .workFlowTemplateId(1)
-            .upmGroupID(1)
-            .nextUPMGroup(null)
-            .upmGroup(null)
-            .previousUPMGroup(null)
-            .previousUPMGroupId(1)
-            .displayOrder(1)
-            .removed(false)
-            .build();
+            WorkFlowTemplateDataDTO.builder()
+                    .workFlowTemplateDataId(1)
+                    .workFlowTemplateId(1)
+                    .upmGroupID(1)
+                    .nextUPMGroup(null)
+                    .upmGroup(null)
+                    .previousUPMGroup(null)
+                    .previousUPMGroupId(1)
+                    .displayOrder(1)
+                    .removed(false)
+                    .build();
 
     upmGroup = new UpmGroup();
     upmGroup.setUpmGroupID(1);
@@ -120,24 +120,24 @@ class WorkflowTemplateServiceImplTest {
     upmGroupDTO.setStatus(Status.ACT);
 
     workflowTemplateDataTemp =
-        WorkflowTemplateDataTemp.builder()
-            .workFlowTemplateTempDataId(1)
-            .workflowTemplateTemp(null)
-            .upmGroup(null)
-            .nextUPMGroup(null)
-            .previousUPMGroup(null)
-            .displayOrder(1)
-            .build();
+            WorkflowTemplateDataTemp.builder()
+                    .workFlowTemplateTempDataId(1)
+                    .workflowTemplateTemp(null)
+                    .upmGroup(null)
+                    .nextUPMGroup(null)
+                    .previousUPMGroup(null)
+                    .displayOrder(1)
+                    .build();
 
     workflowTemplateTemp =
-        WorkflowTemplateTemp.builder()
-            .workFlowTemplateId(1)
-            .workFlowTemplateName("Template")
-            .code("")
-            .description("")
-            .status(Status.ACT)
-            .workFlowTemplateDataSet(List.of(workflowTemplateDataTemp))
-            .build();
+            WorkflowTemplateTemp.builder()
+                    .workFlowTemplateId(1)
+                    .workFlowTemplateName("Template")
+                    .code("")
+                    .description("")
+                    .status(Status.ACT)
+                    .workFlowTemplateDataSet(List.of(workflowTemplateDataTemp))
+                    .build();
 
     approveRejectRQ = new ApproveRejectRQ();
     approveRejectRQ.setApproveRejectDataID(1);
@@ -150,15 +150,15 @@ class WorkflowTemplateServiceImplTest {
     List<UpmGroupDTO> mockCommiteeTypeList = List.of(new UpmGroupDTO(), new UpmGroupDTO());
     when(upmGroupRepository.findAllApprovedUpmGroups()).thenReturn(mockList);
     StandardResponse<List<UpmGroupDTO>> response =
-        workflowTemplateServiceImpl.getAllApprovedUPMGroups();
+            workflowTemplateServiceImpl.getAllApprovedUPMGroups();
     verify(upmGroupRepository, times(1)).findAllApprovedUpmGroups();
     assertNotNull(response);
     assertEquals(
-        new StandardResponse<>(
-            ErrorEnums.SUCCESS_CODE.getStatus(),
-            ErrorEnums.SUCCESS_CODE.getLabel(),
-            mockCommiteeTypeList),
-        response);
+            new StandardResponse<>(
+                    ErrorEnums.SUCCESS_CODE.getStatus(),
+                    ErrorEnums.SUCCESS_CODE.getLabel(),
+                    mockCommiteeTypeList),
+            response);
   }
 
   @Test
@@ -166,7 +166,7 @@ class WorkflowTemplateServiceImplTest {
     when(upmGroupRepository.findAllApprovedUpmGroups()).thenReturn(Collections.emptyList());
 
     StandardResponse<List<UpmGroupDTO>> response =
-        workflowTemplateServiceImpl.getAllApprovedUPMGroups();
+            workflowTemplateServiceImpl.getAllApprovedUPMGroups();
 
     assertNotNull(response);
     assertEquals(true, response.getSuccess());
@@ -180,7 +180,7 @@ class WorkflowTemplateServiceImplTest {
     when(upmGroupRepository.findAllApprovedUpmGroups()).thenReturn(List.of(upmGroup));
 
     StandardResponse<List<UpmGroupDTO>> response =
-        workflowTemplateServiceImpl.getAllApprovedUPMGroups();
+            workflowTemplateServiceImpl.getAllApprovedUPMGroups();
 
     assertNotNull(response);
     List<UpmGroupDTO> mappedList = (List<UpmGroupDTO>) response.getResponse();
@@ -205,7 +205,7 @@ class WorkflowTemplateServiceImplTest {
     when(upmGroupRepository.findAllApprovedUpmGroups()).thenReturn(List.of(upmGroup, secondGroup));
 
     StandardResponse<List<UpmGroupDTO>> response =
-        workflowTemplateServiceImpl.getAllApprovedUPMGroups();
+            workflowTemplateServiceImpl.getAllApprovedUPMGroups();
 
     List<UpmGroupDTO> mappedList = (List<UpmGroupDTO>) response.getResponse();
     assertEquals(2, mappedList.size());
@@ -228,7 +228,7 @@ class WorkflowTemplateServiceImplTest {
     when(upmGroupRepository.findAllApprovedUpmGroups()).thenReturn(List.of(upmGroup));
 
     StandardResponse<List<UpmGroupDTO>> response =
-        workflowTemplateServiceImpl.getAllApprovedUPMGroups();
+            workflowTemplateServiceImpl.getAllApprovedUPMGroups();
 
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getSuccess());
     assertEquals(ErrorEnums.SUCCESS_CODE.getLabel(), response.getMessage());
@@ -242,7 +242,7 @@ class WorkflowTemplateServiceImplTest {
     when(workflowTemplateDataTempRepository.getNextSequenceValue()).thenReturn(2001);
 
     StandardResponse<String> response =
-        workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(newWorkflowTemplateDTO);
+            workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(newWorkflowTemplateDTO);
     assertNotNull(response);
     assertEquals(true, response.getSuccess());
     verify(workflowTemplateTempRepository, times(1)).saveAndFlush(any(WorkflowTemplateTemp.class));
@@ -252,40 +252,40 @@ class WorkflowTemplateServiceImplTest {
 
     when(workflowTemplateTempRepository.getWorkflowTempCountByName("BCC")).thenReturn(1);
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> {
-              workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(newWorkflowTemplateDTO);
-            });
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> {
+                      workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(newWorkflowTemplateDTO);
+                    });
     assertEquals("Already Found", exception.getMessage());
 
     newWorkflowTemplateDTO.setWorkFlowTemplateId(1);
     newWorkflowTemplateDTO.setWorkFlowTemplateDataDTOList(List.of());
     ApiRequestException emptyDataException =
-        assertThrows(
-            ApiRequestException.class,
-            () -> {
-              workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(newWorkflowTemplateDTO);
-            });
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> {
+                      workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(newWorkflowTemplateDTO);
+                    });
     assertEquals(
-        "Template Name, Template Code and UPM Level are required.",
-        emptyDataException.getMessage());
+            "Template Name, Template Code and UPM Level are required.",
+            emptyDataException.getMessage());
 
     newWorkflowTemplateDTO.setWorkFlowTemplateDataDTOList(List.of(workFlowTemplateDataDTO));
     workFlowTemplateDataDTO.setWorkFlowTemplateDataId(null);
     StandardResponse<String> response2 =
-        workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(newWorkflowTemplateDTO);
+            workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(newWorkflowTemplateDTO);
     assertNotNull(response2);
   }
 
   @Test
   void testSaveOrUpdateTempWorkflowTemplate_NullRequest_ThrowsException() {
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () -> workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(null));
+            assertThrows(
+                    ApiRequestException.class,
+                    () -> workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(null));
     assertEquals(
-        "Template Name, Template Code and UPM Level are required.", exception.getMessage());
+            "Template Name, Template Code and UPM Level are required.", exception.getMessage());
     verify(workflowTemplateTempRepository, never()).saveAndFlush(any(WorkflowTemplateTemp.class));
   }
 
@@ -295,13 +295,13 @@ class WorkflowTemplateServiceImplTest {
     newWorkflowTemplateDTO.setWorkFlowTemplateDataDTOList(List.of(workFlowTemplateDataDTO));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(
-                    newWorkflowTemplateDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(
+                                    newWorkflowTemplateDTO));
     assertEquals(
-        "Template Name, Template Code and UPM Level are required.", exception.getMessage());
+            "Template Name, Template Code and UPM Level are required.", exception.getMessage());
   }
 
   @Test
@@ -310,13 +310,13 @@ class WorkflowTemplateServiceImplTest {
     newWorkflowTemplateDTO.setWorkFlowTemplateDataDTOList(List.of(workFlowTemplateDataDTO));
 
     ApiRequestException exception =
-        assertThrows(
-            ApiRequestException.class,
-            () ->
-                workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(
-                    newWorkflowTemplateDTO));
+            assertThrows(
+                    ApiRequestException.class,
+                    () ->
+                            workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(
+                                    newWorkflowTemplateDTO));
     assertEquals(
-        "Template Name, Template Code and UPM Level are required.", exception.getMessage());
+            "Template Name, Template Code and UPM Level are required.", exception.getMessage());
     verify(workflowTemplateTempRepository, never()).saveAndFlush(any(WorkflowTemplateTemp.class));
   }
 
@@ -324,11 +324,11 @@ class WorkflowTemplateServiceImplTest {
   void testSaveOrUpdateTempWorkflowTemplate_UpdateExisting_UsesProvidedIdNotNextSequence() {
     existingWorkflowTemplateDTO.setWorkFlowTemplateDataDTOList(List.of(workFlowTemplateDataDTO));
     when(workflowTemplateTempRepository.getWorkflowTempCountByName("Existing Template"))
-        .thenReturn(0);
+            .thenReturn(0);
     when(workflowTemplateTempRepository.getNextSequenceValue()).thenReturn(9999);
 
     ArgumentCaptor<WorkflowTemplateTemp> captor =
-        ArgumentCaptor.forClass(WorkflowTemplateTemp.class);
+            ArgumentCaptor.forClass(WorkflowTemplateTemp.class);
 
     workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(existingWorkflowTemplateDTO);
 
@@ -342,38 +342,38 @@ class WorkflowTemplateServiceImplTest {
     Date date = new Date();
     when(workflowTemplateTempRepository.findById(10)).thenReturn(Optional.empty());
     RuntimeException notFoundException =
-        assertThrows(
-            RuntimeException.class,
-            () -> {
-              approveRejectRQ.setApproveRejectDataID(10);
-              workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
-            });
+            assertThrows(
+                    RuntimeException.class,
+                    () -> {
+                      approveRejectRQ.setApproveRejectDataID(10);
+                      workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
+                    });
     assertTrue(notFoundException.getMessage().contains("Not Found"));
 
     approveRejectRQ.setApproveRejectDataID(1);
     when(workflowTemplateTempRepository.findById(1))
-        .thenReturn(Optional.ofNullable(workflowTemplateTemp));
+            .thenReturn(Optional.ofNullable(workflowTemplateTemp));
     approveRejectRQ.setApproveStatus(MasterDataApproveStatus.PENDING);
     StandardResponse<Boolean> response =
-        workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
+            workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
     assertEquals(
-        new StandardResponse<>(
-            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), true),
-        response);
+            new StandardResponse<>(
+                    ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), true),
+            response);
 
     when(workflowTemplateRepository.getNextSequenceValue()).thenReturn(1);
     approveRejectRQ.setApproveStatus(MasterDataApproveStatus.APPROVED);
 
     WorkflowTemplate workflowTemplate =
-        workflowTemplateServiceImpl.workflowTemplateMapper(workflowTemplateTemp);
+            workflowTemplateServiceImpl.workflowTemplateMapper(workflowTemplateTemp);
     workflowTemplate.setCreatedDate(date);
     workflowTemplate.setApproveStatus(approveRejectRQ.getApproveStatus());
     workflowTemplate.setApprovedDate(date);
     workflowTemplate.setApprovedBy("User");
     workflowTemplate.setWorkFlowTemplateId(1);
     workflowTemplate.setWorkFlowTemplateDataSet(
-        workflowTemplateServiceImpl.getTempWorkflowTemplateData(
-            workflowTemplateTemp, workflowTemplate));
+            workflowTemplateServiceImpl.getTempWorkflowTemplateData(
+                    workflowTemplateTemp, workflowTemplate));
 
     workflowTemplateServiceImpl.insertToAuditTableFromMaster(workflowTemplate);
     workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
@@ -388,9 +388,9 @@ class WorkflowTemplateServiceImplTest {
     when(workflowTemplateTempRepository.findById(99)).thenReturn(Optional.empty());
 
     RuntimeException exception =
-        assertThrows(
-            RuntimeException.class,
-            () -> workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ));
+            assertThrows(
+                    RuntimeException.class,
+                    () -> workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ));
 
     assertTrue(exception.getCause() instanceof ApiRequestException);
     assertEquals("Not Found", exception.getCause().getMessage());
@@ -407,7 +407,7 @@ class WorkflowTemplateServiceImplTest {
     ArgumentCaptor<WorkflowTemplate> captor = ArgumentCaptor.forClass(WorkflowTemplate.class);
 
     StandardResponse<Boolean> response =
-        workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
+            workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
 
     assertEquals(true, response.getResponse());
     verify(workflowTemplateRepository, times(1)).saveAndFlush(captor.capture());
@@ -423,7 +423,7 @@ class WorkflowTemplateServiceImplTest {
     when(workflowTemplateTempRepository.findById(1)).thenReturn(Optional.of(workflowTemplateTemp));
 
     StandardResponse<Boolean> response =
-        workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
+            workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
 
     assertEquals(true, response.getResponse());
     assertEquals(MasterDataApproveStatus.REJECTED, workflowTemplateTemp.getApproveStatus());
@@ -438,8 +438,8 @@ class WorkflowTemplateServiceImplTest {
     when(workflowTemplateTempRepository.findById(1)).thenReturn(Optional.of(workflowTemplateTemp));
 
     assertThrows(
-        RuntimeException.class,
-        () -> workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ));
+            RuntimeException.class,
+            () -> workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ));
 
     verify(workflowTemplateTempRepository, never()).saveAndFlush(any(WorkflowTemplateTemp.class));
     verify(workflowTemplateTempRepository, never()).delete(any(WorkflowTemplateTemp.class));
@@ -451,7 +451,7 @@ class WorkflowTemplateServiceImplTest {
     when(workflowTemplateTempRepository.findById(1)).thenReturn(Optional.of(workflowTemplateTemp));
 
     StandardResponse<Boolean> response =
-        workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
+            workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
 
     assertEquals(true, response.getResponse());
     verify(workflowTemplateTempRepository, never()).saveAndFlush(any(WorkflowTemplateTemp.class));
@@ -481,7 +481,7 @@ class WorkflowTemplateServiceImplTest {
     Mockito.when(pageWithContent.hasContent()).thenReturn(true);
     Mockito.when(pageWithContent.getContent()).thenReturn(templateList);
     Mockito.when(workflowTemplateTempRepository.findAllWorkflowTemplateTemp(pageable))
-        .thenReturn(pageWithContent);
+            .thenReturn(pageWithContent);
 
     // Child data mock
     WorkflowTemplateDataTemp childData = new WorkflowTemplateDataTemp();
@@ -498,10 +498,10 @@ class WorkflowTemplateServiceImplTest {
     assertEquals(1, childDataList.size());
 
     Mockito.when(workflowTemplateDataTempRepository.findAllTempWorkflowTemplateData(anyInt()))
-        .thenReturn(childDataList);
+            .thenReturn(childDataList);
 
     StandardResponse<WorkflowTemplateResponse> response =
-        workflowTemplateServiceImpl.getTempWorkflowTemplate(pageable);
+            workflowTemplateServiceImpl.getTempWorkflowTemplate(pageable);
 
     assertNotNull(response);
     assertEquals(true, response.getSuccess());
@@ -519,10 +519,10 @@ class WorkflowTemplateServiceImplTest {
     when(emptyPage.hasContent()).thenReturn(false);
     when(emptyPage.getTotalElements()).thenReturn(0L);
     when(workflowTemplateTempRepository.findAllWorkflowTemplateTemp(pageable))
-        .thenReturn(emptyPage);
+            .thenReturn(emptyPage);
 
     StandardResponse<WorkflowTemplateResponse> response =
-        workflowTemplateServiceImpl.getTempWorkflowTemplate(pageable);
+            workflowTemplateServiceImpl.getTempWorkflowTemplate(pageable);
 
     WorkflowTemplateResponse body = (WorkflowTemplateResponse) response.getResponse();
     assertNotNull(body);
@@ -533,7 +533,7 @@ class WorkflowTemplateServiceImplTest {
 
   @Test
   void testGetTempWorkflowTemplate_ContentWithNoChildData_ReturnsEmptyChildArray()
-      throws ApiRequestException {
+          throws ApiRequestException {
     Pageable pageable = PageRequest.of(0, 10);
     WorkflowTemplateTemp template = new WorkflowTemplateTemp();
     template.setWorkFlowTemplateId(5);
@@ -547,12 +547,12 @@ class WorkflowTemplateServiceImplTest {
     when(pageWithContent.getContent()).thenReturn(List.of(template));
     when(pageWithContent.getTotalElements()).thenReturn(1L);
     when(workflowTemplateTempRepository.findAllWorkflowTemplateTemp(pageable))
-        .thenReturn(pageWithContent);
+            .thenReturn(pageWithContent);
     when(workflowTemplateDataTempRepository.findAllTempWorkflowTemplateData(5))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
 
     StandardResponse<WorkflowTemplateResponse> response =
-        workflowTemplateServiceImpl.getTempWorkflowTemplate(pageable);
+            workflowTemplateServiceImpl.getTempWorkflowTemplate(pageable);
 
     WorkflowTemplateResponse body = (WorkflowTemplateResponse) response.getResponse();
     assertEquals(1, body.getDataList().size());
@@ -561,7 +561,7 @@ class WorkflowTemplateServiceImplTest {
 
   @Test
   void testGetTempWorkflowTemplate_MultipleTemplatesWithChildren_MapsAllFields()
-      throws ApiRequestException {
+          throws ApiRequestException {
     Pageable pageable = PageRequest.of(0, 10);
     WorkflowTemplateTemp template1 = new WorkflowTemplateTemp();
     template1.setWorkFlowTemplateId(1);
@@ -582,14 +582,14 @@ class WorkflowTemplateServiceImplTest {
     when(pageWithContent.getContent()).thenReturn(List.of(template1, template2));
     when(pageWithContent.getTotalElements()).thenReturn(2L);
     when(workflowTemplateTempRepository.findAllWorkflowTemplateTemp(pageable))
-        .thenReturn(pageWithContent);
+            .thenReturn(pageWithContent);
     when(workflowTemplateDataTempRepository.findAllTempWorkflowTemplateData(1))
-        .thenReturn(List.of(workflowTemplateDataTemp));
+            .thenReturn(List.of(workflowTemplateDataTemp));
     when(workflowTemplateDataTempRepository.findAllTempWorkflowTemplateData(2))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
 
     StandardResponse<WorkflowTemplateResponse> response =
-        workflowTemplateServiceImpl.getTempWorkflowTemplate(pageable);
+            workflowTemplateServiceImpl.getTempWorkflowTemplate(pageable);
 
     WorkflowTemplateResponse body = (WorkflowTemplateResponse) response.getResponse();
     assertEquals(2, body.getDataList().size());
@@ -607,12 +607,12 @@ class WorkflowTemplateServiceImplTest {
     when(pageWithContent.getContent()).thenReturn(List.of(workflowTemplateTemp));
     when(pageWithContent.getTotalElements()).thenReturn(42L);
     when(workflowTemplateTempRepository.findAllWorkflowTemplateTemp(pageable))
-        .thenReturn(pageWithContent);
+            .thenReturn(pageWithContent);
     when(workflowTemplateDataTempRepository.findAllTempWorkflowTemplateData(1))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
 
     StandardResponse<WorkflowTemplateResponse> response =
-        workflowTemplateServiceImpl.getTempWorkflowTemplate(pageable);
+            workflowTemplateServiceImpl.getTempWorkflowTemplate(pageable);
 
     WorkflowTemplateResponse body = (WorkflowTemplateResponse) response.getResponse();
     assertEquals(42L, body.getCount());
@@ -641,11 +641,11 @@ class WorkflowTemplateServiceImplTest {
     Page<WorkflowTemplate> page = new PageImpl<>(Collections.singletonList(template));
     when(workflowTemplateRepository.findAllWorkflowTemplate(pageable)).thenReturn(page);
     when(workflowTemplateDataRepository.findAllWorkflowTemplateData(1))
-        .thenReturn(Collections.singletonList(templateData));
+            .thenReturn(Collections.singletonList(templateData));
 
     // Call the method
     StandardResponse<Page<WorkflowTemplateDTO>> response =
-        workflowTemplateServiceImpl.getWorkflowTemplate(pageable);
+            workflowTemplateServiceImpl.getWorkflowTemplate(pageable);
 
     // Assertions
     assertNotNull(response);
@@ -667,7 +667,7 @@ class WorkflowTemplateServiceImplTest {
     when(workflowTemplateRepository.findAllWorkflowTemplate(pageable)).thenReturn(emptyPage);
 
     StandardResponse<Page<WorkflowTemplateDTO>> response =
-        workflowTemplateServiceImpl.getWorkflowTemplate(pageable);
+            workflowTemplateServiceImpl.getWorkflowTemplate(pageable);
 
     Page<WorkflowTemplateDTO> dtoPage = (Page<WorkflowTemplateDTO>) response.getResponse();
     assertTrue(dtoPage.getContent().isEmpty());
@@ -677,7 +677,7 @@ class WorkflowTemplateServiceImplTest {
 
   @Test
   void testGetWorkflowTemplate_ContentWithNoChildData_ReturnsEmptyChildArray()
-      throws ApiRequestException {
+          throws ApiRequestException {
     Pageable pageable = PageRequest.of(0, 10);
     WorkflowTemplate template = new WorkflowTemplate();
     template.setWorkFlowTemplateId(7);
@@ -687,13 +687,13 @@ class WorkflowTemplateServiceImplTest {
     template.setApproveStatus(MasterDataApproveStatus.APPROVED);
 
     Page<WorkflowTemplate> page =
-        new PageImpl<>(Collections.singletonList(template), pageable, 1);
+            new PageImpl<>(Collections.singletonList(template), pageable, 1);
     when(workflowTemplateRepository.findAllWorkflowTemplate(pageable)).thenReturn(page);
     when(workflowTemplateDataRepository.findAllWorkflowTemplateData(7))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
 
     StandardResponse<Page<WorkflowTemplateDTO>> response =
-        workflowTemplateServiceImpl.getWorkflowTemplate(pageable);
+            workflowTemplateServiceImpl.getWorkflowTemplate(pageable);
 
     Page<WorkflowTemplateDTO> dtoPage = (Page<WorkflowTemplateDTO>) response.getResponse();
     assertEquals(1, dtoPage.getContent().size());
@@ -702,7 +702,7 @@ class WorkflowTemplateServiceImplTest {
 
   @Test
   void testGetWorkflowTemplate_MultipleTemplates_MapsAllFieldsCorrectly()
-      throws ApiRequestException {
+          throws ApiRequestException {
     Pageable pageable = PageRequest.of(0, 10);
     WorkflowTemplate template1 = new WorkflowTemplate();
     template1.setWorkFlowTemplateId(1);
@@ -719,15 +719,15 @@ class WorkflowTemplateServiceImplTest {
     template2.setApproveStatus(MasterDataApproveStatus.APPROVED);
 
     Page<WorkflowTemplate> page =
-        new PageImpl<>(List.of(template1, template2), pageable, 2);
+            new PageImpl<>(List.of(template1, template2), pageable, 2);
     when(workflowTemplateRepository.findAllWorkflowTemplate(pageable)).thenReturn(page);
     when(workflowTemplateDataRepository.findAllWorkflowTemplateData(1))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
     when(workflowTemplateDataRepository.findAllWorkflowTemplateData(2))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
 
     StandardResponse<Page<WorkflowTemplateDTO>> response =
-        workflowTemplateServiceImpl.getWorkflowTemplate(pageable);
+            workflowTemplateServiceImpl.getWorkflowTemplate(pageable);
 
     Page<WorkflowTemplateDTO> dtoPage = (Page<WorkflowTemplateDTO>) response.getResponse();
     assertEquals(2, dtoPage.getContent().size());
@@ -748,10 +748,10 @@ class WorkflowTemplateServiceImplTest {
     Page<WorkflowTemplate> page = new PageImpl<>(List.of(template), pageable, 11);
     when(workflowTemplateRepository.findAllWorkflowTemplate(pageable)).thenReturn(page);
     when(workflowTemplateDataRepository.findAllWorkflowTemplateData(1))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
 
     StandardResponse<Page<WorkflowTemplateDTO>> response =
-        workflowTemplateServiceImpl.getWorkflowTemplate(pageable);
+            workflowTemplateServiceImpl.getWorkflowTemplate(pageable);
 
     Page<WorkflowTemplateDTO> dtoPage = (Page<WorkflowTemplateDTO>) response.getResponse();
     assertEquals(11, dtoPage.getTotalElements());
@@ -764,7 +764,7 @@ class WorkflowTemplateServiceImplTest {
     doNothing().when(workflowTemplateTempRepository).deleteById(1);
 
     ResponseEntity<StandardResponse<Void>> response =
-        workflowTemplateServiceImpl.deleteWorkFlowTempById(1);
+            workflowTemplateServiceImpl.deleteWorkFlowTempById(1);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -776,7 +776,7 @@ class WorkflowTemplateServiceImplTest {
 
   @Test
   void testDeleteWorkFlowTempById_VerifiesRepositoryCalledWithCorrectId()
-      throws ApiRequestException {
+          throws ApiRequestException {
     doNothing().when(workflowTemplateTempRepository).deleteById(42);
 
     workflowTemplateServiceImpl.deleteWorkFlowTempById(42);
@@ -789,13 +789,13 @@ class WorkflowTemplateServiceImplTest {
   @Test
   void testDeleteWorkFlowTempById_RepositoryThrowsException_WrapsInRuntimeException() {
     doThrow(new RuntimeException("DB error"))
-        .when(workflowTemplateTempRepository)
-        .deleteById(5);
+            .when(workflowTemplateTempRepository)
+            .deleteById(5);
 
     RuntimeException exception =
-        assertThrows(
-            RuntimeException.class,
-            () -> workflowTemplateServiceImpl.deleteWorkFlowTempById(5));
+            assertThrows(
+                    RuntimeException.class,
+                    () -> workflowTemplateServiceImpl.deleteWorkFlowTempById(5));
 
     assertNotNull(exception.getCause());
     assertEquals("DB error", exception.getCause().getMessage());
@@ -806,7 +806,7 @@ class WorkflowTemplateServiceImplTest {
     doNothing().when(workflowTemplateTempRepository).deleteById(null);
 
     ResponseEntity<StandardResponse<Void>> response =
-        workflowTemplateServiceImpl.deleteWorkFlowTempById(null);
+            workflowTemplateServiceImpl.deleteWorkFlowTempById(null);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -818,7 +818,7 @@ class WorkflowTemplateServiceImplTest {
     doNothing().when(workflowTemplateTempRepository).deleteById(9);
 
     ResponseEntity<StandardResponse<Void>> response =
-        workflowTemplateServiceImpl.deleteWorkFlowTempById(9);
+            workflowTemplateServiceImpl.deleteWorkFlowTempById(9);
 
     assertEquals(ErrorEnums.SUCCESS_CODE.getLabel(), response.getBody().getMessage());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
