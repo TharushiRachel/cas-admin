@@ -16,6 +16,9 @@ public interface DALimitTempRepository extends JpaRepository<DALimitTemp, Intege
     @Query(value = "SELECT SEQ_DA_LIMITS_TEMP.NEXTVAL FROM DUAL", nativeQuery = true)
     Integer getCurrentSequenceValue();
 
+        @Query(value = "SELECT SEQ_DA_LIMITS_TEMP.NEXTVAL FROM DUAL CONNECT BY LEVEL <= :count", nativeQuery = true)
+        List<Integer> getNextSequenceValues(@Param("count") Integer count);
+
     @Query(
             value = """
                     SELECT *
@@ -25,6 +28,19 @@ public interface DALimitTempRepository extends JpaRepository<DALimitTemp, Intege
             nativeQuery = true
     )
     List<DALimitTemp> findAllByDesignationId(@Param("designationId") Integer designationId);
+
+    @Query(
+            value = """
+                    SELECT *
+                    FROM DA_LIMITS_TEMP
+                    WHERE DESIGNATION_ID = :designationId
+                      AND STATUS = :status
+                    ORDER BY IS_COMMITTEE ASC, COLUMN_ID ASC
+                    """,
+            nativeQuery = true
+    )
+    List<DALimitTemp> findAllByDesignationIdAndStatus(@Param("designationId") Integer designationId,
+                                                      @Param("status") String status);
 
     @Modifying(clearAutomatically = true)
     @Query(
@@ -62,6 +78,16 @@ public interface DALimitTempRepository extends JpaRepository<DALimitTemp, Intege
                                                                     @Param("isCommittee") String isCommittee,
                                                                     @Param("status") String status);
 
+    @Query(
+            value = """
+                    SELECT *
+                    FROM DA_LIMITS_TEMP
+                    WHERE STATUS = :status
+                    ORDER BY DESIGNATION_ID ASC, IS_COMMITTEE ASC, COLUMN_ID ASC
+                    """,
+            nativeQuery = true
+    )
+    List<DALimitTemp> findAllByStatus(@Param("status") String status);
 }
 
 

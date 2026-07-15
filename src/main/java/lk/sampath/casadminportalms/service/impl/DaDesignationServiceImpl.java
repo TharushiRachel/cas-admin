@@ -22,7 +22,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,12 +69,12 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         List<DATableHeadingResponse> individual = rootHeaders.stream()
                 .filter(h -> DaTableType.INDIVIDUAL.equals(h.getTableType()))
                 .map(this::mapToJsonStructure)
-                .collect(Collectors.toList());
+                .toList();
 
         List<DATableHeadingResponse> committee = rootHeaders.stream()
                 .filter(h -> DaTableType.COMMITTEE.equals(h.getTableType()))
                 .map(this::mapToJsonStructure)
-                .collect(Collectors.toList());
+                .toList();
 
         DATableHeaderDTO dto = new DATableHeaderDTO();
         dto.setIndividualTableHeaders(individual);
@@ -102,7 +101,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                                     DAHeaderResponse::getDisplayOrder,
                                     Comparator.nullsLast(Integer::compareTo)))
                             .map(this::mapToJsonStructure)
-                            .collect(Collectors.toList());
+                            .toList();
 
             target.setSubHeadings(children);
         }
@@ -247,8 +246,6 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
         DADesignationData designation = upsertDesignation(request, designationByCode);
         replaceLimitTemps(designation, isCommittee, request.getColumnValues(), columnHeadersBySubId);
-        designation = daDesignationMasterRepository.saveAndFlush(designation);
-        cacheDesignation(designationByCode, designation);
 
         return buildSaveResponse(designation, tableType, isCommittee);
     }
@@ -302,7 +299,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
             designation.setCreatedBy(username);
         }
 
-        designation = daDesignationMasterRepository.saveAndFlush(designation);
+        designation = daDesignationMasterRepository.save(designation);
         cacheDesignation(designationByCode, designation);
         return designation;
     }
@@ -312,7 +309,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         if (request.getDesignationId() != null) {
             DADesignationData byId = daDesignationMasterRepository.findById(request.getDesignationId())
                     .orElseThrow(() -> new ApiRequestException(
-                            "DA Designation with id " + request.getDesignationId() + " does not exist"));
+                            "DA Designation Master with id " + request.getDesignationId() + " does not exist in Master table"));
             cacheDesignation(designationByCode, byId);
             return byId;
         }
@@ -394,14 +391,25 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         // Avoid lazy collection access; manage temps through repository only.
         daLimitTempRepository.deleteByDesignationIdAndIsCommittee(designation.getId(), isCommittee);
 
+        if (CollectionUtils.isEmpty(columnValues)) {
+            return;
+        }
+
         String username = UserContext.getUsername();
         Date now = new Date();
+        List<Integer> sequenceValues = daLimitTempRepository.getNextSequenceValues(columnValues.size());
+        if (CollectionUtils.isEmpty(sequenceValues) || sequenceValues.size() < columnValues.size()) {
+            throw new ApiRequestException("Unable to generate DA_LIMITS_TEMP ids for batch save");
+        }
+
+        List<DALimitTemp> tempRows = new ArrayList<>(columnValues.size());
+        int rowIndex = 0;
 
         for (DAColumnValueRequest columnValue : columnValues) {
             DATableHeader header = columnHeadersBySubId.get(columnValue.getSubId());
 
             DALimitTemp limitTemp = new DALimitTemp();
-            limitTemp.setDaLimitsId(daLimitTempRepository.getCurrentSequenceValue());
+            limitTemp.setDaLimitsId(sequenceValues.get(rowIndex++));
             limitTemp.setDesignation(designation);
             limitTemp.setColumnId(columnValue.getSubId());
             limitTemp.setRiskValue(columnValue.getRiskValue());
@@ -411,9 +419,10 @@ public class DaDesignationServiceImpl implements DaDesignationService {
             limitTemp.setApproveStatus(MasterDataApproveStatus.PENDING);
             limitTemp.setCreatedBy(username);
             limitTemp.setCreatedDate(now);
-
-            daLimitTempRepository.save(limitTemp);
+            tempRows.add(limitTemp);
         }
+
+        daLimitTempRepository.saveAll(tempRows);
     }
 
     @Override
@@ -661,9 +670,18 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         List<DADesignationData> designations =
                 daDesignationMasterRepository.findAllByStatus(Status.ACT.name());
 
+        List<DALimit> approvedLimits = daLimitRepository.findAllByStatus(AppsConstants.Status.ACT.name());
+        List<DALimitTemp> pendingLimits = daLimitTempRepository.findAllByStatus(AppsConstants.Status.ACT.name());
+        Map<Integer, Map<String, Map<Integer, Double>>> approvedValueIndex = indexApprovedValues(approvedLimits);
+        Map<Integer, Map<String, Map<Integer, Double>>> pendingValueIndex = indexPendingValues(pendingLimits);
+
+        List<DAHeaderResponse> headerTree = buildHeaderTree();
+        DATableHeaderDTO approvedHeaders = buildHeaderResponse(headerTree);
+        DATableHeaderDTO pendingHeaders = buildHeaderResponse(headerTree);
+
         DATableApprovalResponse approvalResponse = new DATableApprovalResponse();
-        approvalResponse.setApproved(buildTableData(designations, false, this::loadApprovedValues));
-        approvalResponse.setPending(buildTableData(designations, false, this::loadPendingValues));
+        approvalResponse.setApproved(buildTableData(designations, false, approvedHeaders, approvedValueIndex));
+        approvalResponse.setPending(buildTableData(designations, false, pendingHeaders, pendingValueIndex));
         populateDesignationLists(approvalResponse, designations);
 
         StandardResponse<DATableApprovalResponse> response =
@@ -678,39 +696,9 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<DATableHeaderDTO>> getDaTableById(Integer designationId)
+    public ResponseEntity<StandardResponse<DATableApprovalResponse>> getDaTableById(Integer designationId)
             throws ApiRequestException {
         log.info("START : DaDesignationServiceImpl | getDaTableById | designationId={}", designationId);
-
-        if (designationId == null) {
-            throw new ApiRequestException("designationId cannot be null");
-        }
-
-        daDesignationMasterRepository.findById(designationId)
-                .orElseThrow(() -> new ApiRequestException(
-                        "DA Designation with id " + designationId + " does not exist"));
-
-        DATableHeaderDTO headers = buildHeaderResponse();
-        Map<Integer, DATableHeadingResponse> committeeLeaves = indexLeafHeaders(headers.getCommitteeTableHeaders());
-        Map<Integer, DATableHeadingResponse> individualLeaves = indexLeafHeaders(headers.getIndividualTableHeaders());
-
-        String committeeFlag = AppsConstants.YesNo.Y.name();
-        String individualFlag = AppsConstants.YesNo.N.name();
-
-        putDesignationValuesOnHeaders(committeeLeaves, designationId, loadValuesPreferApproved(designationId, committeeFlag));
-        putDesignationValuesOnHeaders(individualLeaves, designationId, loadValuesPreferApproved(designationId, individualFlag));
-
-        StandardResponse<DATableHeaderDTO> response =
-                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), headers);
-        log.info("END : getDaTableById | designationId={}", designationId);
-        return ResponseEntity.ok(response);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<StandardResponse<DADesignationListDTO>> deleteDaDesignation(Integer designationId)
-            throws ApiRequestException {
-        log.info("START : DaDesignationServiceImpl | deleteDaDesignation | designationId={}", designationId);
 
         if (designationId == null) {
             throw new ApiRequestException("designationId cannot be null");
@@ -720,22 +708,26 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                 .orElseThrow(() -> new ApiRequestException(
                         "DA Designation with id " + designationId + " does not exist"));
 
-        // DA_DESIGNATION (master) is never modified by delete; only pending DA_LIMITS_TEMP can be removed.
-        daLimitTempRepository.deleteByDesignationId(designationId);
+        List<DALimit> approvedLimits = daLimitRepository.findAllByDesignationIdAndStatus(
+            designationId, AppsConstants.Status.ACT.name());
+        List<DALimitTemp> pendingLimits = daLimitTempRepository.findAllByDesignationIdAndStatus(
+            designationId, AppsConstants.Status.ACT.name());
+        Map<Integer, Map<String, Map<Integer, Double>>> approvedValueIndex = indexApprovedValues(approvedLimits);
+        Map<Integer, Map<String, Map<Integer, Double>>> pendingValueIndex = indexPendingValues(pendingLimits);
 
-        StandardResponse<DADesignationListDTO> response = new StandardResponse<>(
-                ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), new DADesignationListDTO(designation));
-        log.info("END : deleteDaDesignation | designationId={}", designationId);
+        List<DAHeaderResponse> headerTree = buildHeaderTree();
+        DATableHeaderDTO approvedHeaders = buildHeaderResponse(headerTree);
+        DATableHeaderDTO pendingHeaders = buildHeaderResponse(headerTree);
+
+        DATableApprovalResponse approvalResponse = new DATableApprovalResponse();
+        approvalResponse.setApproved(buildTableData(Collections.singletonList(designation), true, approvedHeaders, approvedValueIndex));
+        approvalResponse.setPending(buildTableData(Collections.singletonList(designation), true, pendingHeaders, pendingValueIndex));
+        populateDesignationLists(approvalResponse, Collections.singletonList(designation));
+
+        StandardResponse<DATableApprovalResponse> response =
+            new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), approvalResponse);
+        log.info("END : getDaTableById | designationId={}", designationId);
         return ResponseEntity.ok(response);
-    }
-
-    /** DA_LIMITS (approved) values if present for this designation/table; otherwise DA_LIMITS_TEMP (pending) values. */
-    private Map<Integer, Double> loadValuesPreferApproved(Integer designationId, String isCommittee) {
-        Map<Integer, Double> approvedValues = loadApprovedValues(designationId, isCommittee);
-        if (!approvedValues.isEmpty()) {
-            return approvedValues;
-        }
-        return loadPendingValues(designationId, isCommittee);
     }
 
     /**
@@ -765,13 +757,13 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                 .filter(designation -> committeeIds.contains(designation.getId()))
                 .map(designation -> new DADesignationListDTO(designation, committeeFlag))
                 .sorted(Comparator.comparing(DADesignationListDTO::getDisplayOrder, Comparator.nullsLast(Integer::compareTo)))
-                .collect(Collectors.toList());
+                .toList();
 
         List<DADesignationListDTO> individualList = designations.stream()
                 .filter(designation -> individualIds.contains(designation.getId()))
                 .map(designation -> new DADesignationListDTO(designation, individualFlag))
                 .sorted(Comparator.comparing(DADesignationListDTO::getDisplayOrder, Comparator.nullsLast(Integer::compareTo)))
-                .collect(Collectors.toList());
+                .toList();
 
         approvalResponse.setCommitteeDesignationList(committeeList);
         approvalResponse.setIndividualDesignationList(individualList);
@@ -783,8 +775,8 @@ public class DaDesignationServiceImpl implements DaDesignationService {
      */
     private DATableDataResponse buildTableData(List<DADesignationData> designations,
                                                boolean includeEmptyRows,
-                                               BiFunction<Integer, String, Map<Integer, Double>> valuesLoader) {
-        DATableHeaderDTO headers = buildHeaderResponse();
+                                               DATableHeaderDTO headers,
+                                               Map<Integer, Map<String, Map<Integer, Double>>> valueIndex) {
         DATableDataResponse tableData = new DATableDataResponse();
         tableData.setCommitteeTableHeaders(headers.getCommitteeTableHeaders());
         tableData.setIndividualTableHeaders(headers.getIndividualTableHeaders());
@@ -796,14 +788,14 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         String individualFlag = AppsConstants.YesNo.N.name();
 
         for (DADesignationData designation : designations) {
-            Map<Integer, Double> committeeValues = valuesLoader.apply(designation.getId(), committeeFlag);
+            Map<Integer, Double> committeeValues = getValuesFromIndex(valueIndex, designation.getId(), committeeFlag);
             if (includeEmptyRows || !committeeValues.isEmpty()) {
                 tableData.getCommitteeRows().add(
                         buildRowResponse(designation, DaTableType.COMMITTEE, committeeFlag, committeeValues));
                 putDesignationValuesOnHeaders(committeeLeaves, designation.getId(), committeeValues);
             }
 
-            Map<Integer, Double> individualValues = valuesLoader.apply(designation.getId(), individualFlag);
+            Map<Integer, Double> individualValues = getValuesFromIndex(valueIndex, designation.getId(), individualFlag);
             if (includeEmptyRows || !individualValues.isEmpty()) {
                 tableData.getIndividualRows().add(
                         buildRowResponse(designation, DaTableType.INDIVIDUAL, individualFlag, individualValues));
@@ -818,10 +810,27 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         return tableData;
     }
 
+        private DATableHeaderDTO buildHeaderResponse(List<DAHeaderResponse> rootHeaders) {
+        List<DATableHeadingResponse> individual = rootHeaders.stream()
+            .filter(h -> DaTableType.INDIVIDUAL.equals(h.getTableType()))
+            .map(this::mapToJsonStructure)
+            .toList();
+
+        List<DATableHeadingResponse> committee = rootHeaders.stream()
+            .filter(h -> DaTableType.COMMITTEE.equals(h.getTableType()))
+            .map(this::mapToJsonStructure)
+            .toList();
+
+        DATableHeaderDTO dto = new DATableHeaderDTO();
+        dto.setIndividualTableHeaders(individual);
+        dto.setCommitteeTableHeaders(committee);
+        return dto;
+        }
+
     private DADesignationTableDTO buildRowResponse(DADesignationData designation,
-                                                    DaTableType tableType,
-                                                    String isCommittee,
-                                                    Map<Integer, Double> values) {
+                                                   DaTableType tableType,
+                                                   String isCommittee,
+                                                   Map<Integer, Double> values) {
         DADesignationTableDTO row = new DADesignationTableDTO();
         row.setDesignationId(designation.getId());
         row.setDesignationCode(designation.getDesignationCode());
@@ -836,26 +845,68 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         return row;
     }
 
-    /** Approved values only, from DA_LIMITS. Keys are column subId. */
-    private Map<Integer, Double> loadApprovedValues(Integer designationId, String isCommittee) {
-        Map<Integer, Double> tableValues = new LinkedHashMap<>();
-        daLimitRepository.findAllByDesignationIdAndIsCommitteeAndStatus(
-                        designationId, isCommittee, AppsConstants.Status.ACT.name())
-                .stream()
-                .sorted(Comparator.comparing(DALimit::getColumnId, Comparator.nullsLast(Integer::compareTo)))
-                .forEach(limit -> tableValues.put(limit.getColumnId(), limit.getRiskValue()));
-        return tableValues;
+
+    private Map<Integer, Map<String, Map<Integer, Double>>> indexApprovedValues(List<DALimit> limits) {
+        Map<Integer, Map<String, Map<Integer, Double>>> valueIndex = new HashMap<>();
+        if (CollectionUtils.isEmpty(limits)) {
+            return valueIndex;
+        }
+
+        for (DALimit limit : limits) {
+            if (limit == null || limit.getDesignationId() == null || !StringUtils.hasText(limit.getIsCommittee())
+                    || limit.getColumnId() == null || limit.getRiskValue() == null) {
+                continue;
+            }
+
+            valueIndex
+                    .computeIfAbsent(limit.getDesignationId(), k -> new HashMap<>())
+                    .computeIfAbsent(limit.getIsCommittee(), k -> new LinkedHashMap<>())
+                    .put(limit.getColumnId(), limit.getRiskValue());
+        }
+
+        return valueIndex;
     }
 
-    /** Pending values only, from DA_LIMITS_TEMP. Keys are column subId. */
-    private Map<Integer, Double> loadPendingValues(Integer designationId, String isCommittee) {
-        Map<Integer, Double> tableValues = new LinkedHashMap<>();
-        daLimitTempRepository.findAllByDesignationIdAndIsCommitteeAndStatus(
-                        designationId, isCommittee, AppsConstants.Status.ACT.name())
-                .stream()
-                .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
-                .forEach(limit -> tableValues.put(limit.getColumnId(), limit.getRiskValue()));
-        return tableValues;
+    private Map<Integer, Map<String, Map<Integer, Double>>> indexPendingValues(List<DALimitTemp> limits) {
+        Map<Integer, Map<String, Map<Integer, Double>>> valueIndex = new HashMap<>();
+        if (CollectionUtils.isEmpty(limits)) {
+            return valueIndex;
+        }
+
+        for (DALimitTemp limit : limits) {
+            if (limit == null || limit.getDesignation() == null || limit.getDesignation().getId() == null
+                    || !StringUtils.hasText(limit.getIsCommittee()) || limit.getColumnId() == null
+                    || limit.getRiskValue() == null) {
+                continue;
+            }
+
+            valueIndex
+                    .computeIfAbsent(limit.getDesignation().getId(), k -> new HashMap<>())
+                    .computeIfAbsent(limit.getIsCommittee(), k -> new LinkedHashMap<>())
+                    .put(limit.getColumnId(), limit.getRiskValue());
+        }
+
+        return valueIndex;
+    }
+
+    private Map<Integer, Double> getValuesFromIndex(Map<Integer, Map<String, Map<Integer, Double>>> valueIndex,
+                                                    Integer designationId,
+                                                    String isCommittee) {
+        if (designationId == null || !StringUtils.hasText(isCommittee) || CollectionUtils.isEmpty(valueIndex)) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, Map<Integer, Double>> byCommittee = valueIndex.get(designationId);
+        if (CollectionUtils.isEmpty(byCommittee)) {
+            return Collections.emptyMap();
+        }
+
+        Map<Integer, Double> values = byCommittee.get(isCommittee);
+        if (CollectionUtils.isEmpty(values)) {
+            return Collections.emptyMap();
+        }
+
+        return new LinkedHashMap<>(values);
     }
 
     /** Puts designationId -> riskValue onto each leaf header for the matching subId. */
@@ -898,4 +949,38 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseEntity<StandardResponse<DADesignationListDTO>> deleteDaDesignation(Integer designationId)
+            throws ApiRequestException {
+        log.info("START : DaDesignationServiceImpl | deleteDaDesignation | designationId={}", designationId);
+
+        if (designationId == null) {
+            throw new ApiRequestException("designationId cannot be null");
+        }
+        List<DALimitTemp> deletedRecords = new ArrayList<>();
+        List<DALimitTemp> tempLimits = daLimitTempRepository.findAllByDesignationId(designationId);
+        for( DALimitTemp temp : tempLimits) {
+            temp.setStatus(AppsConstants.Status.INA);
+            temp.setModifiedBy(UserContext.getUsername());
+            temp.setLastModifiedDate(new Date());
+            deletedRecords.add(temp);
+        }
+
+        daLimitTempRepository.saveAll(deletedRecords);
+
+        DADesignationData designation = daDesignationMasterRepository.findById(designationId)
+                .orElseThrow(() -> new ApiRequestException(
+                        "DA Designation with id " + designationId + " does not exist"));
+        designation.setStatus(Status.INA);
+        designation.setModifiedBy(UserContext.getUsername());
+        designation.setModifiedDate(new Date());
+        daDesignationMasterRepository.save(designation);
+
+
+        StandardResponse<DADesignationListDTO> response = new StandardResponse<>(
+                ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), new DADesignationListDTO(designation));
+        log.info("END : deleteDaDesignation | designationId={}", designationId);
+        return ResponseEntity.ok(response);
+    }
 }

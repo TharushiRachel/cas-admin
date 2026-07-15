@@ -24,20 +24,6 @@ public interface DADesignationRepository extends JpaRepository<DADesignationData
     )
     List<DADesignationData> findAllByStatus(@Param("status") String status);
 
-    @Query(
-            value = """
-                    SELECT *
-                    FROM DA_DESIGNATION
-                    WHERE IS_COMMITTEE = :isCommittee
-                      AND STATUS = :status
-                    ORDER BY DISPLAY_ORDER ASC
-                    """,
-            nativeQuery = true
-    )
-    List<DADesignationData> findAllByIsCommitteeAndStatusOrderByDisplayOrderAsc(
-            @Param("isCommittee") String isCommittee,
-            @Param("status") String status);
-
     /**
      * One designation master per code (shared by committee and individual limit rows).
      */

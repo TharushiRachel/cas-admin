@@ -33,16 +33,4 @@ public interface DALimitHeadingRepository extends JpaRepository<DATableHeader, L
     )
     List<DATableHeader> findByTableTypeAndSubIdIsNotNull(@Param("tableType") String tableType);
 
-    @Query(
-            value = """
-                    SELECT *
-                    FROM CASV3_T_DA_TABLE_HEADER
-                    WHERE TABLE_TYPE = :tableType
-                      AND SUB_ID = :subId
-                    ORDER BY DISPLAY_ORDER ASC
-                    """,
-            nativeQuery = true
-    )
-    List<DATableHeader> findByTableTypeAndSubId(@Param("tableType") String tableType,
-                                                @Param("subId") Integer subId);
 }

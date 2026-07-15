@@ -20,9 +20,10 @@ public interface DaDesignationService {
     ResponseEntity<StandardResponse<DADesignationBulkSaveResponse>> approveRejectDaDesignationLimits(
             ApproveRejectRQ request) throws ApiRequestException;
 
-    ResponseEntity<StandardResponse<DATableHeaderDTO>> getDaTableById(Integer designationId) throws ApiRequestException;
+        ResponseEntity<StandardResponse<DATableApprovalResponse>> getDaTableById(Integer designationId) throws ApiRequestException;
 
     ResponseEntity<StandardResponse<DATableApprovalResponse>> getDaTable() throws ApiRequestException;
 
-    ResponseEntity<StandardResponse<DADesignationListDTO>> deleteDaDesignation(Integer designationId) throws ApiRequestException;
+    ResponseEntity<StandardResponse<DADesignationListDTO>> deleteDaDesignation(Integer designationId)
+            throws ApiRequestException;
 }

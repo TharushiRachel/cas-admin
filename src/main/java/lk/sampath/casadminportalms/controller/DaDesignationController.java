@@ -51,14 +51,14 @@ public class DaDesignationController {
     }
 
     @GetMapping("/table/{designationId}")
-    public ResponseEntity<StandardResponse<DATableHeaderDTO>> getDaTableById(
+    public ResponseEntity<StandardResponse<DATableApprovalResponse>> getDaTableById(
             @PathVariable Integer designationId) throws ApiRequestException {
         return daDesignationService.getDaTableById(designationId);
     }
 
-    @PostMapping("/delete/{designationId}")
-    public ResponseEntity<StandardResponse<DADesignationListDTO>> deleteDaDesignation(
-            @PathVariable Integer designationId) throws ApiRequestException {
+    @GetMapping("/deleteDaDesignation/{designationId}")
+    public ResponseEntity<StandardResponse<DADesignationListDTO>> deleteDaDesignation(@PathVariable Integer designationId)
+            throws ApiRequestException {
         return daDesignationService.deleteDaDesignation(designationId);
     }
 }
