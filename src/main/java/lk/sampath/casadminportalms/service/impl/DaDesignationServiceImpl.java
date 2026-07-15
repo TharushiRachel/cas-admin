@@ -706,6 +706,31 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         return ResponseEntity.ok(response);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseEntity<StandardResponse<DADesignationListDTO>> deleteDaDesignation(Integer designationId)
+            throws ApiRequestException {
+        log.info("START : DaDesignationServiceImpl | deleteDaDesignation | designationId={}", designationId);
+
+        if (designationId == null) {
+            throw new ApiRequestException("designationId cannot be null");
+        }
+
+        DADesignationData designation = daDesignationMasterRepository.findById(designationId)
+                .orElseThrow(() -> new ApiRequestException(
+                        "DA Designation with id " + designationId + " does not exist"));
+
+        designation.setStatus(Status.INA);
+        designation.setModifiedBy(UserContext.getUsername());
+        designation.setModifiedDate(new Date());
+        designation = daDesignationMasterRepository.saveAndFlush(designation);
+
+        StandardResponse<DADesignationListDTO> response = new StandardResponse<>(
+                ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), new DADesignationListDTO(designation));
+        log.info("END : deleteDaDesignation | designationId={}", designationId);
+        return ResponseEntity.ok(response);
+    }
+
     /** DA_LIMITS (approved) values if present for this designation/table; otherwise DA_LIMITS_TEMP (pending) values. */
     private Map<Integer, Double> loadValuesPreferApproved(Integer designationId, String isCommittee) {
         Map<Integer, Double> approvedValues = loadApprovedValues(designationId, isCommittee);

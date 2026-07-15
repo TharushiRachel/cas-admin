@@ -55,4 +55,10 @@ public class DaDesignationController {
             @PathVariable Integer designationId) throws ApiRequestException {
         return daDesignationService.getDaTableById(designationId);
     }
+
+    @PostMapping("/delete/{designationId}")
+    public ResponseEntity<StandardResponse<DADesignationListDTO>> deleteDaDesignation(
+            @PathVariable Integer designationId) throws ApiRequestException {
+        return daDesignationService.deleteDaDesignation(designationId);
+    }
 }
