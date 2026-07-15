@@ -1,6 +1,7 @@
 package lk.sampath.casadminportalms.entity.daDesignation;
 
 import jakarta.persistence.*;
+import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
 import lk.sampath.casadminportalms.enums.Status;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -58,8 +59,10 @@ public class DADesignationData {
         @Column(name = "AUTHORIZER_DISPLAY_NAME")
         private String authorizedDisplayName;
 
+        @Enumerated(EnumType.STRING)
         @Column(name = "APPROVE_STATUS")
-        private String approveStatus;
+        private MasterDataApproveStatus approveStatus;
+
         @Column(name = "DESIGNATION_CODE")
         private String designationCode;
 

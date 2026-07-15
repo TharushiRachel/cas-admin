@@ -9,8 +9,8 @@ import java.util.List;
 public class DATableDataResponse {
 
     private List<DATableHeadingResponse> committeeTableHeaders = new ArrayList<>();
-    private List<DADesignationSaveResponse> committeeRows = new ArrayList<>();
+    private List<DADesignationTableDTO> committeeRows = new ArrayList<>();
 
     private List<DATableHeadingResponse> individualTableHeaders = new ArrayList<>();
-    private List<DADesignationSaveResponse> individualRows = new ArrayList<>();
+    private List<DADesignationTableDTO> individualRows = new ArrayList<>();
 }

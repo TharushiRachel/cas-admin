@@ -24,6 +24,16 @@ public interface DALimitRepository extends JpaRepository<DALimit, Integer> {
     List<DALimit> findAllByDesignationIdAndStatus(@Param("designationId") Integer designationId,
                                                   @Param("status") String status);
 
+    @Modifying(clearAutomatically = true)
+    @Query(
+            value = """
+                    DELETE FROM DA_LIMITS
+                    WHERE DESIGNATION_ID = :designationId
+                    """,
+            nativeQuery = true
+    )
+    void deleteByDesignationId(@Param("designationId") Integer designationId);
+
     @Query(
             value = """
                     SELECT *
@@ -37,24 +47,4 @@ public interface DALimitRepository extends JpaRepository<DALimit, Integer> {
     List<DALimit> findAllByDesignationIdAndIsCommitteeAndStatus(@Param("designationId") Integer designationId,
                                                                 @Param("isCommittee") String isCommittee,
                                                                 @Param("status") String status);
-
-    @Query(
-            value = """
-                    SELECT *
-                    FROM DA_LIMITS
-                    WHERE STATUS = :status
-                    """,
-            nativeQuery = true
-    )
-    List<DALimit> findAllByStatus(@Param("status") String status);
-
-    @Modifying(clearAutomatically = true)
-    @Query(
-            value = """
-                    DELETE FROM DA_LIMITS
-                    WHERE DESIGNATION_ID = :designationId
-                    """,
-            nativeQuery = true
-    )
-    void deleteByDesignationId(@Param("designationId") Integer designationId);
 }

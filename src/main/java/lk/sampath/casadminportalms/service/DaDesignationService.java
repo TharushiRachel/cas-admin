@@ -12,10 +12,6 @@ public interface DaDesignationService {
 
     ResponseEntity<StandardResponse<DATableHeaderDTO>> getAllLimitHeadings() throws ApiRequestException;
 
-    ResponseEntity<StandardResponse<DATableDataResponse>> getDaTable() throws ApiRequestException;
-
-    ResponseEntity<StandardResponse<DATableDataResponse>> getDaTableById(Integer designationId) throws ApiRequestException;
-
     ResponseEntity<StandardResponse<List<DADesignationCodeDTO>>> getAllDesignationCodeDetails() throws ApiRequestException;
 
     ResponseEntity<StandardResponse<DADesignationBulkSaveResponse>> saveDaDesignationLimits(
@@ -23,4 +19,8 @@ public interface DaDesignationService {
 
     ResponseEntity<StandardResponse<DADesignationBulkSaveResponse>> approveRejectDaDesignationLimits(
             ApproveRejectRQ request) throws ApiRequestException;
+
+    ResponseEntity<StandardResponse<DATableDataResponse>> getDaTableById(Integer designationId) throws ApiRequestException;
+
+    ResponseEntity<StandardResponse<DATableDataResponse>> getDaTable() throws ApiRequestException;
 }

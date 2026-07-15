@@ -26,18 +26,6 @@ public class DaDesignationController {
         return daDesignationService.getAllLimitHeadings();
     }
 
-    @GetMapping("/table")
-    public ResponseEntity<StandardResponse<DATableDataResponse>> getDaTable()
-            throws ApiRequestException {
-        return daDesignationService.getDaTable();
-    }
-
-    @GetMapping("/table/{designationId}")
-    public ResponseEntity<StandardResponse<DATableDataResponse>> getDaTableById(
-            @PathVariable Integer designationId) throws ApiRequestException {
-        return daDesignationService.getDaTableById(designationId);
-    }
-
     @GetMapping("/getDesignationsFromUPM")
     public ResponseEntity<StandardResponse<List<DADesignationCodeDTO>>> getDesignationsFromUPM()
             throws ApiRequestException {
@@ -54,5 +42,17 @@ public class DaDesignationController {
     public ResponseEntity<StandardResponse<DADesignationBulkSaveResponse>> approveRejectDaDesignationLimits(
             @RequestBody ApproveRejectRQ request) throws ApiRequestException {
         return daDesignationService.approveRejectDaDesignationLimits(request);
+    }
+
+    @GetMapping("/table")
+    public ResponseEntity<StandardResponse<DATableDataResponse>> getDaTable()
+            throws ApiRequestException {
+        return daDesignationService.getDaTable();
+    }
+
+    @GetMapping("/table/{designationId}")
+    public ResponseEntity<StandardResponse<DATableDataResponse>> getDaTableById(
+            @PathVariable Integer designationId) throws ApiRequestException {
+        return daDesignationService.getDaTableById(designationId);
     }
 }

@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Data
-public class DADesignationSaveResponse {
+public class DADesignationTableDTO {
 
     private Integer designationId;
     private String designationCode;
@@ -20,5 +20,5 @@ public class DADesignationSaveResponse {
     private Status status;
     private MasterDataApproveStatus approveStatus;
 
-    private Map<String, Double> values = new LinkedHashMap<>();
+    private Map<Integer, Double> tableValues = new LinkedHashMap<>();
 }

@@ -1,5 +1,6 @@
 package lk.sampath.casadminportalms.repository.daDesignation;
 
+import lk.sampath.casadminportalms.entity.daDesignation.DALimit;
 import lk.sampath.casadminportalms.entity.daDesignation.DALimitTemp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
