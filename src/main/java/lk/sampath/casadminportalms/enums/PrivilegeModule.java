@@ -1,15 +1,16 @@
 package lk.sampath.casadminportalms.enums;
 
 public enum PrivilegeModule {
-    WEB("Web"), MOBILE("Mobile");
+  WEB("Web"),
+  MOBILE("Mobile");
 
-    private String description;
+  private String description;
 
-    PrivilegeModule(String description) {
-        this.description = description;
-    }
+  PrivilegeModule(String description) {
+    this.description = description;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getDescription() {
+    return description;
+  }
 }

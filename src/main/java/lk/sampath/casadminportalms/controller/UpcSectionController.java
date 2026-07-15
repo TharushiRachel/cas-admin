@@ -1,5 +1,6 @@
 package lk.sampath.casadminportalms.controller;
 
+import java.util.List;
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.upcsection.UpcSectionDTO;
@@ -11,95 +12,110 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/upcSection")
 public class UpcSectionController {
 
-    private final UpcSectionService upcSectionService;
+  private final UpcSectionService upcSectionService;
 
-    public UpcSectionController(UpcSectionService upcSectionService) {
-        this.upcSectionService = upcSectionService;
-    }
+  public UpcSectionController(UpcSectionService upcSectionService) {
+    this.upcSectionService = upcSectionService;
+  }
 
+  @GetMapping("/upcSectionTemp")
+  public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> viewAllUpcSectionTemp(
+      @RequestHeader(name = "page", required = false) Integer headerPage,
+      @RequestHeader(name = "size", required = false) Integer headerSize,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size)
+      throws ApiRequestException {
+    int effectivePage = headerPage != null ? headerPage : page;
+    int effectiveSize = headerSize != null ? headerSize : size;
+    Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
+    ResponseEntity<StandardResponse<List<UpcSectionDTO>>> upcSectionTempList =
+        upcSectionService.findAllUpcSectionTempList(pageable);
+    return ResponseEntity.ok().body(upcSectionTempList.getBody());
+  }
 
-    @GetMapping("/upcSectionTemp")
-    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> viewAllUpcSectionTemp(
-            @RequestHeader(name = "page", required = false) Integer headerPage,
-            @RequestHeader(name = "size", required = false) Integer headerSize,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        int effectivePage = headerPage != null ? headerPage : page;
-        int effectiveSize = headerSize != null ? headerSize : size;
-        Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
-        ResponseEntity<StandardResponse<List<UpcSectionDTO>>> upcSectionTempList = upcSectionService.findAllUpcSectionTempList(pageable);
-        return ResponseEntity.ok().body(upcSectionTempList.getBody());
-    }
+  @GetMapping("/upcSectionTemp/{upcSectionID}")
+  public ResponseEntity<StandardResponse<UpcSectionDTO>> viewUpcSectionTempById(
+      @PathVariable Integer upcSectionID) throws ApiRequestException {
+    ResponseEntity<StandardResponse<UpcSectionDTO>> upcSectionTemp =
+        upcSectionService.findUpcSectionTempByID(upcSectionID);
+    return ResponseEntity.ok().body(upcSectionTemp.getBody());
+  }
 
+  @GetMapping("/upcSectionList")
+  public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> getPagedUpcSectionData(
+      @RequestHeader(name = "page", required = false) Integer headerPage,
+      @RequestHeader(name = "size", required = false) Integer headerSize,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size)
+      throws ApiRequestException {
+    int effectivePage = headerPage != null ? headerPage : page;
+    int effectiveSize = headerSize != null ? headerSize : size;
+    Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
+    ResponseEntity<StandardResponse<List<UpcSectionDTO>>> pageDataResult =
+        upcSectionService.findAllApprovedUpcSection(pageable);
 
-    @GetMapping("/upcSectionTemp/{upcSectionID}")
-    public ResponseEntity<StandardResponse<UpcSectionDTO>> viewUpcSectionTempById(@PathVariable Integer upcSectionID) throws ApiRequestException {
-        ResponseEntity<StandardResponse<UpcSectionDTO>> upcSectionTemp = upcSectionService.findUpcSectionTempByID(upcSectionID);
-        return ResponseEntity.ok().body(upcSectionTemp.getBody());
-    }
+    return ResponseEntity.ok().body(pageDataResult.getBody());
+  }
 
-    @GetMapping("/upcSectionList")
-    public ResponseEntity<StandardResponse<List<UpcSectionDTO>>> getPagedUpcSectionData(
-            @RequestHeader(name = "page", required = false) Integer headerPage,
-            @RequestHeader(name = "size", required = false) Integer headerSize,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws ApiRequestException {
-        int effectivePage = headerPage != null ? headerPage : page;
-        int effectiveSize = headerSize != null ? headerSize : size;
-        Pageable pageable = PageRequest.of(effectivePage, effectiveSize);
-        ResponseEntity<StandardResponse<List<UpcSectionDTO>>> pageDataResult =
-                upcSectionService.findAllApprovedUpcSection(pageable);
+  @GetMapping("/{upcSectionID}")
+  public ResponseEntity<StandardResponse<UpcSectionDTO>> viewUpcSectionById(
+      @PathVariable Integer upcSectionID) throws ApiRequestException {
+    ResponseEntity<StandardResponse<UpcSectionDTO>> upcSectionDTO =
+        upcSectionService.findApprovedUpcSectionByID(upcSectionID);
+    return ResponseEntity.ok().body(upcSectionDTO.getBody());
+  }
 
-        return ResponseEntity.ok().body(pageDataResult.getBody());
-    }
+  @PostMapping
+  public ResponseEntity<StandardResponse<UpcSectionDTO>> saveUpcSection(
+      @Validated @RequestBody UpcSectionDTO request) throws ApiRequestException {
+    ResponseEntity<StandardResponse<UpcSectionDTO>> saveUpcSection =
+        upcSectionService.saveUpcSectionTemp(request);
+    return ResponseEntity.ok().body(saveUpcSection.getBody());
+  }
 
+  @PostMapping("/approveRejectUpcSection")
+  public ResponseEntity<StandardResponse<UpcSectionDTO>> approveRejectUpcSection(
+      @RequestBody ApproveRejectRQ request) throws ApiRequestException {
+    ResponseEntity<StandardResponse<UpcSectionDTO>> approvedUpcSection =
+        upcSectionService.approveRejectUpcSection(request);
+    return ResponseEntity.ok().body(approvedUpcSection.getBody());
+  }
 
-    @GetMapping("/{upcSectionID}")
-    public ResponseEntity<StandardResponse<UpcSectionDTO>> viewUpcSectionById(@PathVariable Integer upcSectionID) throws ApiRequestException {
-        ResponseEntity<StandardResponse<UpcSectionDTO>>  upcSectionDTO = upcSectionService.findApprovedUpcSectionByID(upcSectionID);
-        return ResponseEntity.ok().body(upcSectionDTO.getBody());
-    }
+  @PostMapping("/updateUpcSectionTemp/{upcSectionID}")
+  public ResponseEntity<StandardResponse<UpcSectionDTO>> updateUpcSectionTemp(
+      @PathVariable Integer upcSectionID, @Validated @RequestBody UpcSectionDTO request)
+      throws ApiRequestException {
+    ResponseEntity<StandardResponse<UpcSectionDTO>> upcSectionTemp =
+        upcSectionService.updateUpcSectionTemp(upcSectionID, request);
+    return ResponseEntity.ok().body(upcSectionTemp.getBody());
+  }
 
-    @PostMapping
-    public ResponseEntity<StandardResponse<UpcSectionDTO>> saveUpcSection(@Validated @RequestBody UpcSectionDTO request) throws ApiRequestException {
-        ResponseEntity<StandardResponse<UpcSectionDTO>> saveUpcSection = upcSectionService.saveUpcSectionTemp(request);
-        return ResponseEntity.ok().body(saveUpcSection.getBody());
-    }
+  @PostMapping("/updateUpcSectionMaster/{upcSectionID}")
+  public ResponseEntity<StandardResponse<UpcSectionDTO>> updateApprovedUpcSection(
+      @PathVariable Integer upcSectionID, @Validated @RequestBody UpcSectionDTO upcSectionDTO)
+      throws ApiRequestException {
+    ResponseEntity<StandardResponse<UpcSectionDTO>> updateApprovedUpcSection =
+        upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO);
+    return ResponseEntity.ok().body(updateApprovedUpcSection.getBody());
+  }
 
-    @PostMapping("/approveRejectUpcSection")
-    public ResponseEntity<StandardResponse<UpcSectionDTO>> approveRejectUpcSection(@RequestBody ApproveRejectRQ request) throws ApiRequestException {
-        ResponseEntity<StandardResponse<UpcSectionDTO>> approvedUpcSection = upcSectionService.approveRejectUpcSection(request);
-        return ResponseEntity.ok().body(approvedUpcSection.getBody());
-    }
+  @PostMapping("/upcSectionTemp/deleteUpcSectionTemp")
+  public ResponseEntity<StandardResponse<Void>> deleteUpcSectionTemp(
+      @Validated @RequestBody UpcSectionDTO request) throws ApiRequestException {
+    ResponseEntity<StandardResponse<Void>> upcSection =
+        upcSectionService.deleteUpcSectionFormTemp(request.getUpcSectionID());
+    return ResponseEntity.ok().body(upcSection.getBody());
+  }
 
-    @PostMapping("/updateUpcSectionTemp/{upcSectionID}")
-    public ResponseEntity<StandardResponse<UpcSectionDTO>> updateUpcSectionTemp(@PathVariable Integer upcSectionID, @Validated @RequestBody UpcSectionDTO request) throws ApiRequestException {
-        ResponseEntity<StandardResponse<UpcSectionDTO>> upcSectionTemp = upcSectionService.updateUpcSectionTemp(upcSectionID, request);
-        return ResponseEntity.ok().body(upcSectionTemp.getBody());
-    }
-
-    @PostMapping("/updateUpcSectionMaster/{upcSectionID}")
-    public ResponseEntity<StandardResponse<UpcSectionDTO>> updateApprovedUpcSection(@PathVariable Integer upcSectionID, @Validated @RequestBody UpcSectionDTO upcSectionDTO) throws ApiRequestException{
-        ResponseEntity<StandardResponse<UpcSectionDTO>> updateApprovedUpcSection = upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO);
-        return ResponseEntity.ok().body(updateApprovedUpcSection.getBody());
-    }
-
-
-    @PostMapping("/upcSectionTemp/deleteUpcSectionTemp")
-    public ResponseEntity<StandardResponse<Void>> deleteUpcSectionTemp(@Validated @RequestBody UpcSectionDTO request) throws ApiRequestException{
-        ResponseEntity<StandardResponse<Void>> upcSection = upcSectionService.deleteUpcSectionFormTemp(request.getUpcSectionID());
-        return ResponseEntity.ok().body(upcSection.getBody());
-    }
-
-    @GetMapping("/approvedActiveList")
-    public ResponseEntity<StandardResponse<UpcSectionDTO>> approvedActiveList() throws ApiRequestException {
-        ResponseEntity<StandardResponse<UpcSectionDTO>>  upcSectionDTO = upcSectionService.approvedActiveList();
-        return ResponseEntity.ok().body(upcSectionDTO.getBody());
-    }
+  @GetMapping("/approvedActiveList")
+  public ResponseEntity<StandardResponse<UpcSectionDTO>> approvedActiveList()
+      throws ApiRequestException {
+    ResponseEntity<StandardResponse<UpcSectionDTO>> upcSectionDTO =
+        upcSectionService.approvedActiveList();
+    return ResponseEntity.ok().body(upcSectionDTO.getBody());
+  }
 }

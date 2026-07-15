@@ -1,9 +1,8 @@
-package lk.sampath.casadminportalms.repository;
+package lk.sampath.casadminportalms.repository.committeepool;
 
 import lk.sampath.casadminportalms.entity.committeepool.CommitteePoolTemp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CommitteePoolTempRepository extends JpaRepository<CommitteePoolTemp, Integer> {
-}
+public interface CommitteePoolTempRepository extends JpaRepository<CommitteePoolTemp, Integer> {}

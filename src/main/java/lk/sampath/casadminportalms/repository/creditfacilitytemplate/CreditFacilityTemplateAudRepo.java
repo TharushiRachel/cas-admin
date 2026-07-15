@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CreditFacilityTemplateAudRepo extends JpaRepository<CreditFacilityTemplateAud, Integer> {
-}
+public interface CreditFacilityTemplateAudRepo
+    extends JpaRepository<CreditFacilityTemplateAud, Integer> {}

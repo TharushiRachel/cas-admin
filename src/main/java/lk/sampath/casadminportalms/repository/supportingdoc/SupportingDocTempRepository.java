@@ -7,10 +7,12 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SupportingDocTempRepository extends JpaRepository<SupportingDocTemp, Integer>, QuerydslPredicateExecutor<SupportingDocTemp> {
+public interface SupportingDocTempRepository
+    extends JpaRepository<SupportingDocTemp, Integer>,
+        QuerydslPredicateExecutor<SupportingDocTemp> {
 
-    @Query(value = "SELECT SEQ_T_UPC_TEMPLATE_DATA.NEXTVAL FROM DUAL", nativeQuery = true)
-    Integer getCurrentSequenceValue();
-    
-    boolean existsByDocumentName(String documentName);
+  @Query(value = "SELECT SEQ_T_UPC_TEMPLATE_DATA.NEXTVAL FROM DUAL", nativeQuery = true)
+  Integer getCurrentSequenceValue();
+
+  boolean existsByDocumentName(String documentName);
 }

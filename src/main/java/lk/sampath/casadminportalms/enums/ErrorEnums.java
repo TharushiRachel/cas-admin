@@ -1,43 +1,40 @@
 package lk.sampath.casadminportalms.enums;
 
-import lombok.Data;
-
 public enum ErrorEnums {
+  SUCCESS_CODE("Success", "200", true),
+  FAILED_CODE("Failed", "500", false);
+  private String label;
+  private String code;
 
-    SUCCESS_CODE("Success", "200", true);
+  private Boolean status;
 
-    private String label;
-    private String code;
+  ErrorEnums(String label, String code, Boolean status) {
+    this.label = label;
+    this.code = code;
+    this.status = status;
+  }
 
-    private Boolean status;
+  public String getLabel() {
+    return label;
+  }
 
-    ErrorEnums(String label, String code, Boolean status) {
-        this.label = label;
-        this.code = code;
-        this.status = status;
-    }
+  public void setLabel(String label) {
+    this.label = label;
+  }
 
-    public String getLabel() {
-        return label;
-    }
+  public String getCode() {
+    return code;
+  }
 
-    public void setLabel(String label) {
-        this.label = label;
-    }
+  public void setCode(String code) {
+    this.code = code;
+  }
 
-    public String getCode() {
-        return code;
-    }
+  public Boolean getStatus() {
+    return status;
+  }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
+  public void setStatus(Boolean status) {
+    this.status = status;
+  }
 }

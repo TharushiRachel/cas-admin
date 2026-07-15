@@ -11,7 +11,6 @@ package lk.sampath.casadminportalms.util;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
-
 import java.lang.reflect.Field;
 
 public class EntityUtils {

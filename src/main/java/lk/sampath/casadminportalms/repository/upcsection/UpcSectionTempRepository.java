@@ -7,7 +7,8 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UpcSectionTempRepository extends JpaRepository<UpcSectionTemp, Integer>, QuerydslPredicateExecutor<UpcSectionTemp> {
-    @Query(value = "SELECT SEQ_T_UPC_SECTION.NEXTVAL FROM DUAL", nativeQuery = true)
-    Integer getCurrentSequenceValue();
+public interface UpcSectionTempRepository
+    extends JpaRepository<UpcSectionTemp, Integer>, QuerydslPredicateExecutor<UpcSectionTemp> {
+  @Query(value = "SELECT SEQ_T_UPC_SECTION.NEXTVAL FROM DUAL", nativeQuery = true)
+  Integer getCurrentSequenceValue();
 }

@@ -1,13 +1,12 @@
 package lk.sampath.casadminportalms.entity.upctemplate;
 
 import jakarta.persistence.*;
+import java.util.List;
 import lk.sampath.casadminportalms.entity.common.ApprovableEntity;
 import lk.sampath.casadminportalms.enums.Status;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 @Entity
 @Setter
@@ -16,30 +15,32 @@ import java.util.List;
 @Table(name = "CASV3_T_UPC_TEMPLATE_TEMP")
 public class UpcTemplateTemp extends ApprovableEntity {
 
-    @Id
-    @Column(name = "UPC_TEMPLATE_ID")
-    private Integer upcTemplateID;
+  @Id
+  @Column(name = "UPC_TEMPLATE_ID")
+  private Integer upcTemplateID;
 
-    @Column(name = "TEMPLATE_NAME")
-    private String templateName;
+  @Column(name = "TEMPLATE_NAME")
+  private String templateName;
 
-    @Column(name = "DESCRIPTION")
-    private String description;
+  @Column(name = "DESCRIPTION")
+  private String description;
 
-    @Column(name = "UPC_LABEL")
-    private String upcLabel;
+  @Column(name = "UPC_LABEL")
+  private String upcLabel;
 
-    @Column(name = "UPC_LABEL_BACKGROUND_COLOR")
-    private String upcLabelBackgroundColor;
+  @Column(name = "UPC_LABEL_BACKGROUND_COLOR")
+  private String upcLabelBackgroundColor;
 
-    @Column(name = "UPC_LABEL_FONT_COLOR")
-    private String upcLabelFontColor;
+  @Column(name = "UPC_LABEL_FONT_COLOR")
+  private String upcLabelFontColor;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "STATUS")
-    private Status status;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "STATUS")
+  private Status status;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE}, mappedBy = "upcTemplateTemp")
-    private List<UpcTemplateDataTemp> upcTemplateDataTempList;
-
+  @OneToMany(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.MERGE},
+      mappedBy = "upcTemplateTemp")
+  private List<UpcTemplateDataTemp> upcTemplateDataTempList;
 }

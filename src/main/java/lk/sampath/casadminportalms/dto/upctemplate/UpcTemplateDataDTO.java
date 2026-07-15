@@ -7,39 +7,39 @@ import lombok.Data;
 @Data
 public class UpcTemplateDataDTO {
 
-    private Integer upcTemplateDataID;
+  private Integer upcTemplateDataID;
 
-    private Integer upcTemplateID;
+  private Integer upcTemplateID;
 
-    private Integer upcSectionID;
+  private Integer upcSectionID;
 
-    private Integer parentSectionID;
+  private Integer parentSectionID;
 
-    private Integer sectionLevel;
+  private Integer sectionLevel;
 
-    private Integer displayOrder;
+  private Integer displayOrder;
 
-    private String upcSectionName;
+  private String upcSectionName;
 
-    public UpcTemplateDataDTO(){}
+  public UpcTemplateDataDTO() {}
 
-    public UpcTemplateDataDTO(UpcTemplateDataTemp upcTemplateData){
-        this.upcTemplateDataID = upcTemplateData.getUpcTemplateDataID();
-        this.upcTemplateID = upcTemplateData.getUpcTemplateTemp().getUpcTemplateID();
-        this.upcSectionID = upcTemplateData.getUpcSection().getUpcSectionID();
-        this.displayOrder = upcTemplateData.getDisplayOrder();
-        this.parentSectionID = upcTemplateData.getParentSectionID();
-        this.sectionLevel = upcTemplateData.getSectionLevel();
-        this.upcSectionName = upcTemplateData.getUpcSection().getUpcSectionName();
-    }
+  public UpcTemplateDataDTO(UpcTemplateDataTemp upcTemplateData) {
+    this.upcTemplateDataID = upcTemplateData.getUpcTemplateDataID();
+    this.upcTemplateID = upcTemplateData.getUpcTemplateTemp().getUpcTemplateID();
+    this.upcSectionID = upcTemplateData.getUpcSection().getUpcSectionID();
+    this.displayOrder = upcTemplateData.getDisplayOrder();
+    this.parentSectionID = upcTemplateData.getParentSectionID();
+    this.sectionLevel = upcTemplateData.getSectionLevel();
+    this.upcSectionName = upcTemplateData.getUpcSection().getUpcSectionName();
+  }
 
-    public UpcTemplateDataDTO(UpcTemplateData upcTemplateData){
-        this.upcTemplateDataID = upcTemplateData.getUpcTemplateDataID();
-        this.upcTemplateID = upcTemplateData.getUpcTemplate().getUpcTemplateID();
-        this.upcSectionID = upcTemplateData.getUpcSection().getUpcSectionID();
-        this.displayOrder = upcTemplateData.getDisplayOrder();
-        this.parentSectionID = upcTemplateData.getParentSectionID();
-        this.sectionLevel = upcTemplateData.getSectionLevel();
-        this.upcSectionName = upcTemplateData.getUpcSection().getUpcSectionName();
-    }
+  public UpcTemplateDataDTO(UpcTemplateData upcTemplateData) {
+    this.upcTemplateDataID = upcTemplateData.getUpcTemplateDataID();
+    this.upcTemplateID = upcTemplateData.getUpcTemplate().getUpcTemplateID();
+    this.upcSectionID = upcTemplateData.getUpcSection().getUpcSectionID();
+    this.displayOrder = upcTemplateData.getDisplayOrder();
+    this.parentSectionID = upcTemplateData.getParentSectionID();
+    this.sectionLevel = upcTemplateData.getSectionLevel();
+    this.upcSectionName = upcTemplateData.getUpcSection().getUpcSectionName();
+  }
 }

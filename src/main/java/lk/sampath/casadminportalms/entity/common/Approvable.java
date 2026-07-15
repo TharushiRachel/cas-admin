@@ -1,25 +1,24 @@
 package lk.sampath.casadminportalms.entity.common;
 
-import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
-
 import java.io.Serializable;
 import java.util.Date;
+import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
 
 public interface Approvable extends Serializable {
 
-    public MasterDataApproveStatus getApproveStatus();
+  public MasterDataApproveStatus getApproveStatus();
 
-    public void setApproveStatus(MasterDataApproveStatus approveStatus);
+  public void setApproveStatus(MasterDataApproveStatus approveStatus);
 
-    public Date getApprovedDate();
+  public Date getApprovedDate();
 
-    public void setApprovedDate(Date approvedDate);
+  public void setApprovedDate(Date approvedDate);
 
-    public String getApprovedBy();
+  public String getApprovedBy();
 
-    public void setApprovedBy(String approvedBy);
+  public void setApprovedBy(String approvedBy);
 
-    public Integer getParentRecordID();
+  public Integer getParentRecordID();
 
-    public void setParentRecordID(Integer parentRecordID);
+  public void setParentRecordID(Integer parentRecordID);
 }

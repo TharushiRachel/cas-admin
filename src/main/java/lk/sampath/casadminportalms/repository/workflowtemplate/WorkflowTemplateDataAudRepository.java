@@ -5,6 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface WorkflowTemplateDataAudRepository extends JpaRepository<WorkflowTemplateDataAud, Integer> {
-
-}
+public interface WorkflowTemplateDataAudRepository
+    extends JpaRepository<WorkflowTemplateDataAud, Integer> {}

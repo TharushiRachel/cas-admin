@@ -1,7 +1,7 @@
-package lk.sampath.casadminportalms.enums;//package lk.sampath.casadminportalms.enums;
-//import org.springframework.util.StringUtils;
+package lk.sampath.casadminportalms.enums; // package lk.sampath.casadminportalms.enums;
+// import org.springframework.util.StringUtils;
 //
-//public class DomainConstants {
+// public class DomainConstants {
 //
 //    public enum MasterDataApproveStatus {
 //        PENDING("Pending", "P"),
@@ -125,7 +125,8 @@ package lk.sampath.casadminportalms.enums;//package lk.sampath.casadminportalms.
 ////        public static InterestRatingSubCategory resolve(String status) {
 ////            InterestRatingSubCategory result = null;
 ////            if (org.apache.commons.lang3.StringUtils.isNotEmpty(status)) {
-////                for (InterestRatingSubCategory interestRatingSubCategory : InterestRatingSubCategory.values()) {
+////                for (InterestRatingSubCategory interestRatingSubCategory :
+// InterestRatingSubCategory.values()) {
 ////                    if (interestRatingSubCategory.name().equals(status.toUpperCase())) {
 ////                        result = interestRatingSubCategory;
 ////                        break;
@@ -171,4 +172,4 @@ package lk.sampath.casadminportalms.enums;//package lk.sampath.casadminportalms.
 ////        }
 ////    }
 //
-//}
+// }

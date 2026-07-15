@@ -1,6 +1,5 @@
 package lk.sampath.casadminportalms.service;
 
-
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.creditfacilitytemplate.CftResponse;
@@ -14,19 +13,29 @@ public interface CreditFacilityTemplateService {
 
     ResponseEntity<StandardResponse<Page<CftResponse>>> getAllCreditFacilityTemplatesTemp(Pageable pageable) throws ApiRequestException;
 
-    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> getCreditFacilityTemplateTempByID(Integer creditFacilityTemplateID) throws ApiRequestException;
+  ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> getCreditFacilityTemplateTempByID(
+      Integer creditFacilityTemplateID) throws ApiRequestException;
 
     ResponseEntity<StandardResponse<Page<CftResponse>>> getAllCreditFacilityTemplates(Pageable pageable) throws ApiRequestException;
 
-    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> getCreditFacilityTemplateByID(Integer creditFacilityTemplateID) throws ApiRequestException;
+  ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> getCreditFacilityTemplateByID(
+      Integer creditFacilityTemplateID) throws ApiRequestException;
 
-    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> saveCreditFacilityTemplateTemp(CreditFacilityTemplateDTO creditFacilityTemplateDTO) throws ApiRequestException;
+  ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> saveCreditFacilityTemplateTemp(
+      CreditFacilityTemplateDTO creditFacilityTemplateDTO) throws ApiRequestException;
 
-    public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> updateCreditFacilityTemplateTemp(Integer creditFacilityTemplateID, CreditFacilityTemplateDTO creditFacilityTemplateDTO) throws ApiRequestException;
+  public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>>
+      updateCreditFacilityTemplateTemp(
+          Integer creditFacilityTemplateID, CreditFacilityTemplateDTO creditFacilityTemplateDTO)
+          throws ApiRequestException;
 
-    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> authorizeCreditFacilityTemplate(ApproveRejectRQ approveRejectRQ) throws ApiRequestException;
+  ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> authorizeCreditFacilityTemplate(
+      ApproveRejectRQ approveRejectRQ) throws ApiRequestException;
 
-    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> updateCreditFacilityTemplate(Integer creditFacilityTemplateID, CreditFacilityTemplateDTO creditFacilityTemplateDTO) throws ApiRequestException;
+  ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> updateCreditFacilityTemplate(
+      Integer creditFacilityTemplateID, CreditFacilityTemplateDTO creditFacilityTemplateDTO)
+      throws ApiRequestException;
 
-    ResponseEntity<StandardResponse<Void>> deleteCreditFacilityTemplateTemp(Integer creditFacilityTemplateID);
+  ResponseEntity<StandardResponse<Void>> deleteCreditFacilityTemplateTemp(
+      Integer creditFacilityTemplateID);
 }

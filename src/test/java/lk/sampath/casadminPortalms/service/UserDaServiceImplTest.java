@@ -1,6 +1,14 @@
 package lk.sampath.casadminPortalms.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import com.querydsl.core.BooleanBuilder;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.userda.UserDaDTO;
@@ -23,459 +31,497 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-
-
 class UserDaServiceImplTest {
 
-    @Mock
-    private UserDaTempRepository userDaTempRepository;
+  @Mock private UserDaTempRepository userDaTempRepository;
 
-    @Mock
-    private UserDaRepository userDaRepository;
+  @Mock private UserDaRepository userDaRepository;
 
-    @Mock
-    private UserDaAudRepository userDaAudRepository;
+  @Mock private UserDaAudRepository userDaAudRepository;
 
+  @InjectMocks private UserDaServiceImpl userDaService;
 
-    @InjectMocks
-    private UserDaServiceImpl userDaService;
+  private UserDaTemp userDaTemp;
 
-    private UserDaTemp userDaTemp;
+  private UserDa userDa;
 
-    private UserDa userDa;
+  private UserDaDTO userDaDTO;
 
-    private UserDaDTO userDaDTO;
+  private ApproveRejectRQ approveRejectRQ;
 
-    private ApproveRejectRQ approveRejectRQ;
+  @BeforeEach
+  void setup() {
+    MockitoAnnotations.openMocks(this);
 
+    userDaTemp = new UserDaTemp();
+    userDaTemp.setUserDaID(1);
+    userDaTemp.setUserName("Unit Testing");
+    userDaTemp.setDescription("Unit Testing Description Temp");
+    userDaTemp.setMaxAmount(BigDecimal.valueOf(123));
+    userDaTemp.setApproveStatus(MasterDataApproveStatus.PENDING);
 
-    @BeforeEach
-    void setup(){
-        MockitoAnnotations.openMocks(this);
+    userDa = new UserDa();
+    userDa.setUserDaID(1);
+    userDa.setUserName("Unit Testing");
+    userDa.setDescription("Unit Testing Description");
+    userDa.setMaxAmount(BigDecimal.valueOf(123));
+    userDa.setApproveStatus(MasterDataApproveStatus.APPROVED);
 
-        userDaTemp = new UserDaTemp();
-        userDaTemp.setUserDaID(1);
-        userDaTemp.setUserName("Unit Testing");
-        userDaTemp.setDescription("Unit Testing Description Temp");
-        userDaTemp.setMaxAmount(BigDecimal.valueOf(123));
-        userDaTemp.setApproveStatus(MasterDataApproveStatus.PENDING);
+    userDaDTO = new UserDaDTO();
+    userDaDTO.setUserDaID(1);
+    userDaDTO.setUserName("Old Unit Testing");
+    userDaDTO.setDescription("Old Unit Testing Description");
+    userDaDTO.setMaxAmount(BigDecimal.valueOf(123));
+    userDaDTO.setStatus(Status.INA);
 
+    approveRejectRQ = new ApproveRejectRQ();
+    approveRejectRQ.setApproveRejectDataID(1);
+    approveRejectRQ.setApproveStatus(MasterDataApproveStatus.APPROVED);
+  }
 
-        userDa = new UserDa();
-        userDa.setUserDaID(1);
-        userDa.setUserName("Unit Testing");
-        userDa.setDescription("Unit Testing Description");
-        userDa.setMaxAmount(BigDecimal.valueOf(123));
-        userDa.setApproveStatus(MasterDataApproveStatus.APPROVED);
+  /** findAllUserDaTempList * */
+  @Test
+  void testFindAllUserDaTempList_Success() {
+    List<UserDaTemp> userDaTempList = Arrays.asList(userDaTemp);
 
-        userDaDTO = new UserDaDTO();
-        userDaDTO.setUserDaID(1);
-        userDaDTO.setUserName("Old Unit Testing");
-        userDaDTO.setDescription("Old Unit Testing Description");
-        userDaDTO.setMaxAmount(BigDecimal.valueOf(123));
-        userDaDTO.setStatus(Status.INA);
+    when(userDaTempRepository.findAll()).thenReturn(userDaTempList);
 
-        approveRejectRQ = new ApproveRejectRQ();
-        approveRejectRQ.setApproveRejectDataID(1);
-        approveRejectRQ.setApproveStatus(MasterDataApproveStatus.APPROVED);
+    ResponseEntity<StandardResponse<List<UserDaDTO>>> response =
+        userDaService.findAllUserDaTempList();
 
-    }
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
 
-    /** findAllUserDaTempList **/
+    verify(userDaTempRepository, times(1)).findAll();
+  }
 
-    @Test
-    void testFindAllUserDaTempList_Success() {
-        List<UserDaTemp> userDaTempList = Arrays.asList(userDaTemp);
+  @Test
+  void testFindAllUserDaTempList_EmptyList() throws ApiRequestException {
+    List<UserDaTemp> userDaTempList = Collections.emptyList();
+    when(userDaTempRepository.findAll()).thenReturn(userDaTempList);
 
-        when(userDaTempRepository.findAll()).thenReturn(userDaTempList);
+    ResponseEntity<StandardResponse<List<UserDaDTO>>> response =
+        userDaService.findAllUserDaTempList();
 
-        ResponseEntity<StandardResponse<List<UserDaDTO>>> response = userDaService.findAllUserDaTempList();
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
+    verify(userDaTempRepository, times(1)).findAll();
+  }
 
-        verify(userDaTempRepository, times(1)).findAll();
-    }
-    @Test
-    void testFindAllUserDaTempList_EmptyList() throws ApiRequestException {
-        List<UserDaTemp> userDaTempList = Collections.emptyList();
-        when(userDaTempRepository.findAll()).thenReturn(userDaTempList);
+  /** findUserDaTempByID * */
+  @Test
+  void testFindUserDaTempById_Success() throws ApiRequestException {
+    when(userDaTempRepository.findById(userDaTemp.getUserDaID()))
+        .thenReturn(Optional.of(userDaTemp));
 
-        ResponseEntity<StandardResponse<List<UserDaDTO>>> response = userDaService.findAllUserDaTempList();
+    ResponseEntity<StandardResponse<UserDaDTO>> response =
+        userDaService.findUserDaTempByID(userDaTemp.getUserDaID());
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
 
-        verify(userDaTempRepository, times(1)).findAll();
-    }
+    verify(userDaTempRepository, times(1)).findById(userDaTemp.getUserDaID());
+  }
 
-    /** findUserDaTempByID **/
-    @Test
-    void testFindUserDaTempById_Success() throws ApiRequestException {
-       when(userDaTempRepository.findById(userDaTemp.getUserDaID())).thenReturn(Optional.of(userDaTemp));
+  @Test
+  void testFindUserDaTempById_NotFound() {
+    when(userDaTempRepository.findById(2)).thenReturn(Optional.empty());
 
-       ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.findUserDaTempByID(userDaTemp.getUserDaID());
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              userDaService.findUserDaTempByID(2);
+            });
 
-       assertNotNull(response);
-       assertEquals(HttpStatus.OK, response.getStatusCode());
-       assertNotNull(response.getBody());
+    assertEquals("User Da with TEMP 2 does not exists", exception.getMessage());
 
-       verify(userDaTempRepository, times(1)).findById(userDaTemp.getUserDaID());
-    }
+    verify(userDaTempRepository, times(1)).findById(2);
+  }
 
-    @Test
-    void testFindUserDaTempById_NotFound() {
-        when(userDaTempRepository.findById(2)).thenReturn(Optional.empty());
+  /** findAllApprovedUserDa * */
+  @Test
+  void testFindAllApprovedUserDaList_Success() {
+    List<UserDa> userDaList = Arrays.asList(userDa);
 
-        ApiRequestException exception = assertThrows(ApiRequestException.class, () -> {
-            userDaService.findUserDaTempByID(2);
-        });
+    when(userDaRepository.findAll()).thenReturn(userDaList);
 
-        assertEquals("User Da with TEMP 2 does not exists", exception.getMessage());
+    ResponseEntity<StandardResponse<List<UserDaDTO>>> response =
+        userDaService.findAllApprovedUserDa();
 
-        verify(userDaTempRepository, times(1)).findById(2);
-    }
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
 
-    /** findAllApprovedUserDa **/
-    @Test
-    void testFindAllApprovedUserDaList_Success() {
-        List<UserDa> userDaList = Arrays.asList(userDa);
-
-        when(userDaRepository.findAll()).thenReturn(userDaList);
-
-        ResponseEntity<StandardResponse<List<UserDaDTO>>> response = userDaService.findAllApprovedUserDa();
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-
-        verify(userDaRepository, times(1)).findAll();
-    }
-    @Test
-    void testFindAllApprovedUserDaList_EmptyList() throws ApiRequestException {
-        List<UserDa> userDaList = Collections.emptyList();
-        when(userDaRepository.findAll()).thenReturn(userDaList);
-
-        ResponseEntity<StandardResponse<List<UserDaDTO>>> response = userDaService.findAllApprovedUserDa();
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-
-        verify(userDaRepository, times(1)).findAll();
-    }
-
-    /** findApprovedUserDaById **/
-    @Test
-    void testFindApprovedUserDaById_Success() throws ApiRequestException {
-        when(userDaRepository.findById(userDa.getUserDaID())).thenReturn(Optional.of(userDa));
-
-        ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.findApprovedUserDaById(userDa.getUserDaID());
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-
-        verify(userDaRepository, times(1)).findById(userDa.getUserDaID());
-    }
-
-    @Test
-    void testFindApprovedUserDaById_NotFound() {
-        when(userDaRepository.findById(2)).thenReturn(Optional.empty());
-
-        ApiRequestException exception = assertThrows(ApiRequestException.class, () -> {
-            userDaService.findApprovedUserDaById(2);
-        });
-
-        assertEquals("User Da with 2 does not exists", exception.getMessage());
-
-        verify(userDaRepository, times(1)).findById(2);
-    }
-
-    /** saveUserDaTemp **/
-    @Test
-    void testSaveUserDaTemp_Success() throws ApiRequestException {
-        when(userDaTempRepository.findAll(any(BooleanBuilder.class))).thenReturn(Collections.emptyList());
-        when(userDaTempRepository.getCurrentSequenceValue()).thenReturn(1);
-        when(userDaTempRepository.saveAndFlush(any(UserDaTemp.class))).thenReturn(userDaTemp);
-
-        ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.saveUserDaTemp(userDaDTO);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-
-        // Cast response object and verify fields
-        UserDaTemp savedUser = (UserDaTemp) response.getBody().getResponse();
-        assertEquals(userDaTemp.getUserName(), savedUser.getUserName());
-
-        verify(userDaTempRepository, times(1)).findAll(any(BooleanBuilder.class));
-        verify(userDaTempRepository, times(1)).saveAndFlush(any(UserDaTemp.class));
-    }
-
-    @Test
-    void testSaveUserDaTemp_UserAlreadyExists() {
-        when(userDaTempRepository.findAll(any(BooleanBuilder.class))).thenReturn(List.of(userDaTemp));
-
-        ApiRequestException exception = assertThrows(ApiRequestException.class, () -> {
-            userDaService.saveUserDaTemp(userDaDTO);
-        });
-
-        assertEquals("UserDA Already Exists", exception.getMessage());
-
-        verify(userDaTempRepository, times(1)).findAll(any(BooleanBuilder.class));
-        verify(userDaTempRepository, never()).saveAndFlush(any(UserDaTemp.class));
-    }
-
-    /** approveRejectUserDa **/
-    @Test
-    void testApproveRejectUserDa_ApprovalSuccess() throws ApiRequestException {
-        when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID())).thenReturn(Optional.of(userDaTemp));
-        when(userDaRepository.findById(userDaTemp.getUserDaID())).thenReturn(Optional.of(userDa));
-
-        ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.approveRejectUserDa(approveRejectRQ);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        verify(userDaTempRepository, times(1)).findById(approveRejectRQ.getApproveRejectDataID());
-        verify(userDaTempRepository, times(1)).save(userDaTemp);
-    }
-
-    /** approveRejectUserDa - Reject Path **/
-    @Test
-    void testApproveRejectUserDa_RejectionSuccess() throws ApiRequestException {
-        approveRejectRQ.setApproveStatus(MasterDataApproveStatus.REJECTED);
-        when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID())).thenReturn(Optional.of(userDaTemp));
-
-        ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.approveRejectUserDa(approveRejectRQ);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        verify(userDaTempRepository, times(1)).findById(approveRejectRQ.getApproveRejectDataID());
-        verify(userDaTempRepository, times(1)).save(userDaTemp);
-    }
-
-    /** approveRejectUserDa - Invalid Request **/
-    @Test
-    void testApproveRejectUserDa_InvalidRequest() {
-        ApproveRejectRQ invalidRequest = new ApproveRejectRQ();
-        ApiRequestException exception = assertThrows(ApiRequestException.class, () -> {
-            userDaService.approveRejectUserDa(invalidRequest);
-        });
-        assertEquals("Invalid ApproveRejectRQ: DataID cannot be null", exception.getMessage());
-    }
-
-    /** approveRejectUserDa - UserDaTemp Not Found **/
-    @Test
-    void testApproveRejectUserDa_UserDaTempNotFound() {
-        when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID())).thenReturn(Optional.empty());
-        ApiRequestException exception = assertThrows(ApiRequestException.class, () -> {
-            userDaService.approveRejectUserDa(approveRejectRQ);
-        });
-        assertEquals("User Da with TEMP 1 does not exists", exception.getMessage());
-    }
-
-    /** approveRejectUserDa - Unknown Status **/
-    @Test
-    void testApproveRejectUserDa_UnknownStatus() {
-        approveRejectRQ.setApproveStatus(null);
-        when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID())).thenReturn(Optional.of(userDaTemp));
-
-        ApiRequestException exception = assertThrows(ApiRequestException.class, () -> {
-            userDaService.approveRejectUserDa(approveRejectRQ);
-        });
-        assertTrue(exception.getMessage().contains("Unknown approval status"));
-    }
-
-    @Test
-    void testHandleApproval_CallsMapUserDa_ForNewUser() throws ApiRequestException {
-        when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID())).thenReturn(Optional.of(userDaTemp));
-        when(userDaRepository.findById(userDaTemp.getUserDaID())).thenReturn(Optional.empty());
-        when(userDaRepository.saveAndFlush(any(UserDa.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.approveRejectUserDa(approveRejectRQ);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        verify(userDaTempRepository, times(1)).delete(userDaTemp);
-        verify(userDaRepository, times(1)).saveAndFlush(any(UserDa.class));
-    }
-
-    @Test
-    void testHandleApproval_CallsUpdateUserDaToMaster_ForExistingUser() throws ApiRequestException {
-        when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID())).thenReturn(Optional.of(userDaTemp));
-        when(userDaRepository.findById(userDaTemp.getUserDaID())).thenReturn(Optional.of(userDa));
-        when(userDaRepository.saveAndFlush(any(UserDa.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.approveRejectUserDa(approveRejectRQ);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        verify(userDaTempRepository, times(1)).delete(userDaTemp);
-        verify(userDaRepository, times(1)).saveAndFlush(userDa);
-    }
-
-
-    /** updateUserDaTemp **/
-    @Test
-    void testUpdateUserDaTemp_Success() throws ApiRequestException {
-        when(userDaTempRepository.findById(1)).thenReturn(Optional.of(userDaTemp));
-        when(userDaTempRepository.findAll(any(BooleanBuilder.class))).thenReturn(Collections.emptyList());
-
-        ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.updateUserDaTemp(1, userDaDTO);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        verify(userDaTempRepository, times(1)).save(userDaTemp);
-    }
-
-    /** updateUserDaTemp - UserDaTemp Not Found **/
-    @Test
-    void testUpdateUserDaTemp_UserDaTempNotFound() {
-        when(userDaTempRepository.findById(1)).thenReturn(Optional.empty());
-
-        ApiRequestException exception = assertThrows(ApiRequestException.class, () -> {
-            userDaService.updateUserDaTemp(1, userDaDTO);
-        });
-        assertEquals("User Da with TEMP 1 does not exists", exception.getMessage());
-    }
-
-    @Test
-    void testUpdateUserDaTemp_UserNameConflict() {
-        UserDaTemp conflictingUser = new UserDaTemp();
-        conflictingUser.setUserName(userDaDTO.getUserName());
-        conflictingUser.setUserDaID(2);
-        when(userDaTempRepository.findById(1)).thenReturn(Optional.of(userDaTemp));
-        when(userDaTempRepository.findAll(any(BooleanBuilder.class))).thenReturn(List.of(conflictingUser));
-
-        ApiRequestException exception = assertThrows(ApiRequestException.class, () -> {
-            userDaService.updateUserDaTemp(1, userDaDTO);
-        });
-        assertEquals("User Da with TEMP Old Unit Testing Already Exists", exception.getMessage());
-    }
-
-    /** updateApprovedUserDa **/
-    @Test
-    void testUpdateApprovedUserDa_Success() throws ApiRequestException {
-        when(userDaRepository.findById(userDaDTO.getUserDaID())).thenReturn(Optional.of(userDa));
-        when(userDaTempRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
-        when(userDaRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
-        when(userDaTempRepository.saveAndFlush(any(UserDaTemp.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.updateApprovedUserDa(1, userDaDTO);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        verify(userDaTempRepository, times(1)).saveAndFlush(any(UserDaTemp.class));
-    }
-
-    /** updateApprovedUserDa - UserDa Not Found **/
-    @Test
-    void testUpdateApprovedUserDa_UserDaNotFound() {
-        when(userDaRepository.findById(userDaDTO.getUserDaID())).thenReturn(Optional.empty());
-
-        ApiRequestException exception = assertThrows(ApiRequestException.class, () -> {
-            userDaService.updateApprovedUserDa(1, userDaDTO);
-        });
-        assertEquals("User Da with 1 does not exists", exception.getMessage());
-    }
-
-    /** updateApprovedUserDa - UserName Conflict in Temporary Records **/
-    @Test
-    void testUpdateApprovedUserDa_UserNameConflictInTemp() {
-        when(userDaRepository.findById(userDaDTO.getUserDaID())).thenReturn(Optional.of(userDa));
-        when(userDaTempRepository.exists(any(BooleanBuilder.class))).thenReturn(true);
-
-        ApiRequestException exception = assertThrows(ApiRequestException.class, () -> {
-            userDaService.updateApprovedUserDa(1, userDaDTO);
-        });
-        assertEquals("User name 'Old Unit Testing' already exists in the system.", exception.getMessage());
-    }
-
-    /** updateApprovedUserDa - UserName Conflict in Master Records **/
-    @Test
-    void testUpdateApprovedUserDa_UserNameConflictInMaster() {
-        when(userDaRepository.findById(userDaDTO.getUserDaID())).thenReturn(Optional.of(userDa));
-        when(userDaTempRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
-        when(userDaRepository.exists(any(BooleanBuilder.class))).thenReturn(true);
-
-        ApiRequestException exception = assertThrows(ApiRequestException.class, () -> {
-            userDaService.updateApprovedUserDa(1, userDaDTO);
-        });
-        assertEquals("User name 'Old Unit Testing' already exists in the system.", exception.getMessage());
-    }
-
-    /** deleteUserDaFromTemp **/
-    @Test
-    void testDeleteUserDaFromTemp_Success() throws ApiRequestException {
-        doNothing().when(userDaTempRepository).deleteById(1);
-
-        ResponseEntity<StandardResponse<Void>> response = userDaService.deleteUserDaFromTemp(1);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().getResponse());
-
-        verify(userDaTempRepository, times(1)).deleteById(1);
-    }
-
-    @Test
-    void testApproveRejectUserDa_RejectionSuccess_WithAudit() throws ApiRequestException {
-        approveRejectRQ.setApproveStatus(MasterDataApproveStatus.REJECTED);
-
-        when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
-                .thenReturn(Optional.of(userDaTemp));
-        when(userDaAudRepository.save(any(UserDaAud.class)))
-                .thenAnswer(invocation -> {
-                    UserDaAud audit = invocation.getArgument(0);
-                    audit.setId(1);
-                    return audit;
-                });
-
-        ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.approveRejectUserDa(approveRejectRQ);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-
-        verify(userDaTempRepository, times(1)).findById(approveRejectRQ.getApproveRejectDataID());
-        verify(userDaAudRepository, times(1)).save(any(UserDaAud.class));
-
-        ArgumentCaptor<UserDaAud> auditCaptor = ArgumentCaptor.forClass(UserDaAud.class);
-        verify(userDaAudRepository, times(1)).save(auditCaptor.capture());
-
-        UserDaAud capturedAudit = auditCaptor.getValue();
-
-        assertNotNull(capturedAudit);
-        assertEquals(1, capturedAudit.getId());
-        assertEquals(userDaTemp.getUserDaID(), capturedAudit.getUserDaID());
-        assertEquals(userDaTemp.getStatus(), capturedAudit.getStatus());
-        assertEquals(userDaTemp.getApproveStatus(), capturedAudit.getApproveStatus());
-        assertEquals(userDaTemp.getUserName(), capturedAudit.getUserName());
-        assertEquals(userDaTemp.getMaxAmount(), capturedAudit.getMaxAmount());
-        assertEquals(userDaTemp.getDescription(), capturedAudit.getDescription());
-
-    }
-
-
-
-
+    verify(userDaRepository, times(1)).findAll();
+  }
+
+  @Test
+  void testFindAllApprovedUserDaList_EmptyList() throws ApiRequestException {
+    List<UserDa> userDaList = Collections.emptyList();
+    when(userDaRepository.findAll()).thenReturn(userDaList);
+
+    ResponseEntity<StandardResponse<List<UserDaDTO>>> response =
+        userDaService.findAllApprovedUserDa();
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+
+    verify(userDaRepository, times(1)).findAll();
+  }
+
+  /** findApprovedUserDaById * */
+  @Test
+  void testFindApprovedUserDaById_Success() throws ApiRequestException {
+    when(userDaRepository.findById(userDa.getUserDaID())).thenReturn(Optional.of(userDa));
+
+    ResponseEntity<StandardResponse<UserDaDTO>> response =
+        userDaService.findApprovedUserDaById(userDa.getUserDaID());
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+
+    verify(userDaRepository, times(1)).findById(userDa.getUserDaID());
+  }
+
+  @Test
+  void testFindApprovedUserDaById_NotFound() {
+    when(userDaRepository.findById(2)).thenReturn(Optional.empty());
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              userDaService.findApprovedUserDaById(2);
+            });
+
+    assertEquals("User Da with 2 does not exists", exception.getMessage());
+
+    verify(userDaRepository, times(1)).findById(2);
+  }
+
+  /** saveUserDaTemp * */
+  @Test
+  void testSaveUserDaTemp_Success() throws ApiRequestException {
+    when(userDaTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(Collections.emptyList());
+    when(userDaTempRepository.getCurrentSequenceValue()).thenReturn(1);
+    when(userDaTempRepository.saveAndFlush(any(UserDaTemp.class))).thenReturn(userDaTemp);
+
+    ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.saveUserDaTemp(userDaDTO);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+
+    // Cast response object and verify fields
+    UserDaTemp savedUser = (UserDaTemp) response.getBody().getResponse();
+    assertEquals(userDaTemp.getUserName(), savedUser.getUserName());
+
+    verify(userDaTempRepository, times(1)).findAll(any(BooleanBuilder.class));
+    verify(userDaTempRepository, times(1)).saveAndFlush(any(UserDaTemp.class));
+  }
+
+  @Test
+  void testSaveUserDaTemp_UserAlreadyExists() {
+    when(userDaTempRepository.findAll(any(BooleanBuilder.class))).thenReturn(List.of(userDaTemp));
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              userDaService.saveUserDaTemp(userDaDTO);
+            });
+
+    assertEquals("UserDA Already Exists", exception.getMessage());
+
+    verify(userDaTempRepository, times(1)).findAll(any(BooleanBuilder.class));
+    verify(userDaTempRepository, never()).saveAndFlush(any(UserDaTemp.class));
+  }
+
+  /** approveRejectUserDa * */
+  @Test
+  void testApproveRejectUserDa_ApprovalSuccess() throws ApiRequestException {
+    when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
+        .thenReturn(Optional.of(userDaTemp));
+    when(userDaRepository.findById(userDaTemp.getUserDaID())).thenReturn(Optional.of(userDa));
+
+    ResponseEntity<StandardResponse<UserDaDTO>> response =
+        userDaService.approveRejectUserDa(approveRejectRQ);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    verify(userDaTempRepository, times(1)).findById(approveRejectRQ.getApproveRejectDataID());
+    verify(userDaTempRepository, times(1)).save(userDaTemp);
+  }
+
+  /** approveRejectUserDa - Reject Path * */
+  @Test
+  void testApproveRejectUserDa_RejectionSuccess() throws ApiRequestException {
+    approveRejectRQ.setApproveStatus(MasterDataApproveStatus.REJECTED);
+    when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
+        .thenReturn(Optional.of(userDaTemp));
+
+    ResponseEntity<StandardResponse<UserDaDTO>> response =
+        userDaService.approveRejectUserDa(approveRejectRQ);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    verify(userDaTempRepository, times(1)).findById(approveRejectRQ.getApproveRejectDataID());
+    verify(userDaTempRepository, times(1)).save(userDaTemp);
+  }
+
+  /** approveRejectUserDa - Invalid Request * */
+  @Test
+  void testApproveRejectUserDa_InvalidRequest() {
+    ApproveRejectRQ invalidRequest = new ApproveRejectRQ();
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              userDaService.approveRejectUserDa(invalidRequest);
+            });
+    assertEquals("Invalid ApproveRejectRQ: DataID cannot be null", exception.getMessage());
+  }
+
+  /** approveRejectUserDa - UserDaTemp Not Found * */
+  @Test
+  void testApproveRejectUserDa_UserDaTempNotFound() {
+    when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
+        .thenReturn(Optional.empty());
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              userDaService.approveRejectUserDa(approveRejectRQ);
+            });
+    assertEquals("User Da with TEMP 1 does not exists", exception.getMessage());
+  }
+
+  /** approveRejectUserDa - Unknown Status * */
+  @Test
+  void testApproveRejectUserDa_UnknownStatus() {
+    approveRejectRQ.setApproveStatus(null);
+    when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
+        .thenReturn(Optional.of(userDaTemp));
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              userDaService.approveRejectUserDa(approveRejectRQ);
+            });
+    assertTrue(exception.getMessage().contains("Unknown approval status"));
+  }
+
+  @Test
+  void testHandleApproval_CallsMapUserDa_ForNewUser() throws ApiRequestException {
+    when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
+        .thenReturn(Optional.of(userDaTemp));
+    when(userDaRepository.findById(userDaTemp.getUserDaID())).thenReturn(Optional.empty());
+    when(userDaRepository.saveAndFlush(any(UserDa.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ResponseEntity<StandardResponse<UserDaDTO>> response =
+        userDaService.approveRejectUserDa(approveRejectRQ);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    verify(userDaTempRepository, times(1)).delete(userDaTemp);
+    verify(userDaRepository, times(1)).saveAndFlush(any(UserDa.class));
+  }
+
+  @Test
+  void testHandleApproval_CallsUpdateUserDaToMaster_ForExistingUser() throws ApiRequestException {
+    when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
+        .thenReturn(Optional.of(userDaTemp));
+    when(userDaRepository.findById(userDaTemp.getUserDaID())).thenReturn(Optional.of(userDa));
+    when(userDaRepository.saveAndFlush(any(UserDa.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ResponseEntity<StandardResponse<UserDaDTO>> response =
+        userDaService.approveRejectUserDa(approveRejectRQ);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    verify(userDaTempRepository, times(1)).delete(userDaTemp);
+    verify(userDaRepository, times(1)).saveAndFlush(userDa);
+  }
+
+  /** updateUserDaTemp * */
+  @Test
+  void testUpdateUserDaTemp_Success() throws ApiRequestException {
+    when(userDaTempRepository.findById(1)).thenReturn(Optional.of(userDaTemp));
+    when(userDaTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(Collections.emptyList());
+
+    ResponseEntity<StandardResponse<UserDaDTO>> response =
+        userDaService.updateUserDaTemp(1, userDaDTO);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    verify(userDaTempRepository, times(1)).save(userDaTemp);
+  }
+
+  /** updateUserDaTemp - UserDaTemp Not Found * */
+  @Test
+  void testUpdateUserDaTemp_UserDaTempNotFound() {
+    when(userDaTempRepository.findById(1)).thenReturn(Optional.empty());
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              userDaService.updateUserDaTemp(1, userDaDTO);
+            });
+    assertEquals("User Da with TEMP 1 does not exists", exception.getMessage());
+  }
+
+  @Test
+  void testUpdateUserDaTemp_UserNameConflict() {
+    UserDaTemp conflictingUser = new UserDaTemp();
+    conflictingUser.setUserName(userDaDTO.getUserName());
+    conflictingUser.setUserDaID(2);
+    when(userDaTempRepository.findById(1)).thenReturn(Optional.of(userDaTemp));
+    when(userDaTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(List.of(conflictingUser));
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              userDaService.updateUserDaTemp(1, userDaDTO);
+            });
+    assertEquals("User Da with TEMP Old Unit Testing Already Exists", exception.getMessage());
+  }
+
+  /** updateApprovedUserDa * */
+  @Test
+  void testUpdateApprovedUserDa_Success() throws ApiRequestException {
+    when(userDaRepository.findById(userDaDTO.getUserDaID())).thenReturn(Optional.of(userDa));
+    when(userDaTempRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
+    when(userDaRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
+    when(userDaTempRepository.saveAndFlush(any(UserDaTemp.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ResponseEntity<StandardResponse<UserDaDTO>> response =
+        userDaService.updateApprovedUserDa(1, userDaDTO);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    verify(userDaTempRepository, times(1)).saveAndFlush(any(UserDaTemp.class));
+  }
+
+  /** updateApprovedUserDa - UserDa Not Found * */
+  @Test
+  void testUpdateApprovedUserDa_UserDaNotFound() {
+    when(userDaRepository.findById(userDaDTO.getUserDaID())).thenReturn(Optional.empty());
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              userDaService.updateApprovedUserDa(1, userDaDTO);
+            });
+    assertEquals("User Da with 1 does not exists", exception.getMessage());
+  }
+
+  /** updateApprovedUserDa - UserName Conflict in Temporary Records * */
+  @Test
+  void testUpdateApprovedUserDa_UserNameConflictInTemp() {
+    when(userDaRepository.findById(userDaDTO.getUserDaID())).thenReturn(Optional.of(userDa));
+    when(userDaTempRepository.exists(any(BooleanBuilder.class))).thenReturn(true);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              userDaService.updateApprovedUserDa(1, userDaDTO);
+            });
+    assertEquals(
+        "User name 'Old Unit Testing' already exists in the system.", exception.getMessage());
+  }
+
+  /** updateApprovedUserDa - UserName Conflict in Master Records * */
+  @Test
+  void testUpdateApprovedUserDa_UserNameConflictInMaster() {
+    when(userDaRepository.findById(userDaDTO.getUserDaID())).thenReturn(Optional.of(userDa));
+    when(userDaTempRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
+    when(userDaRepository.exists(any(BooleanBuilder.class))).thenReturn(true);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              userDaService.updateApprovedUserDa(1, userDaDTO);
+            });
+    assertEquals(
+        "User name 'Old Unit Testing' already exists in the system.", exception.getMessage());
+  }
+
+  /** deleteUserDaFromTemp * */
+  @Test
+  void testDeleteUserDaFromTemp_Success() throws ApiRequestException {
+    doNothing().when(userDaTempRepository).deleteById(1);
+
+    ResponseEntity<StandardResponse<Void>> response = userDaService.deleteUserDaFromTemp(1);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().getResponse());
+
+    verify(userDaTempRepository, times(1)).deleteById(1);
+  }
+
+  @Test
+  void testApproveRejectUserDa_RejectionSuccess_WithAudit() throws ApiRequestException {
+    approveRejectRQ.setApproveStatus(MasterDataApproveStatus.REJECTED);
+
+    when(userDaTempRepository.findById(approveRejectRQ.getApproveRejectDataID()))
+        .thenReturn(Optional.of(userDaTemp));
+    when(userDaAudRepository.save(any(UserDaAud.class)))
+        .thenAnswer(
+            invocation -> {
+              UserDaAud audit = invocation.getArgument(0);
+              audit.setId(1);
+              return audit;
+            });
+
+    ResponseEntity<StandardResponse<UserDaDTO>> response =
+        userDaService.approveRejectUserDa(approveRejectRQ);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+
+    verify(userDaTempRepository, times(1)).findById(approveRejectRQ.getApproveRejectDataID());
+    verify(userDaAudRepository, times(1)).save(any(UserDaAud.class));
+
+    ArgumentCaptor<UserDaAud> auditCaptor = ArgumentCaptor.forClass(UserDaAud.class);
+    verify(userDaAudRepository, times(1)).save(auditCaptor.capture());
+
+    UserDaAud capturedAudit = auditCaptor.getValue();
+
+    assertNotNull(capturedAudit);
+    assertEquals(1, capturedAudit.getId());
+    assertEquals(userDaTemp.getUserDaID(), capturedAudit.getUserDaID());
+    assertEquals(userDaTemp.getStatus(), capturedAudit.getStatus());
+    assertEquals(userDaTemp.getApproveStatus(), capturedAudit.getApproveStatus());
+    assertEquals(userDaTemp.getUserName(), capturedAudit.getUserName());
+    assertEquals(userDaTemp.getMaxAmount(), capturedAudit.getMaxAmount());
+    assertEquals(userDaTemp.getDescription(), capturedAudit.getDescription());
+  }
 }

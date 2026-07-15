@@ -6,38 +6,37 @@ public enum Status {
         ACT("ACT", "A"),
         INA("INA", "I");
 
-        private String label;
-        private String value;
+  private String label;
+  private String value;
 
-        Status(String label, String value) {
-            this.label = label;
-            this.value = value;
-        }
+  Status(String label, String value) {
+    this.label = label;
+    this.value = value;
+  }
 
-        public String getValue() {
-            return value;
-        }
+  public String getValue() {
+    return value;
+  }
 
-        public String getLabel() {
-            return label;
-        }
+  public String getLabel() {
+    return label;
+  }
 
-        public static Status getEnum(String value) {
-            for (Status clusterStatus : Status.values()) {
-                if (clusterStatus.getValue().equalsIgnoreCase(value)) {
-                    return clusterStatus;
-                }
-            }
-            return null;
-        }
-
-    public static Status resolveStatus(String statusStr) {
-        Status matchingStatus = null;
-        if (!StringUtils.isEmpty(statusStr)) {
-            matchingStatus = Status.valueOf(statusStr.trim());
-        }
-
-        return matchingStatus;
+  public static Status getEnum(String value) {
+    for (Status clusterStatus : Status.values()) {
+      if (clusterStatus.getValue().equalsIgnoreCase(value)) {
+        return clusterStatus;
+      }
     }
+    return null;
+  }
+
+  public static Status resolveStatus(String statusStr) {
+    Status matchingStatus = null;
+    if (!StringUtils.isEmpty(statusStr)) {
+      matchingStatus = Status.valueOf(statusStr.trim());
     }
 
+    return matchingStatus;
+  }
+}

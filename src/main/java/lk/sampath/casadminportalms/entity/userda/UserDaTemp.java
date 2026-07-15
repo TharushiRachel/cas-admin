@@ -1,48 +1,43 @@
 package lk.sampath.casadminportalms.entity.userda;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import lk.sampath.casadminportalms.entity.common.ApprovableEntity;
 import lk.sampath.casadminportalms.enums.Status;
 import lombok.*;
-
-import java.math.BigDecimal;
 
 @Entity
 @Setter
 @Getter
 @Table(name = "CASV3_T_USER_DA_TEMP")
 @RequiredArgsConstructor
+public class UserDaTemp extends ApprovableEntity {
 
+  @Id
+  @Column(name = "USER_DA_ID")
+  private Integer userDaID;
 
-public class UserDaTemp extends ApprovableEntity  {
+  @Column(name = "USER_NAME")
+  private String userName;
 
-    @Id
-    @Column(name = "USER_DA_ID")
-    private Integer userDaID;
+  @Column(name = "MAX_AMOUNT")
+  private BigDecimal maxAmount;
 
-    @Column(name = "USER_NAME")
-    private String userName;
+  @Column(name = "DESCRIPTION")
+  private String description;
 
-    @Column(name = "MAX_AMOUNT")
-    private BigDecimal maxAmount;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "STATUS")
+  private Status status;
 
-    @Column(name = "DESCRIPTION")
-    private String description;
+  @Column(name = "CLEAN_AMOUNT")
+  private BigDecimal cleanAmount;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "STATUS")
-    private Status status;
-
-    @Column(name = "CLEAN_AMOUNT")
-    private BigDecimal cleanAmount;
-
-
-    @PrePersist
-    @PreUpdate
-    private void initializeFields() {
-        if (cleanAmount == null) {
-            cleanAmount = BigDecimal.ZERO;
-        }
+  @PrePersist
+  @PreUpdate
+  private void initializeFields() {
+    if (cleanAmount == null) {
+      cleanAmount = BigDecimal.ZERO;
     }
-
+  }
 }

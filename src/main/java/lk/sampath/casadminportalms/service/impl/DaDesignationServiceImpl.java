@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.dadesignation.*;
-import lk.sampath.casadminportalms.dto.userSession.UserContext;
+import lk.sampath.casadminportalms.dto.usersession.UserContext;
 import lk.sampath.casadminportalms.entity.daDesignation.*;
 import lk.sampath.casadminportalms.enums.*;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
@@ -23,7 +23,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -592,15 +591,15 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         Map<String, Double> values = new LinkedHashMap<>();
 
         if (MasterDataApproveStatus.APPROVED.equals(approveStatus)) {
-                daLimitRepository.findAllByDesignationIdAndStatus(designationId, AppsConstants.Status.ACT.name()).stream()
+            daLimitRepository.findAllByDesignationIdAndStatus(designationId, AppsConstants.Status.ACT.name()).stream()
                     .filter(limit -> isCommittee.equalsIgnoreCase(normalizeIsCommittee(limit.getIsCommittee())))
                     .sorted(Comparator.comparing(DALimit::getColumnId, Comparator.nullsLast(Integer::compareTo)))
                     .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
         } else {
             daLimitTempRepository.findAllByDesignationId(designationId).stream()
-                .filter(limit -> isCommittee.equalsIgnoreCase(normalizeIsCommittee(limit.getIsCommittee())))
-                .filter(limit -> AppsConstants.Status.ACT.equals(limit.getStatus()))
-                .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
+                    .filter(limit -> isCommittee.equalsIgnoreCase(normalizeIsCommittee(limit.getIsCommittee())))
+                    .filter(limit -> AppsConstants.Status.ACT.equals(limit.getStatus()))
+                    .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
                     .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
         }
 
@@ -642,8 +641,8 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
         Map<String, Double> values = new LinkedHashMap<>();
         daLimitTempRepository
-        .findAllByDesignationIdAndIsCommitteeAndStatus(
-            designation.getId(), isCommittee, AppsConstants.Status.ACT.name())
+                .findAllByDesignationIdAndIsCommitteeAndStatus(
+                        designation.getId(), isCommittee, AppsConstants.Status.ACT.name())
                 .stream()
                 .sorted(Comparator.comparing(
                         limit -> limit.getColumnId(),
@@ -727,9 +726,9 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                         "DA Designation with id " + designationId + " does not exist"));
 
         List<DALimit> approvedLimits = daLimitRepository.findAllByDesignationIdAndStatus(
-            designationId, AppsConstants.Status.ACT.name());
+                designationId, AppsConstants.Status.ACT.name());
         List<DALimitTemp> pendingLimits = daLimitTempRepository.findAllByDesignationIdAndStatus(
-            designationId, AppsConstants.Status.ACT.name());
+                designationId, AppsConstants.Status.ACT.name());
         Map<Integer, Map<String, Map<Integer, Double>>> approvedValueIndex = indexApprovedValues(approvedLimits);
         Map<Integer, Map<String, Map<Integer, Double>>> pendingValueIndex = indexPendingValues(pendingLimits);
 
@@ -743,7 +742,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         populateDesignationLists(approvalResponse, Collections.singletonList(designation));
 
         StandardResponse<DATableApprovalResponse> response =
-            new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), approvalResponse);
+                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), approvalResponse);
         log.info("END : getDaTableById | designationId={}", designationId);
         return ResponseEntity.ok(response);
     }
@@ -828,22 +827,22 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         return tableData;
     }
 
-        private DATableHeaderDTO buildHeaderResponse(List<DAHeaderResponse> rootHeaders) {
+    private DATableHeaderDTO buildHeaderResponse(List<DAHeaderResponse> rootHeaders) {
         List<DATableHeadingResponse> individual = rootHeaders.stream()
-            .filter(h -> DaTableType.INDIVIDUAL.equals(h.getTableType()))
-            .map(this::mapToJsonStructure)
-            .toList();
+                .filter(h -> DaTableType.INDIVIDUAL.equals(h.getTableType()))
+                .map(this::mapToJsonStructure)
+                .toList();
 
         List<DATableHeadingResponse> committee = rootHeaders.stream()
-            .filter(h -> DaTableType.COMMITTEE.equals(h.getTableType()))
-            .map(this::mapToJsonStructure)
-            .toList();
+                .filter(h -> DaTableType.COMMITTEE.equals(h.getTableType()))
+                .map(this::mapToJsonStructure)
+                .toList();
 
         DATableHeaderDTO dto = new DATableHeaderDTO();
         dto.setIndividualTableHeaders(individual);
         dto.setCommitteeTableHeaders(committee);
         return dto;
-        }
+    }
 
     private DADesignationTableDTO buildRowResponse(DADesignationData designation,
                                                    DaTableType tableType,

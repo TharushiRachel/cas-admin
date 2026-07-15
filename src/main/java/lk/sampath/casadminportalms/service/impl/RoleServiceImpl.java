@@ -1,9 +1,10 @@
 package lk.sampath.casadminportalms.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
+import java.util.*;
+import java.util.stream.Collectors;
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
-import lk.sampath.casadminportalms.dto.role.PrivilegeDTO;
 import lk.sampath.casadminportalms.dto.role.RoleDTO;
 import lk.sampath.casadminportalms.dto.role.UpmRolePrivilegeDTO;
 import lk.sampath.casadminportalms.entity.role.*;
@@ -11,11 +12,9 @@ import lk.sampath.casadminportalms.enums.ErrorEnums;
 import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
 import lk.sampath.casadminportalms.enums.Status;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
-import lk.sampath.casadminportalms.repository.jdbc.RoleRepositoryJdbc;
 import lk.sampath.casadminportalms.repository.role.*;
 import lk.sampath.casadminportalms.service.RoleService;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -25,175 +24,152 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 @Service
 @Transactional
 @Log4j2
 public class RoleServiceImpl implements RoleService {
 
-    private static final String ROLE_WITH_ID = "Role with ID ";
+  private static final String ROLE_WITH_ID = "Role with ID ";
 
-    private static final String DOES_NOT_EXISTS = "Does not exists";
+  private static final String DOES_NOT_EXISTS = "Does not exists";
 
-    private static final String NOT_NULL = "Upc Template cannot be empty or null";
+  private static final String NOT_NULL = "Upc Template cannot be empty or null";
 
-    private final PrivilegeRepository privilegeRepository;
+  private final PrivilegeRepository privilegeRepository;
 
-    private final PrivilegeCategoryRepository privilegeCategoryRepository;
+  private final PrivilegeCategoryRepository privilegeCategoryRepository;
 
-    private final RoleTempRepository roleTempRepository;
+  private final RoleTempRepository roleTempRepository;
 
-    private final RoleRepository roleRepository;
+  private final RoleRepository roleRepository;
 
-    private final RoleRepositoryJdbc roleRepositoryJdbc;
+  private final RoleAudRepository roleAudRepository;
 
-    private final RoleAudRepository roleAudRepository;
+  private final RolePrivilegeAudRepository rolePrivilegeAudRepository;
 
-    private final RolePrivilegeAudRepository rolePrivilegeAudRepository;
+  private final RoleJdbc roleJdbc;
 
-    private final RoleJdbc roleJdbc;
+  public RoleServiceImpl(
+      PrivilegeRepository privilegeRepository,
+      PrivilegeCategoryRepository privilegeCategoryRepository,
+      RoleTempRepository roleTempRepository,
+      RoleRepository roleRepository,
+      RoleAudRepository roleAudRepository,
+      RolePrivilegeAudRepository rolePrivilegeAudRepository,
+      RoleJdbc roleJdbc) {
+    this.privilegeRepository = privilegeRepository;
+    this.privilegeCategoryRepository = privilegeCategoryRepository;
+    this.roleTempRepository = roleTempRepository;
+    this.roleRepository = roleRepository;
+    this.roleAudRepository = roleAudRepository;
+    this.rolePrivilegeAudRepository = rolePrivilegeAudRepository;
+    this.roleJdbc = roleJdbc;
+  }
 
-    public RoleServiceImpl(PrivilegeRepository privilegeRepository, PrivilegeCategoryRepository privilegeCategoryRepository, RoleTempRepository roleTempRepository,
-                           RoleRepository roleRepository, RoleRepositoryJdbc roleRepositoryJdbc, RoleAudRepository roleAudRepository,
-                           RolePrivilegeAudRepository rolePrivilegeAudRepository, RoleJdbc roleJdbc) {
-        this.privilegeRepository = privilegeRepository;
-        this.privilegeCategoryRepository = privilegeCategoryRepository;
-        this.roleTempRepository = roleTempRepository;
-        this.roleRepository = roleRepository;
-        this.roleRepositoryJdbc = roleRepositoryJdbc;
-        this.roleAudRepository = roleAudRepository;
-        this.rolePrivilegeAudRepository = rolePrivilegeAudRepository;
-        this.roleJdbc = roleJdbc;
+  @Override
+  @Transactional(readOnly = true)
+  public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories(
+      Pageable pageable) throws ApiRequestException {
+
+    List<PrivilegeCategory> privilegeCategoryList =
+        privilegeCategoryRepository.findAll(pageable).getContent();
+
+    Map<String, List<Privilege>> privilegeCategoryMap = new LinkedHashMap<>();
+
+    for (PrivilegeCategory privilegeCategory : privilegeCategoryList) {
+      List<Privilege> privilegeList =
+          privilegeRepository.findByPrivilegeCategoryPrivilegeCategoryID(
+              privilegeCategory.getPrivilegeCategoryID());
+
+      List<Privilege> privileges = new ArrayList<>();
+      for (Privilege privilege : privilegeList) {
+        Privilege privilegeData = new Privilege();
+        privilegeData.setPrivilegeID(privilege.getPrivilegeID());
+        privilegeData.setPrivilegeName(privilege.getPrivilegeName());
+        privilegeData.setCode(privilege.getCode());
+        privilegeData.setDescription(privilege.getDescription());
+        privilegeData.setStatus(privilege.getStatus());
+        privileges.add(privilegeData);
+      }
+
+      privilegeCategoryMap.put(privilegeCategory.getCategory(), privileges);
     }
 
+    StandardResponse<List<PrivilegeCategory>> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(),
+            ErrorEnums.SUCCESS_CODE.getLabel(),
+            privilegeCategoryMap);
+    return ResponseEntity.ok().body(response);
+  }
 
-    @Override
-    @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories(Pageable pageable) throws ApiRequestException {
+  @Override
+  @Transactional(readOnly = true)
+  public ResponseEntity<StandardResponse<Object>> findRolesTempByID(Integer roleID)
+      throws ApiRequestException {
+    RoleTemp roleTemp =
+        roleTempRepository
+            .findById(roleID)
+            .orElseThrow(
+                () -> new ApiRequestException("Role Temp with" + roleID + DOES_NOT_EXISTS));
 
-        List<PrivilegeCategory> privilegeCategoryList = privilegeCategoryRepository.findAll(pageable).getContent();
+    RoleDTO roleTempDTO = new RoleDTO();
+    roleTempDTO.setRoleID(roleTemp.getRoleID());
+    roleTempDTO.setRoleName(roleTemp.getRoleName());
+    roleTempDTO.setUpmPrivilegeCode(roleTemp.getUpmPrivilegeCode());
+    roleTempDTO.setStatus(roleTemp.getStatus());
+    roleTempDTO.setApproveStatus(roleTemp.getApproveStatus());
+    roleTempDTO.setApprovedDate(roleTemp.getApprovedDate());
+    roleTempDTO.setApprovedBy(roleTemp.getApprovedBy());
+    roleTempDTO.setCreatedDate(roleTemp.getCreatedDate());
+    roleTempDTO.setCreatedBy(roleTemp.getCreatedBy());
+    roleTempDTO.setLastModifiedDate(roleTemp.getLastModifiedDate());
+    roleTempDTO.setModifiedBy(roleTemp.getModifiedBy());
+    roleTempDTO.setPrivileges(
+        roleTemp.getPrivileges().stream().map(Privilege::getPrivilegeID).toList());
 
-        Map<String, List<Privilege>> privilegeCategoryMap = new LinkedHashMap<>();
+    StandardResponse<Object> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), roleTempDTO);
+    return ResponseEntity.ok().body(response);
+  }
 
-        for (PrivilegeCategory privilegeCategory : privilegeCategoryList) {
-            List<Privilege> privilegeList = privilegeRepository.findByPrivilegeCategoryPrivilegeCategoryID(
-                    privilegeCategory.getPrivilegeCategoryID()
-            );
+  @Transactional(readOnly = true)
+  @Override
+  public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllRolesTempList(Pageable pageable)
+      throws ApiRequestException {
+    List<RoleTemp> roleTempList = roleTempRepository.findAll(pageable).getContent();
+    List<RoleDTO> roleDTOList = new ArrayList<>();
 
-            List<Privilege> privileges = new ArrayList<>();
-            for (Privilege privilege : privilegeList) {
-                Privilege privilegeData = new Privilege();
-                privilegeData.setPrivilegeID(privilege.getPrivilegeID());
-                privilegeData.setPrivilegeName(privilege.getPrivilegeName());
-                privilegeData.setCode(privilege.getCode());
-                privilegeData.setDescription(privilege.getDescription());
-                privilegeData.setStatus(privilege.getStatus());
-                privileges.add(privilegeData);
-            }
+    for (RoleTemp roleTemp : roleTempList) {
+      RoleDTO roleTempDTO = new RoleDTO();
+      roleTempDTO.setRoleID(roleTemp.getRoleID());
+      roleTempDTO.setRoleName(roleTemp.getRoleName());
+      roleTempDTO.setUpmPrivilegeCode(roleTemp.getUpmPrivilegeCode());
+      roleTempDTO.setStatus(roleTemp.getStatus());
+      roleTempDTO.setApproveStatus(roleTemp.getApproveStatus());
+      roleTempDTO.setCreatedDate(roleTemp.getCreatedDate());
+      roleTempDTO.setCreatedBy(roleTemp.getCreatedBy());
+      roleTempDTO.setPrivileges(
+          roleTemp.getPrivileges().stream().map(Privilege::getPrivilegeID).toList());
 
-            privilegeCategoryMap.put(privilegeCategory.getCategory(), privileges);
-        }
-
-        StandardResponse<List<PrivilegeCategory>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), privilegeCategoryMap);
-        return ResponseEntity.ok().body(response);
+      roleDTOList.add(roleTempDTO);
     }
 
+    StandardResponse<List<RoleDTO>> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), roleDTOList);
+    return ResponseEntity.ok().body(response);
+  }
 
-    @Override
-    @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<Object>> findRolesTempByID(Integer roleID) throws ApiRequestException {
-        RoleTemp roleTemp = roleTempRepository.findById(roleID).orElseThrow(() -> {
-            throw new ApiRequestException("Role Temp with" + roleID + DOES_NOT_EXISTS);
-        });
-
-        RoleDTO roleTempDTO = new RoleDTO();
-        roleTempDTO.setRoleID(roleTemp.getRoleID());
-        roleTempDTO.setRoleName(roleTemp.getRoleName());
-        roleTempDTO.setUpmPrivilegeCode(roleTemp.getUpmPrivilegeCode());
-        roleTempDTO.setStatus(roleTemp.getStatus());
-        roleTempDTO.setApproveStatus(roleTemp.getApproveStatus());
-        roleTempDTO.setApprovedDate(roleTemp.getApprovedDate());
-        roleTempDTO.setApprovedBy(roleTemp.getApprovedBy());
-        roleTempDTO.setCreatedDate(roleTemp.getCreatedDate());
-        roleTempDTO.setCreatedBy(roleTemp.getCreatedBy());
-        roleTempDTO.setLastModifiedDate(roleTemp.getLastModifiedDate());
-        roleTempDTO.setModifiedBy(roleTemp.getModifiedBy());
-        roleTempDTO.setPrivileges(roleTemp.getPrivileges().stream().map(Privilege::getPrivilegeID).toList());
-
-        StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), roleTempDTO);
-        return ResponseEntity.ok().body(response);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllRolesTempList(Pageable pageable) throws ApiRequestException {
-        List<RoleTemp> roleTempList = roleTempRepository.findAll(pageable).getContent();
-        List<RoleDTO> roleDTOList = new ArrayList<>();
-
-        for (RoleTemp roleTemp : roleTempList) {
-            RoleDTO roleTempDTO = new RoleDTO();
-            roleTempDTO.setRoleID(roleTemp.getRoleID());
-            roleTempDTO.setRoleName(roleTemp.getRoleName());
-            roleTempDTO.setUpmPrivilegeCode(roleTemp.getUpmPrivilegeCode());
-            roleTempDTO.setStatus(roleTemp.getStatus());
-            roleTempDTO.setApproveStatus(roleTemp.getApproveStatus());
-            roleTempDTO.setCreatedDate(roleTemp.getCreatedDate());
-            roleTempDTO.setCreatedBy(roleTemp.getCreatedBy());
-            roleTempDTO.setPrivileges(roleTemp.getPrivileges().stream().map(Privilege::getPrivilegeID).toList());
-
-            roleDTOList.add(roleTempDTO);
-        }
-
-        StandardResponse<List<RoleDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), roleDTOList);
-        return ResponseEntity.ok().body(response);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ResponseEntity<StandardResponse<Page<RoleDTO>>> findAllApprovedRoles(Pageable pageable) throws ApiRequestException {
-        try {
-            Page<Role> rolePage = roleRepository.findAll(pageable);
-            List<RoleDTO> roleDTOList = new ArrayList<>();
-            for (Role role : rolePage.getContent()) {
-                RoleDTO roleDTO = new RoleDTO();
-                roleDTO.setRoleID(role.getRoleID());
-                roleDTO.setRoleName(role.getRoleName());
-                roleDTO.setUpmPrivilegeCode(role.getUpmPrivilegeCode());
-                roleDTO.setStatus(role.getStatus());
-                roleDTO.setApproveStatus(role.getApproveStatus());
-                roleDTO.setApprovedDate(role.getApprovedDate());
-                roleDTO.setApprovedBy(role.getApprovedBy());
-                roleDTO.setCreatedDate(role.getCreatedDate());
-                roleDTO.setCreatedBy(role.getCreatedBy());
-                roleDTO.setLastModifiedDate(role.getLastModifiedDate());
-                roleDTO.setModifiedBy(role.getModifiedBy());
-                roleDTO.setPrivileges(role.getPrivileges().stream().map(Privilege::getPrivilegeID).toList());
-
-                roleDTOList.add(roleDTO);
-            }
-
-            Page<RoleDTO> dtoPage = new PageImpl<>(
-                    roleDTOList,
-                    pageable,
-                    rolePage.getTotalElements()
-            );
-
-            StandardResponse<Page<RoleDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), dtoPage);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public ResponseEntity<StandardResponse<Object>> findApprovedRoleById(int roleID) throws ApiRequestException {
-        Role role = roleRepository.findById(roleID).orElseThrow(() -> {
-            throw new ApiRequestException(" Role with" + roleID + DOES_NOT_EXISTS);
-        });
-
+  @Transactional(readOnly = true)
+  @Override
+  public ResponseEntity<StandardResponse<Page<RoleDTO>>> findAllApprovedRoles(Pageable pageable)
+      throws ApiRequestException {
+    try {
+      Page<Role> rolePage = roleRepository.findAll(pageable);
+      List<RoleDTO> roleDTOList = new ArrayList<>();
+      for (Role role : rolePage.getContent()) {
         RoleDTO roleDTO = new RoleDTO();
         roleDTO.setRoleID(role.getRoleID());
         roleDTO.setRoleName(role.getRoleName());
@@ -206,351 +182,440 @@ public class RoleServiceImpl implements RoleService {
         roleDTO.setCreatedBy(role.getCreatedBy());
         roleDTO.setLastModifiedDate(role.getLastModifiedDate());
         roleDTO.setModifiedBy(role.getModifiedBy());
+        roleDTO.setPrivileges(
+            role.getPrivileges().stream().map(Privilege::getPrivilegeID).toList());
 
-        roleDTO.setPrivileges(role.getPrivileges().stream().map(Privilege::getPrivilegeID).toList());
+        roleDTOList.add(roleDTO);
+      }
 
-        StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), roleDTO);
-        return ResponseEntity.ok().body(response);
+      Page<RoleDTO> dtoPage = new PageImpl<>(roleDTOList, pageable, rolePage.getTotalElements());
+
+      StandardResponse<Page<RoleDTO>> response =
+          new StandardResponse<>(
+              ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), dtoPage);
+      return ResponseEntity.ok(response);
+    } catch (Exception e) {
+      throw new ApiRequestException("Failed to retrieve approved roles.");
     }
+  }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<Object>> saveRoleTemp(RoleDTO roleDTO) throws ApiRequestException {
-        try {
-            log.info("START: Save Role Temp :{}", roleDTO);
-            Date date = new Date();
-            RoleTemp roleTempSave = new RoleTemp();
+  @Transactional(readOnly = true)
+  @Override
+  public ResponseEntity<StandardResponse<Object>> findApprovedRoleById(int roleID)
+      throws ApiRequestException {
+    Role role =
+        roleRepository
+            .findById(roleID)
+            .orElseThrow(() -> new ApiRequestException(" Role with" + roleID + DOES_NOT_EXISTS));
 
-            BooleanBuilder booleanBuilder = new BooleanBuilder();
-            booleanBuilder.and(QRoleTemp.roleTemp.roleName.eq(roleDTO.getRoleName()));
-            List<RoleTemp> roleTemps = (List<RoleTemp>) roleTempRepository.findAll(booleanBuilder);
+    RoleDTO roleDTO = new RoleDTO();
+    roleDTO.setRoleID(role.getRoleID());
+    roleDTO.setRoleName(role.getRoleName());
+    roleDTO.setUpmPrivilegeCode(role.getUpmPrivilegeCode());
+    roleDTO.setStatus(role.getStatus());
+    roleDTO.setApproveStatus(role.getApproveStatus());
+    roleDTO.setApprovedDate(role.getApprovedDate());
+    roleDTO.setApprovedBy(role.getApprovedBy());
+    roleDTO.setCreatedDate(role.getCreatedDate());
+    roleDTO.setCreatedBy(role.getCreatedBy());
+    roleDTO.setLastModifiedDate(role.getLastModifiedDate());
+    roleDTO.setModifiedBy(role.getModifiedBy());
 
-            BooleanBuilder booleanBuilderForMaster = new BooleanBuilder();
-            booleanBuilderForMaster.and(QRole.role.roleName.eq(roleDTO.getRoleName()));
-            List<Role> roleList = (List<Role>) roleRepository.findAll(booleanBuilderForMaster);
+    roleDTO.setPrivileges(role.getPrivileges().stream().map(Privilege::getPrivilegeID).toList());
 
-            if (roleDTO.getRoleName() == null || roleDTO.getRoleName().trim().isEmpty()) {
-                throw new ApiRequestException(NOT_NULL);
-            }
+    StandardResponse<Object> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), roleDTO);
+    return ResponseEntity.ok().body(response);
+  }
 
-            validateRoleNameUniqueness(roleDTO.getRoleName(), null);
+  @Override
+  @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
+  public ResponseEntity<StandardResponse<Object>> saveRoleTemp(RoleDTO roleDTO)
+      throws ApiRequestException {
+    try {
+      log.info("START: Save Role Temp :{}", roleDTO);
+      Date date = new Date();
+      RoleTemp roleTempSave = new RoleTemp();
 
-            if (roleTemps.isEmpty() && roleList.isEmpty()) {
+      BooleanBuilder booleanBuilder = new BooleanBuilder();
+      booleanBuilder.and(QRoleTemp.roleTemp.roleName.eq(roleDTO.getRoleName()));
+      List<RoleTemp> roleTemps = (List<RoleTemp>) roleTempRepository.findAll(booleanBuilder);
 
-                roleTempSave.setRoleID(roleTempRepository.getCurrentSequenceValue());
-                roleTempSave.setStatus(Status.ACT);
-                roleTempSave.setCreatedDate(date);
-                roleTempSave.setRoleName(roleDTO.getRoleName());
-                roleTempSave.setCreatedBy(roleDTO.getCreatedBy());
-                roleTempSave.setApproveStatus(roleDTO.getApproveStatus());
-                roleTempSave.setApprovedDate(roleDTO.getApprovedDate());
-                roleTempSave.setApprovedBy(roleDTO.getApprovedBy());
-                roleTempSave.setModifiedBy(roleDTO.getModifiedBy());
-                roleTempSave.setLastModifiedDate(date);
-                roleTempSave.setUpmPrivilegeCode(roleDTO.getUpmPrivilegeCode());
+      BooleanBuilder booleanBuilderForMaster = new BooleanBuilder();
+      booleanBuilderForMaster.and(QRole.role.roleName.eq(roleDTO.getRoleName()));
+      List<Role> roleList = (List<Role>) roleRepository.findAll(booleanBuilderForMaster);
 
-                Set<Privilege> privileges = privilegeRepository.findByPrivilegeIDIn(roleDTO.getPrivileges());
-                roleTempSave.setPrivileges(privileges);
+      if (roleDTO.getRoleName() == null || roleDTO.getRoleName().trim().isEmpty()) {
+        throw new ApiRequestException(NOT_NULL);
+      }
 
-                if (roleDTO.getAddedPrivileges() != null) {
-                    Set<Privilege> addedPrivileges = privilegeRepository.findByPrivilegeIDIn(roleDTO.getAddedPrivileges());
-                    roleTempSave.getPrivileges().addAll(addedPrivileges);
-                }
+      validateRoleNameUniqueness(roleDTO.getRoleName(), null);
 
-                if (roleDTO.getDeletedPrivileges() != null) {
-                    Set<Privilege> deletedPrivileges = privilegeRepository.findByPrivilegeIDIn(roleDTO.getDeletedPrivileges());
-                    roleTempSave.getPrivileges().removeAll(deletedPrivileges);
-                }
-                log.info("roleTempSave {}", roleTempSave);
-                roleTempRepository.save(roleTempSave);
-            } else if (!roleTemps.isEmpty()) {
-                log.warn("Role Name Already Exists in Temp Table");
-                throw new ApiRequestException("Role Name Already Exists in Temp Table");
-            } else if (!roleList.isEmpty()) {
-                throw new ApiRequestException("Roles Already Exists in Master Table");
-            } else if (roleDTO.getRoleName() == null || roleDTO.getRoleName().trim().isEmpty()) {
-                throw new ApiRequestException("NOT_NUL");
-            }
+      if (roleTemps.isEmpty() && roleList.isEmpty()) {
 
-            RoleDTO role = new RoleDTO(roleTempSave);
-            StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), role);
-            return ResponseEntity.ok().body(response);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+        roleTempSave.setRoleID(roleTempRepository.getCurrentSequenceValue());
+        roleTempSave.setStatus(Status.ACT);
+        roleTempSave.setCreatedDate(date);
+        roleTempSave.setRoleName(roleDTO.getRoleName());
+        roleTempSave.setCreatedBy(roleDTO.getCreatedBy());
+        roleTempSave.setApproveStatus(roleDTO.getApproveStatus());
+        roleTempSave.setApprovedDate(roleDTO.getApprovedDate());
+        roleTempSave.setApprovedBy(roleDTO.getApprovedBy());
+        roleTempSave.setModifiedBy(roleDTO.getModifiedBy());
+        roleTempSave.setLastModifiedDate(date);
+        roleTempSave.setUpmPrivilegeCode(roleDTO.getUpmPrivilegeCode());
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<Object>> updateRoleTemp(Integer roleID, RoleDTO roleDTO) throws ApiRequestException {
-
-        RoleTemp roleDb = roleTempRepository.findById(roleID).orElseThrow(() ->
-                new ApiRequestException(ROLE_WITH_ID + roleID + " does not exist")
-        );
-
-        if (roleDTO.getRoleName() == null || roleDTO.getRoleName().isEmpty()) {
-            throw new ApiRequestException("NOT_NUL");
-        }
-
-        validateRoleNameUniqueness(roleDTO.getRoleName(), roleID);
-
-        roleDb.setRoleName(roleDTO.getRoleName());
-        roleDb.setUpmPrivilegeCode(roleDTO.getUpmPrivilegeCode());
-        roleDb.setStatus(roleDTO.getStatus());
-        roleDb.setApproveStatus(roleDTO.getApproveStatus());
-
-        Set<Privilege> privileges = privilegeRepository.findByPrivilegeIDIn(roleDTO.getPrivileges());
-        roleDb.setPrivileges(privileges);
+        Set<Privilege> privileges =
+            privilegeRepository.findByPrivilegeIDIn(roleDTO.getPrivileges());
+        roleTempSave.setPrivileges(privileges);
 
         if (roleDTO.getAddedPrivileges() != null) {
-            Set<Privilege> addedPrivileges = privilegeRepository.findByPrivilegeIDIn(roleDTO.getAddedPrivileges());
-            roleDb.getPrivileges().addAll(addedPrivileges);
+          Set<Privilege> addedPrivileges =
+              privilegeRepository.findByPrivilegeIDIn(roleDTO.getAddedPrivileges());
+          roleTempSave.getPrivileges().addAll(addedPrivileges);
         }
 
         if (roleDTO.getDeletedPrivileges() != null) {
-            Set<Privilege> deletedPrivileges = privilegeRepository.findByPrivilegeIDIn(roleDTO.getDeletedPrivileges());
-            roleDb.getPrivileges().removeAll(deletedPrivileges);
+          Set<Privilege> deletedPrivileges =
+              privilegeRepository.findByPrivilegeIDIn(roleDTO.getDeletedPrivileges());
+          roleTempSave.getPrivileges().removeAll(deletedPrivileges);
         }
+        log.info("roleTempSave {}", roleTempSave);
+        roleTempRepository.save(roleTempSave);
+      } else if (!roleTemps.isEmpty()) {
+        log.warn("Role Name Already Exists in Temp Table");
+        throw new ApiRequestException("Role Name Already Exists in Temp Table");
+      } else if (!roleList.isEmpty()) {
+        throw new ApiRequestException("Roles Already Exists in Master Table");
+      } else if (roleDTO.getRoleName() == null || roleDTO.getRoleName().trim().isEmpty()) {
+        throw new ApiRequestException("NOT_NUL");
+      }
 
+      RoleDTO role = new RoleDTO(roleTempSave);
+      StandardResponse<Object> response =
+          new StandardResponse<>(
+              ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), role);
+      return ResponseEntity.ok().body(response);
+    } catch (Exception e) {
+      throw new ApiRequestException("Failed to save role.");
+    }
+  }
 
-        roleTempRepository.save(roleDb);
+  @Override
+  @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
+  public ResponseEntity<StandardResponse<Object>> updateRoleTemp(Integer roleID, RoleDTO roleDTO)
+      throws ApiRequestException {
 
-        RoleDTO role = new RoleDTO(roleDb);
-        StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), role);
-        return ResponseEntity.ok().body(response);
+    RoleTemp roleDb =
+        roleTempRepository
+            .findById(roleID)
+            .orElseThrow(() -> new ApiRequestException(ROLE_WITH_ID + roleID + " does not exist"));
+
+    if (roleDTO.getRoleName() == null || roleDTO.getRoleName().isEmpty()) {
+      throw new ApiRequestException("NOT_NUL");
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<Object>> approveRejectRole(ApproveRejectRQ approveRejectRQ) throws ApiRequestException {
-        log.info("START: Approve/Reject Role: {}", approveRejectRQ);
-        Date date = new Date();
-        if (approveRejectRQ == null || approveRejectRQ.getApproveRejectDataID() == null) {
-            throw new ApiRequestException("Invalid ApproveRejectRQ: DataID cannot be null");
-        }
+    validateRoleNameUniqueness(roleDTO.getRoleName(), roleID);
 
-        RoleTemp roleTemp = roleTempRepository.findById(approveRejectRQ.getApproveRejectDataID()).orElseThrow(() -> {
-            throw new ApiRequestException(ROLE_WITH_ID + approveRejectRQ.getApproveRejectDataID() + DOES_NOT_EXISTS);
-        });
+    roleDb.setRoleName(roleDTO.getRoleName());
+    roleDb.setUpmPrivilegeCode(roleDTO.getUpmPrivilegeCode());
+    roleDb.setStatus(roleDTO.getStatus());
+    roleDb.setApproveStatus(roleDTO.getApproveStatus());
 
-        Optional<Role> optionalRole = roleRepository.findById(roleTemp.getRoleID());
-        Role findRole = optionalRole.orElse(null);
+    Set<Privilege> privileges = privilegeRepository.findByPrivilegeIDIn(roleDTO.getPrivileges());
+    roleDb.setPrivileges(privileges);
 
-        roleTemp.setApprovedDate(date);
-        roleTemp.setApproveStatus(approveRejectRQ.getApproveStatus());
-        RoleTemp savedTemp = roleTempRepository.saveAndFlush(roleTemp);
-
-        ResponseEntity<StandardResponse<Object>> response;
-
-        if (approveRejectRQ.getApproveStatus().equals(MasterDataApproveStatus.APPROVED)) {
-            response = handleApproval(roleTemp, findRole);
-        } else if (approveRejectRQ.getApproveStatus().equals(MasterDataApproveStatus.REJECTED)) {
-            response = handleRejection(savedTemp);
-        } else {
-            throw new ApiRequestException("Unknown approval status: " + approveRejectRQ.getApproveStatus());
-        }
-
-        return response;
+    if (roleDTO.getAddedPrivileges() != null) {
+      Set<Privilege> addedPrivileges =
+          privilegeRepository.findByPrivilegeIDIn(roleDTO.getAddedPrivileges());
+      roleDb.getPrivileges().addAll(addedPrivileges);
     }
 
-    public ResponseEntity<StandardResponse<Object>> handleApproval(RoleTemp temp, Role existingTemplate) {
-        RoleDTO savedRole;
-        if (existingTemplate != null && existingTemplate.getRoleID().equals(temp.getRoleID())) {
-            savedRole = updateRoleToMaster(temp, existingTemplate);
-        } else {
-            savedRole = saveRoleToMaster(temp);
-        }
-
-        saveRoleAudit(temp);
-        roleTempRepository.delete(temp);
-
-        StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), savedRole);
-        return ResponseEntity.ok().body(response);
+    if (roleDTO.getDeletedPrivileges() != null) {
+      Set<Privilege> deletedPrivileges =
+          privilegeRepository.findByPrivilegeIDIn(roleDTO.getDeletedPrivileges());
+      roleDb.getPrivileges().removeAll(deletedPrivileges);
     }
 
-    public ResponseEntity<StandardResponse<Object>> handleRejection(RoleTemp temp) {
-        log.info("Handling rejection for UPC Template Temp ID: {}", temp.getRoleID());
+    roleTempRepository.save(roleDb);
 
-        saveRoleAudit(temp);
+    RoleDTO role = new RoleDTO(roleDb);
+    StandardResponse<Object> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), role);
+    return ResponseEntity.ok().body(response);
+  }
 
-        RoleDTO roleDTO = new RoleDTO(temp);
-        StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), roleDTO);
-        return ResponseEntity.ok().body(response);
+  @Override
+  @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
+  public ResponseEntity<StandardResponse<Object>> approveRejectRole(ApproveRejectRQ approveRejectRQ)
+      throws ApiRequestException {
+    log.info("START: Approve/Reject Role: {}", approveRejectRQ);
+    Date date = new Date();
+    if (approveRejectRQ == null || approveRejectRQ.getApproveRejectDataID() == null) {
+      throw new ApiRequestException("Invalid ApproveRejectRQ: DataID cannot be null");
     }
 
-    public RoleDTO saveRoleToMaster(RoleTemp temp) {
+    RoleTemp roleTemp =
+        roleTempRepository
+            .findById(approveRejectRQ.getApproveRejectDataID())
+            .orElseThrow(
+                () -> {
+                  throw new ApiRequestException(
+                      ROLE_WITH_ID + approveRejectRQ.getApproveRejectDataID() + DOES_NOT_EXISTS);
+                });
 
-        Role role = new Role();
-        role.setRoleID(temp.getRoleID());
-        role.setRoleName(temp.getRoleName());
-        role.setPrivileges(temp.getPrivileges());
-        role.setStatus(temp.getStatus());
-        role.setUpmPrivilegeCode(temp.getUpmPrivilegeCode());
-        role.setApproveStatus(temp.getApproveStatus());
-        role.setApprovedBy(temp.getApprovedBy());
-        role.setApprovedDate(temp.getApprovedDate());
-        role.setCreatedBy(temp.getCreatedBy());
-        role.setCreatedDate(temp.getCreatedDate());
-        role.setLastModifiedDate(temp.getLastModifiedDate());
-        role.setModifiedBy(temp.getModifiedBy());
+    Optional<Role> optionalRole = roleRepository.findById(roleTemp.getRoleID());
+    Role findRole = optionalRole.orElse(null);
 
-        roleRepository.save(role);
+    roleTemp.setApprovedDate(date);
+    roleTemp.setApproveStatus(approveRejectRQ.getApproveStatus());
+    RoleTemp savedTemp = roleTempRepository.saveAndFlush(roleTemp);
 
-        return new RoleDTO(role);
+    ResponseEntity<StandardResponse<Object>> response;
+
+    if (approveRejectRQ.getApproveStatus().equals(MasterDataApproveStatus.APPROVED)) {
+      response = handleApproval(roleTemp, findRole);
+    } else if (approveRejectRQ.getApproveStatus().equals(MasterDataApproveStatus.REJECTED)) {
+      response = handleRejection(savedTemp);
+    } else {
+      throw new ApiRequestException(
+          "Unknown approval status: " + approveRejectRQ.getApproveStatus());
     }
 
-    public RoleDTO updateRoleToMaster(RoleTemp roleTemp, Role existingRole) {
+    return response;
+  }
 
-        Role role = (existingRole != null) ? existingRole : new Role();
-
-        role.setPrivileges(roleTemp.getPrivileges() != null ? roleTemp.getPrivileges() : new HashSet<>());
-
-        role.setRoleID(roleTemp.getRoleID());
-        role.setRoleName(roleTemp.getRoleName());
-        role.setPrivileges(roleTemp.getPrivileges());
-        role.setStatus(roleTemp.getStatus());
-        role.setUpmPrivilegeCode(roleTemp.getUpmPrivilegeCode());
-        role.setApproveStatus(roleTemp.getApproveStatus());
-        role.setApprovedBy(roleTemp.getApprovedBy());
-        role.setApprovedDate(roleTemp.getApprovedDate());
-        role.setCreatedBy(roleTemp.getCreatedBy());
-        role.setCreatedDate(roleTemp.getCreatedDate());
-        role.setLastModifiedDate(roleTemp.getLastModifiedDate());
-        role.setModifiedBy(roleTemp.getModifiedBy());
-
-        roleRepository.save(role);
-
-        return new RoleDTO(role);
+  public ResponseEntity<StandardResponse<Object>> handleApproval(
+      RoleTemp temp, Role existingTemplate) {
+    RoleDTO savedRole;
+    if (existingTemplate != null && existingTemplate.getRoleID().equals(temp.getRoleID())) {
+      savedRole = updateRoleToMaster(temp, existingTemplate);
+    } else {
+      savedRole = saveRoleToMaster(temp);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<Object>> updateApprovedRole(Integer roleID, RoleDTO roleDTO) throws ApiRequestException {
-        log.info("START: Update Approved Role :{}", roleDTO);
-        Date date = new Date();
+    saveRoleAudit(temp);
+    roleTempRepository.delete(temp);
 
-        Role roleDb = roleRepository.findById(roleID).orElseThrow(() -> {
-            throw new ApiRequestException(ROLE_WITH_ID + roleID + DOES_NOT_EXISTS);
-        });
+    StandardResponse<Object> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), savedRole);
+    return ResponseEntity.ok().body(response);
+  }
 
-        log.info("roleDb :{}", roleDb);
+  public ResponseEntity<StandardResponse<Object>> handleRejection(RoleTemp temp) {
+    log.info("Handling rejection for UPC Template Temp ID: {}", temp.getRoleID());
 
-        if (!roleDb.getRoleName().equals(roleDTO.getRoleName())) {
-            validateRoleNameUniqueness(roleDTO.getRoleName(), roleID);
-        } else if (roleDTO.getRoleName() == null || roleDTO.getRoleName().trim().isEmpty()) {
-            throw new ApiRequestException(NOT_NULL);
-        }
+    saveRoleAudit(temp);
 
-        RoleTemp roleTemp = new RoleTemp();
-        roleTemp.setRoleID(roleDb.getRoleID());
-        roleTemp.setStatus(roleDTO.getStatus());
-        roleTemp.setCreatedDate(date);
-        roleTemp.setRoleName(roleDTO.getRoleName());
-        roleTemp.setCreatedDate(roleDTO.getCreatedDate());
-        roleTemp.setCreatedBy(roleDTO.getCreatedBy());
-        roleTemp.setApprovedBy(roleDTO.getApprovedBy());
-        roleTemp.setApprovedDate(roleDTO.getApprovedDate());
-        roleTemp.setApproveStatus(roleDTO.getApproveStatus());
-        roleTemp.setUpmPrivilegeCode(roleDTO.getUpmPrivilegeCode());
+    RoleDTO roleDTO = new RoleDTO(temp);
+    StandardResponse<Object> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), roleDTO);
+    return ResponseEntity.ok().body(response);
+  }
 
-        Set<Privilege> privileges = privilegeRepository.findByPrivilegeIDIn(roleDTO.getPrivileges());
-        roleTemp.setPrivileges(privileges);
+  public RoleDTO saveRoleToMaster(RoleTemp temp) {
 
-        if (roleDTO.getAddedPrivileges() != null) {
-            Set<Privilege> addedPrivileges = privilegeRepository.findByPrivilegeIDIn(roleDTO.getAddedPrivileges());
-            roleTemp.getPrivileges().addAll(addedPrivileges);
-        }
+    Role role = new Role();
+    role.setRoleID(temp.getRoleID());
+    role.setRoleName(temp.getRoleName());
+    role.setPrivileges(temp.getPrivileges());
+    role.setStatus(temp.getStatus());
+    role.setUpmPrivilegeCode(temp.getUpmPrivilegeCode());
+    role.setApproveStatus(temp.getApproveStatus());
+    role.setApprovedBy(temp.getApprovedBy());
+    role.setApprovedDate(temp.getApprovedDate());
+    role.setCreatedBy(temp.getCreatedBy());
+    role.setCreatedDate(temp.getCreatedDate());
+    role.setLastModifiedDate(temp.getLastModifiedDate());
+    role.setModifiedBy(temp.getModifiedBy());
 
-        if (roleDTO.getDeletedPrivileges() != null) {
-            Set<Privilege> deletedPrivileges = privilegeRepository.findByPrivilegeIDIn(roleDTO.getDeletedPrivileges());
-            roleTemp.getPrivileges().removeAll(deletedPrivileges);
-        }
+    roleRepository.save(role);
 
-        log.info("END : GET Role {} ", roleTemp);
-        roleTempRepository.save(roleTemp);
-        RoleDTO role = new RoleDTO(roleTemp);
-        StandardResponse<Object> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), role);
-        return ResponseEntity.ok().body(response);
+    return new RoleDTO(role);
+  }
+
+  public RoleDTO updateRoleToMaster(RoleTemp roleTemp, Role existingRole) {
+
+    Role role = (existingRole != null) ? existingRole : new Role();
+
+    role.setPrivileges(
+        roleTemp.getPrivileges() != null ? roleTemp.getPrivileges() : new HashSet<>());
+
+    role.setRoleID(roleTemp.getRoleID());
+    role.setRoleName(roleTemp.getRoleName());
+    role.setPrivileges(roleTemp.getPrivileges());
+    role.setStatus(roleTemp.getStatus());
+    role.setUpmPrivilegeCode(roleTemp.getUpmPrivilegeCode());
+    role.setApproveStatus(roleTemp.getApproveStatus());
+    role.setApprovedBy(roleTemp.getApprovedBy());
+    role.setApprovedDate(roleTemp.getApprovedDate());
+    role.setCreatedBy(roleTemp.getCreatedBy());
+    role.setCreatedDate(roleTemp.getCreatedDate());
+    role.setLastModifiedDate(roleTemp.getLastModifiedDate());
+    role.setModifiedBy(roleTemp.getModifiedBy());
+
+    roleRepository.save(role);
+
+    return new RoleDTO(role);
+  }
+
+  @Override
+  @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
+  public ResponseEntity<StandardResponse<Object>> updateApprovedRole(
+      Integer roleID, RoleDTO roleDTO) throws ApiRequestException {
+    log.info("START: Update Approved Role :{}", roleDTO);
+    Date date = new Date();
+
+    Role roleDb =
+        roleRepository
+            .findById(roleID)
+            .orElseThrow(() -> new ApiRequestException(ROLE_WITH_ID + roleID + DOES_NOT_EXISTS));
+
+    log.info("roleDb :{}", roleDb);
+
+    if (!roleDb.getRoleName().equals(roleDTO.getRoleName())) {
+      validateRoleNameUniqueness(roleDTO.getRoleName(), roleID);
+    } else if (roleDTO.getRoleName() == null || roleDTO.getRoleName().trim().isEmpty()) {
+      throw new ApiRequestException(NOT_NULL);
     }
 
-    public void validateRoleNameUniqueness(String roleName, Integer roleID) throws ApiRequestException {
-        BooleanBuilder tempBuilder = new BooleanBuilder();
-        tempBuilder.and(QRoleTemp.roleTemp.roleName.eq(roleName));
-        if (roleID != null) {
-            tempBuilder.and(QRoleTemp.roleTemp.roleID.ne(roleID));
-        }
-        boolean existsInTemp = roleTempRepository.exists(tempBuilder);
+    RoleTemp roleTemp = new RoleTemp();
+    roleTemp.setRoleID(roleDb.getRoleID());
+    roleTemp.setStatus(roleDTO.getStatus());
+    roleTemp.setCreatedDate(date);
+    roleTemp.setRoleName(roleDTO.getRoleName());
+    roleTemp.setCreatedDate(roleDTO.getCreatedDate());
+    roleTemp.setCreatedBy(roleDTO.getCreatedBy());
+    roleTemp.setApprovedBy(roleDTO.getApprovedBy());
+    roleTemp.setApprovedDate(roleDTO.getApprovedDate());
+    roleTemp.setApproveStatus(roleDTO.getApproveStatus());
+    roleTemp.setUpmPrivilegeCode(roleDTO.getUpmPrivilegeCode());
 
-        BooleanBuilder masterBuilder = new BooleanBuilder();
-        masterBuilder.and(QRole.role.roleName.eq(roleName));
-        if (roleID != null) {
-            masterBuilder.and(QRole.role.roleID.ne(roleID));
-        }
-        boolean existsInMaster = roleRepository.exists(masterBuilder);
+    Set<Privilege> privileges = privilegeRepository.findByPrivilegeIDIn(roleDTO.getPrivileges());
+    roleTemp.setPrivileges(privileges);
 
-        if (existsInTemp || existsInMaster) {
-            throw new ApiRequestException("Role name '" + roleName + "' already exists in the system.");
-        }
+    if (roleDTO.getAddedPrivileges() != null) {
+      Set<Privilege> addedPrivileges =
+          privilegeRepository.findByPrivilegeIDIn(roleDTO.getAddedPrivileges());
+      roleTemp.getPrivileges().addAll(addedPrivileges);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<List<Privilege>>> findAllPrivileges(int page, int size) throws ApiRequestException {
-        List<Privilege> privileges = privilegeRepository.findAll(PageRequest.of(page, size)).getContent();
-
-        StandardResponse<List<Privilege>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), privileges);
-        return ResponseEntity.ok().body(response);
+    if (roleDTO.getDeletedPrivileges() != null) {
+      Set<Privilege> deletedPrivileges =
+          privilegeRepository.findByPrivilegeIDIn(roleDTO.getDeletedPrivileges());
+      roleTemp.getPrivileges().removeAll(deletedPrivileges);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
-    public ResponseEntity<StandardResponse<Void>> deleteRoleTempById(int roleID) throws ApiRequestException {
-        roleTempRepository.deleteById(roleID);
-        StandardResponse<Void> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), roleID);
-        return ResponseEntity.ok().body(response);
+    log.info("END : GET Role {} ", roleTemp);
+    roleTempRepository.save(roleTemp);
+    RoleDTO role = new RoleDTO(roleTemp);
+    StandardResponse<Object> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), role);
+    return ResponseEntity.ok().body(response);
+  }
+
+  public void validateRoleNameUniqueness(String roleName, Integer roleID)
+      throws ApiRequestException {
+    BooleanBuilder tempBuilder = new BooleanBuilder();
+    tempBuilder.and(QRoleTemp.roleTemp.roleName.eq(roleName));
+    if (roleID != null) {
+      tempBuilder.and(QRoleTemp.roleTemp.roleID.ne(roleID));
     }
+    boolean existsInTemp = roleTempRepository.exists(tempBuilder);
 
-    public void saveRoleAudit(RoleTemp roleTemp) {
-        RoleAud audit = new RoleAud();
+    BooleanBuilder masterBuilder = new BooleanBuilder();
+    masterBuilder.and(QRole.role.roleName.eq(roleName));
+    if (roleID != null) {
+      masterBuilder.and(QRole.role.roleID.ne(roleID));
+    }
+    boolean existsInMaster = roleRepository.exists(masterBuilder);
 
-        audit.setRoleID(roleTemp.getRoleID());
-        audit.setStatus(roleTemp.getStatus());
-        audit.setCreatedDate(roleTemp.getCreatedDate());
-        audit.setRoleName(roleTemp.getRoleName());
-        audit.setCreatedBy(roleTemp.getCreatedBy());
-        audit.setApproveStatus(roleTemp.getApproveStatus());
-        audit.setApprovedDate(new Date());
-        audit.setApprovedBy(roleTemp.getApprovedBy());
-        audit.setModifiedBy(roleTemp.getModifiedBy());
-        audit.setLastModifiedDate(roleTemp.getLastModifiedDate());
-        audit.setUpmPrivilegeCode(roleTemp.getUpmPrivilegeCode());
+    if (existsInTemp || existsInMaster) {
+      throw new ApiRequestException("Role name '" + roleName + "' already exists in the system.");
+    }
+  }
 
-        Set<RolePrivilegeAud> rolePrivilegeAudSet = roleTemp.getPrivileges().stream()
-                .map(privilege -> {
-                    Privilege privilegeFromDb = privilegeRepository.findById(privilege.getPrivilegeID())
-                            .orElseThrow(() -> new ApiRequestException("Privilege not found: " + privilege.getPrivilegeID()));
+  @Override
+  @Transactional(readOnly = true)
+  public ResponseEntity<StandardResponse<List<Privilege>>> findAllPrivileges(int page, int size)
+      throws ApiRequestException {
+    List<Privilege> privileges =
+        privilegeRepository.findAll(PageRequest.of(page, size)).getContent();
 
-                    RolePrivilegeAud rolePrivilegeAud = new RolePrivilegeAud();
-                    rolePrivilegeAud.setRole(audit);
-                    rolePrivilegeAud.setPrivilege(privilegeFromDb);
-                    rolePrivilegeAud.setActionDate(new Date());
+    StandardResponse<List<Privilege>> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), privileges);
+    return ResponseEntity.ok().body(response);
+  }
 
-                    return rolePrivilegeAud;
+  @Override
+  @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = ApiRequestException.class)
+  public ResponseEntity<StandardResponse<Void>> deleteRoleTempById(int roleID)
+      throws ApiRequestException {
+    roleTempRepository.deleteById(roleID);
+    StandardResponse<Void> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), roleID);
+    return ResponseEntity.ok().body(response);
+  }
+
+  public void saveRoleAudit(RoleTemp roleTemp) {
+    RoleAud audit = new RoleAud();
+
+    audit.setRoleID(roleTemp.getRoleID());
+    audit.setStatus(roleTemp.getStatus());
+    audit.setCreatedDate(roleTemp.getCreatedDate());
+    audit.setRoleName(roleTemp.getRoleName());
+    audit.setCreatedBy(roleTemp.getCreatedBy());
+    audit.setApproveStatus(roleTemp.getApproveStatus());
+    audit.setApprovedDate(new Date());
+    audit.setApprovedBy(roleTemp.getApprovedBy());
+    audit.setModifiedBy(roleTemp.getModifiedBy());
+    audit.setLastModifiedDate(roleTemp.getLastModifiedDate());
+    audit.setUpmPrivilegeCode(roleTemp.getUpmPrivilegeCode());
+
+    Set<RolePrivilegeAud> rolePrivilegeAudSet =
+        roleTemp.getPrivileges().stream()
+            .map(
+                privilege -> {
+                  Privilege privilegeFromDb =
+                      privilegeRepository
+                          .findById(privilege.getPrivilegeID())
+                          .orElseThrow(
+                              () ->
+                                  new ApiRequestException(
+                                      "Privilege not found: " + privilege.getPrivilegeID()));
+
+                  RolePrivilegeAud rolePrivilegeAud = new RolePrivilegeAud();
+                  rolePrivilegeAud.setRole(audit);
+                  rolePrivilegeAud.setPrivilege(privilegeFromDb);
+                  rolePrivilegeAud.setActionDate(new Date());
+
+                  return rolePrivilegeAud;
                 })
-                .collect(Collectors.toSet());
+            .collect(Collectors.toSet());
 
-        audit.setRolePrivilegeAudSet(rolePrivilegeAudSet);
+    audit.setRolePrivilegeAudSet(rolePrivilegeAudSet);
 
-        roleAudRepository.save(audit);
-        rolePrivilegeAudRepository.saveAll(rolePrivilegeAudSet);
+    roleAudRepository.save(audit);
+    rolePrivilegeAudRepository.saveAll(rolePrivilegeAudSet);
 
-        log.info("Saved audit record for Role ID: {}", roleTemp.getRoleID());
-    }
+    log.info("Saved audit record for Role ID: {}", roleTemp.getRoleID());
+  }
 
-    @Override
-    public ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> getUserPrivilegesByUMPCode(int groupCode) {
-        List<UpmRolePrivilegeDTO> privileges = roleJdbc.getUserPrivilegesByUMPCode(String.valueOf(groupCode));
-        StandardResponse<List<UpmRolePrivilegeDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), privileges);
-        return ResponseEntity.ok().body(response);
-    }
+  @Override
+  public ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> getUserPrivilegesByUMPCode(
+      int groupCode) {
+    List<UpmRolePrivilegeDTO> privileges =
+        roleJdbc.getUserPrivilegesByUMPCode(String.valueOf(groupCode));
+    StandardResponse<List<UpmRolePrivilegeDTO>> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), privileges);
+    return ResponseEntity.ok().body(response);
+  }
 }

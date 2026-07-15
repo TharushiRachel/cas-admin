@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DeviationTempRepository extends JpaRepository<TempDeviation, Integer> {
 
-    @Query(value = "SELECT SEQ_T_DEVIATIONS.NEXTVAL FROM DUAL", nativeQuery = true)
-    Integer getCurrentSequenceValue();
+  @Query(value = "SELECT SEQ_T_DEVIATIONS.NEXTVAL FROM DUAL", nativeQuery = true)
+  Integer getCurrentSequenceValue();
 }

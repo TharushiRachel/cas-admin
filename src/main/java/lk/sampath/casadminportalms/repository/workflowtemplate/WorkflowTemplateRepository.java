@@ -10,9 +10,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WorkflowTemplateRepository extends JpaRepository<WorkflowTemplate, Integer> {
 
-    @Query(value = "SELECT CASV3_SEQ_T_WORKFLOW.NEXTVAL FROM DUAL", nativeQuery = true)
-    Integer getNextSequenceValue();
+  @Query(value = "SELECT CASV3_SEQ_T_WORKFLOW.NEXTVAL FROM DUAL", nativeQuery = true)
+  Integer getNextSequenceValue();
 
-    @Query(value ="SELECT * FROM T_WORK_FLOW_TEMPLATE w WHERE w.APPROVE_STATUS IN ('APPROVED')", nativeQuery = true)
-    Page<WorkflowTemplate> findAllWorkflowTemplate(Pageable pageable);
+  @Query(
+      value = "SELECT * FROM T_WORK_FLOW_TEMPLATE w WHERE w.APPROVE_STATUS IN ('APPROVED')",
+      nativeQuery = true)
+  Page<WorkflowTemplate> findAllWorkflowTemplate(Pageable pageable);
 }

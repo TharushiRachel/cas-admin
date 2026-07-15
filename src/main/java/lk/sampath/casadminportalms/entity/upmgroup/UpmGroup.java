@@ -9,7 +9,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-
 @Entity
 @Setter
 @Getter
@@ -19,22 +18,20 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @ToString
 public class UpmGroup extends ApprovableEntity {
 
-    @Id
-    @Column(name = "UPM_GROUP_ID", nullable = false, updatable = false)
-    private Integer upmGroupID;
+  @Id
+  @Column(name = "UPM_GROUP_ID", nullable = false, updatable = false)
+  private Integer upmGroupID;
 
-    @Column(name = "GROUP_CODE")
-    private String groupCode;
+  @Column(name = "GROUP_CODE")
+  private String groupCode;
 
-    @Column(name = "REFERENCE_NAME")
-    private String referenceName;
+  @Column(name = "REFERENCE_NAME")
+  private String referenceName;
 
-    @Column(name = "WORK_FLOW_LEVEL")
-    private Integer workFlowLevel;
+  @Column(name = "WORK_FLOW_LEVEL")
+  private Integer workFlowLevel;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "STATUS")
-    private Status status;
-
-
+  @Enumerated(EnumType.STRING)
+  @Column(name = "STATUS")
+  private Status status;
 }

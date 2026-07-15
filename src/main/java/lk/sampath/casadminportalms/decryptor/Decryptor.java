@@ -9,25 +9,24 @@
  */
 package lk.sampath.casadminportalms.decryptor;
 
-import lk.sampath.casadminportalms.enums.CipherAlgo;
-import lk.sampath.casadminportalms.enums.FileType;
-import lk.sampath.casadminportalms.exception.CipheringException;
-import lk.sampath.casadminportalms.util.CommonParamSetter;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import lk.sampath.casadminportalms.enums.CipherAlgo;
+import lk.sampath.casadminportalms.enums.FileType;
+import lk.sampath.casadminportalms.exception.CipheringException;
+import lk.sampath.casadminportalms.util.CommonParamSetter;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Component;
 
 @Log4j2
 @Component
@@ -37,7 +36,7 @@ public class Decryptor {
   private static final String LEFT_STATUS = "LEFT";
 
   public String decryptString(
-          String cipherText, String path, String password, FileType fileType, CipherAlgo algorithm)
+      String cipherText, String path, String password, FileType fileType, CipherAlgo algorithm)
       throws UnrecoverableKeyException,
           CertificateException,
           NoSuchAlgorithmException,

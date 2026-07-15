@@ -7,8 +7,9 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserDaTempRepository extends JpaRepository<UserDaTemp, Integer>, QuerydslPredicateExecutor<UserDaTemp> {
+public interface UserDaTempRepository
+    extends JpaRepository<UserDaTemp, Integer>, QuerydslPredicateExecutor<UserDaTemp> {
 
-    @Query(value = "SELECT SEQ_T_USER_DA.NEXTVAL FROM DUAL", nativeQuery = true)
-    Integer getCurrentSequenceValue();
+  @Query(value = "SELECT SEQ_T_USER_DA.NEXTVAL FROM DUAL", nativeQuery = true)
+  Integer getCurrentSequenceValue();
 }

@@ -5,9 +5,9 @@ import lombok.Data;
 @Data
 public class UpmRolePrivilegeDTO {
 
-    private String code;
+  private String code;
 
-    private String allowedSolIds;
+  private String allowedSolIds;
 
-    private String restrictedSolIds;
+  private String restrictedSolIds;
 }

@@ -17,11 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/creditFacilityTemplates")
 public class CreditFacilityTemplateController {
 
-    private final CreditFacilityTemplateService creditFacilityTemplateService;
+  private final CreditFacilityTemplateService creditFacilityTemplateService;
 
-    public CreditFacilityTemplateController(CreditFacilityTemplateService creditFacilityTemplateService) {
-        this.creditFacilityTemplateService = creditFacilityTemplateService;
-    }
+  public CreditFacilityTemplateController(
+      CreditFacilityTemplateService creditFacilityTemplateService) {
+    this.creditFacilityTemplateService = creditFacilityTemplateService;
+  }
 
     @GetMapping("/getAllCftTemp")
     public ResponseEntity<StandardResponse<Page<CftResponse>>> getAllCreditFacilityTemplatesTemp(
@@ -36,11 +37,14 @@ public class CreditFacilityTemplateController {
         return ResponseEntity.ok().body(pagedCreditFacilityTemplates.getBody());
     }
 
-    @GetMapping("/getCftTempById/{creditFacilityTemplateID}")
-    public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> getCreditFacilityTemplateTempById(@PathVariable Integer creditFacilityTemplateID) throws ApiRequestException {
-        ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> creditFacilityTemplateTemp = creditFacilityTemplateService.getCreditFacilityTemplateTempByID(creditFacilityTemplateID);
-        return ResponseEntity.ok().body(creditFacilityTemplateTemp.getBody());
-    }
+  @GetMapping("/getCftTempById/{creditFacilityTemplateID}")
+  public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>>
+      getCreditFacilityTemplateTempById(@PathVariable Integer creditFacilityTemplateID)
+          throws ApiRequestException {
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> creditFacilityTemplateTemp =
+        creditFacilityTemplateService.getCreditFacilityTemplateTempByID(creditFacilityTemplateID);
+    return ResponseEntity.ok().body(creditFacilityTemplateTemp.getBody());
+  }
 
     @GetMapping("/getAllCft")
     public ResponseEntity<StandardResponse<Page<CftResponse>>> getCreditFacilityTemplates(
@@ -55,40 +59,62 @@ public class CreditFacilityTemplateController {
         return ResponseEntity.ok().body(pagedCreditFacilityTemplates.getBody());
     }
 
-    @GetMapping("/getCftById/{creditFacilityTemplateID}")
-    public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> getCreditFacilityTemplateById(@PathVariable Integer creditFacilityTemplateID) throws ApiRequestException {
-        ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> creditFacilityTemplate = creditFacilityTemplateService.getCreditFacilityTemplateByID(creditFacilityTemplateID);
-        return ResponseEntity.ok().body(creditFacilityTemplate.getBody());
-    }
+  @GetMapping("/getCftById/{creditFacilityTemplateID}")
+  public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> getCreditFacilityTemplateById(
+      @PathVariable Integer creditFacilityTemplateID) throws ApiRequestException {
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> creditFacilityTemplate =
+        creditFacilityTemplateService.getCreditFacilityTemplateByID(creditFacilityTemplateID);
+    return ResponseEntity.ok().body(creditFacilityTemplate.getBody());
+  }
 
-    @PostMapping("/saveAndUpdateCftTemp")
-    public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> saveCreditFacilityTemplateTemp(@Validated @RequestBody CreditFacilityTemplateDTO creditFacilityTemplateDTO) throws ApiRequestException {
-        ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> creditFacilityTemplateTemp = creditFacilityTemplateService.saveCreditFacilityTemplateTemp(creditFacilityTemplateDTO);
-        return ResponseEntity.ok().body(creditFacilityTemplateTemp.getBody());
-    }
+  @PostMapping("/saveAndUpdateCftTemp")
+  public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> saveCreditFacilityTemplateTemp(
+      @Validated @RequestBody CreditFacilityTemplateDTO creditFacilityTemplateDTO)
+      throws ApiRequestException {
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> creditFacilityTemplateTemp =
+        creditFacilityTemplateService.saveCreditFacilityTemplateTemp(creditFacilityTemplateDTO);
+    return ResponseEntity.ok().body(creditFacilityTemplateTemp.getBody());
+  }
 
-    @PostMapping("/updateCftTemp/{creditFacilityTemplateID}")
-    public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> updateCreditFacilityTemplateTemp(@PathVariable Integer creditFacilityTemplateID, @Validated @RequestBody CreditFacilityTemplateDTO creditFacilityTemplateDTO) throws ApiRequestException {
-        ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> creditFacilityTemplateTemp = creditFacilityTemplateService.updateCreditFacilityTemplateTemp(creditFacilityTemplateID, creditFacilityTemplateDTO);
-        return ResponseEntity.ok().body(creditFacilityTemplateTemp.getBody());
-    }
+  @PostMapping("/updateCftTemp/{creditFacilityTemplateID}")
+  public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>>
+      updateCreditFacilityTemplateTemp(
+          @PathVariable Integer creditFacilityTemplateID,
+          @Validated @RequestBody CreditFacilityTemplateDTO creditFacilityTemplateDTO)
+          throws ApiRequestException {
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> creditFacilityTemplateTemp =
+        creditFacilityTemplateService.updateCreditFacilityTemplateTemp(
+            creditFacilityTemplateID, creditFacilityTemplateDTO);
+    return ResponseEntity.ok().body(creditFacilityTemplateTemp.getBody());
+  }
 
-    @PostMapping("/authorizeCft")
-    public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> authorizeCreditFacilityTemplate(@RequestBody ApproveRejectRQ approveRejectRQ) throws ApiRequestException {
-        ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> approveRejectResponse = creditFacilityTemplateService.authorizeCreditFacilityTemplate(approveRejectRQ);
-        return ResponseEntity.ok().body(approveRejectResponse.getBody());
-    }
+  @PostMapping("/authorizeCft")
+  public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>>
+      authorizeCreditFacilityTemplate(@RequestBody ApproveRejectRQ approveRejectRQ)
+          throws ApiRequestException {
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> approveRejectResponse =
+        creditFacilityTemplateService.authorizeCreditFacilityTemplate(approveRejectRQ);
+    return ResponseEntity.ok().body(approveRejectResponse.getBody());
+  }
 
-    @PostMapping("/updateCft/{creditFacilityTemplateID}")
-    public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> updateCreditFacilityTemplate(@PathVariable Integer creditFacilityTemplateID, @Validated @RequestBody CreditFacilityTemplateDTO creditFacilityTemplateDTO) throws ApiRequestException {
-        ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> creditFacilityTemplateUpdatedDTO = creditFacilityTemplateService.updateCreditFacilityTemplate(creditFacilityTemplateID, creditFacilityTemplateDTO);
-        return ResponseEntity.ok().body(creditFacilityTemplateUpdatedDTO.getBody());
-    }
+  @PostMapping("/updateCft/{creditFacilityTemplateID}")
+  public ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> updateCreditFacilityTemplate(
+      @PathVariable Integer creditFacilityTemplateID,
+      @Validated @RequestBody CreditFacilityTemplateDTO creditFacilityTemplateDTO)
+      throws ApiRequestException {
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> creditFacilityTemplateUpdatedDTO =
+        creditFacilityTemplateService.updateCreditFacilityTemplate(
+            creditFacilityTemplateID, creditFacilityTemplateDTO);
+    return ResponseEntity.ok().body(creditFacilityTemplateUpdatedDTO.getBody());
+  }
 
-    @PostMapping("/deleteCftTemp")
-    public ResponseEntity<StandardResponse<Void>> deleteCreditFacilityTemplateTemp(@Validated @RequestBody CreditFacilityTemplateDTO creditFacilityTemplateDTO) throws ApiRequestException {
-        ResponseEntity<StandardResponse<Void>> approveRejectResponse = creditFacilityTemplateService.deleteCreditFacilityTemplateTemp(creditFacilityTemplateDTO.getCreditFacilityTemplateID());
-        return ResponseEntity.ok().body(approveRejectResponse.getBody());
-    }
-
+  @PostMapping("/deleteCftTemp")
+  public ResponseEntity<StandardResponse<Void>> deleteCreditFacilityTemplateTemp(
+      @Validated @RequestBody CreditFacilityTemplateDTO creditFacilityTemplateDTO)
+      throws ApiRequestException {
+    ResponseEntity<StandardResponse<Void>> approveRejectResponse =
+        creditFacilityTemplateService.deleteCreditFacilityTemplateTemp(
+            creditFacilityTemplateDTO.getCreditFacilityTemplateID());
+    return ResponseEntity.ok().body(approveRejectResponse.getBody());
+  }
 }

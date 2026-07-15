@@ -1,41 +1,37 @@
 package lk.sampath.casadminportalms.dto.userda;
 
-
+import java.math.BigDecimal;
+import java.util.Date;
 import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
 import lk.sampath.casadminportalms.enums.Status;
 import lombok.Data;
 
-import java.math.BigDecimal;
-import java.util.Date;
-
 @Data
-public class UserDaDTO  {
+public class UserDaDTO {
 
-    private Integer userDaID;
-    
-    private String userName;
+  private Integer userDaID;
 
-    private BigDecimal maxAmount;
+  private String userName;
 
-    private String description;
+  private BigDecimal maxAmount;
 
-    private Status status;
+  private String description;
 
-    private MasterDataApproveStatus approveStatus;
+  private Status status;
 
-    private Date approvedDate;
+  private MasterDataApproveStatus approveStatus;
 
-    private String approvedBy;
+  private Date approvedDate;
 
-    private String createdBy;
+  private String approvedBy;
 
-    private  Date createdDate;
+  private String createdBy;
 
-    private Date lastModifiedDate;
+  private Date createdDate;
 
-    private String modifiedBy;
+  private Date lastModifiedDate;
 
-    private BigDecimal cleanAmount;
+  private String modifiedBy;
 
-
+  private BigDecimal cleanAmount;
 }

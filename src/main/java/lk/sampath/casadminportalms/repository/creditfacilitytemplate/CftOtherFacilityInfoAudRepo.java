@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CftOtherFacilityInfoAudRepo extends JpaRepository<CftOtherFacilityInformationAud, Integer> {
-}
+public interface CftOtherFacilityInfoAudRepo
+    extends JpaRepository<CftOtherFacilityInformationAud, Integer> {}

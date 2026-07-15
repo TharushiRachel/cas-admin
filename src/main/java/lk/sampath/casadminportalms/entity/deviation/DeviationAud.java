@@ -11,22 +11,24 @@ import lombok.Setter;
 @Setter
 public class DeviationAud extends ApprovableEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CASV3_SEQ_DEVIATIONS_AUD")
-    @SequenceGenerator(name = "CASV3_SEQ_DEVIATIONS_AUD", sequenceName = "CASV3_SEQ_DEVIATIONS_AUD", allocationSize = 1)
-    @Column(name = "ID")
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CASV3_SEQ_DEVIATIONS_AUD")
+  @SequenceGenerator(
+      name = "CASV3_SEQ_DEVIATIONS_AUD",
+      sequenceName = "CASV3_SEQ_DEVIATIONS_AUD",
+      allocationSize = 1)
+  @Column(name = "ID")
+  private Integer id;
 
-    @Column(name = "DEVIATION_ID")
-    private Integer deviationId;
+  @Column(name = "DEVIATION_ID")
+  private Integer deviationId;
 
-    @Column(name = "DEVIATION_TYPE")
-    private String deviationType;
+  @Column(name = "DEVIATION_TYPE")
+  private String deviationType;
 
-    @Column(name = "DESCRIPTION")
-    private String description;
+  @Column(name = "DESCRIPTION")
+  private String description;
 
-    @Column(name = "STATUS")
-    private String status;
-
+  @Column(name = "STATUS")
+  private String status;
 }
