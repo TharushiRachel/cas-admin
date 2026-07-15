@@ -7,6 +7,7 @@ import com.querydsl.core.BooleanBuilder;
 import java.math.BigDecimal;
 import java.util.*;
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
+import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.creditfacilitytemplate.*;
 import lk.sampath.casadminportalms.entity.creditfacility.CreditFacilityType;
 import lk.sampath.casadminportalms.entity.creditfacilitytemplate.*;
@@ -14,6 +15,7 @@ import lk.sampath.casadminportalms.entity.supportingdoc.SupportingDoc;
 import lk.sampath.casadminportalms.enums.AppsConstants;
 import lk.sampath.casadminportalms.enums.InputFieldValueType;
 import lk.sampath.casadminportalms.enums.InterestRatingSubCategory;
+import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
 import lk.sampath.casadminportalms.repository.creditfacilitytemplate.*;
 import lk.sampath.casadminportalms.repository.creditfacilitytype.CreditFacilityTypeRepository;
@@ -22,9 +24,14 @@ import lk.sampath.casadminportalms.service.impl.CreditFacilityTemplateServiceImp
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +64,18 @@ class CreditFacilityTemplateServiceImplTest {
   @Mock private CftOtherFacilityInfoAudRepo cftOtherFacilityInfoAudRepo;
 
   @Mock private CftCustomFacilityInfoAudRepo cftCustomFacilityInfoAudRepo;
+
+  @Mock private CftVitalInfoRepository cftVitalInfoRepository;
+
+  @Mock private CftInterestRateRepository cftInterestRateRepository;
+
+  @Mock private CftSupportingDocRepository cftSupportingDocRepository;
+
+  @Mock private CftOtherFacilityInfoRepository otherFacilityInfoRepository;
+
+  @Mock private CftCustomFacilityInfoRepository cftCustomFacilityInfoRepository;
+
+  @Mock private CreditFacilityTemplateAudRepo creditFacilityTemplateAudRepo;
 
   @InjectMocks private CreditFacilityTemplateServiceImpl creditFacilityService;
 
@@ -247,19 +266,92 @@ class CreditFacilityTemplateServiceImplTest {
 
   /** getAllCreditFacilityTemplatesTemp * */
   @Test
-  void testGetAllCreditFacilityTemplatesTemp() {
-    List<CreditFacilityTemplateTemp> creditFacilityTemplateTempList =
-        Arrays.asList(creditFacilityTemplateTemp);
+  void testGetAllCreditFacilityTemplatesTemp_Success() {
+    Pageable pageable = PageRequest.of(0, 10);
+    CftResponse cftResponse = new CftResponse();
+    cftResponse.setCreditFacilityTemplateID(1);
+    cftResponse.setCreditFacilityName("Test Facility");
+    Page<CftResponse> cftResponsePage = new PageImpl<>(Arrays.asList(cftResponse), pageable, 1);
 
-    when(creditFacilityTemplateTempRepository.findAll()).thenReturn(creditFacilityTemplateTempList);
+    when(creditFacilityTemplateTempRepository.findAllTemplates(pageable)).thenReturn(cftResponsePage);
 
-    ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> response =
-        creditFacilityService.getAllCreditFacilityTemplatesTemp();
+    ResponseEntity<StandardResponse<Page<CftResponse>>> response =
+        creditFacilityService.getAllCreditFacilityTemplatesTemp(pageable);
 
     assertNotNull(response);
     assertEquals(200, response.getStatusCodeValue());
     assertNotNull(response.getBody());
-    verify(creditFacilityTemplateTempRepository, times(1)).findAll();
+    assertTrue(response.getBody().getSuccess());
+    Page<CftResponse> returnedPage = (Page<CftResponse>) response.getBody().getResponse();
+    assertEquals(1, returnedPage.getTotalElements());
+    verify(creditFacilityTemplateTempRepository, times(1)).findAllTemplates(pageable);
+  }
+
+  @Test
+  void testGetAllCreditFacilityTemplatesTemp_EmptyPage() {
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<CftResponse> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+
+    when(creditFacilityTemplateTempRepository.findAllTemplates(pageable)).thenReturn(emptyPage);
+
+    ResponseEntity<StandardResponse<Page<CftResponse>>> response =
+        creditFacilityService.getAllCreditFacilityTemplatesTemp(pageable);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+    assertNotNull(response.getBody());
+    Page<CftResponse> returnedPage = (Page<CftResponse>) response.getBody().getResponse();
+    assertTrue(returnedPage.getContent().isEmpty());
+    verify(creditFacilityTemplateTempRepository, times(1)).findAllTemplates(pageable);
+  }
+
+  @Test
+  void testGetAllCreditFacilityTemplatesTemp_MultipleRecords() {
+    Pageable pageable = PageRequest.of(0, 5);
+    CftResponse first = new CftResponse();
+    first.setCreditFacilityTemplateID(1);
+    CftResponse second = new CftResponse();
+    second.setCreditFacilityTemplateID(2);
+    Page<CftResponse> cftResponsePage =
+        new PageImpl<>(Arrays.asList(first, second), pageable, 2);
+
+    when(creditFacilityTemplateTempRepository.findAllTemplates(pageable)).thenReturn(cftResponsePage);
+
+    ResponseEntity<StandardResponse<Page<CftResponse>>> response =
+        creditFacilityService.getAllCreditFacilityTemplatesTemp(pageable);
+
+    assertNotNull(response);
+    Page<CftResponse> returnedPage = (Page<CftResponse>) response.getBody().getResponse();
+    assertEquals(2, returnedPage.getContent().size());
+  }
+
+  @Test
+  void testGetAllCreditFacilityTemplatesTemp_UsesGivenPageable() {
+    Pageable pageable = PageRequest.of(2, 20);
+    Page<CftResponse> cftResponsePage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+
+    when(creditFacilityTemplateTempRepository.findAllTemplates(any(Pageable.class)))
+        .thenReturn(cftResponsePage);
+
+    creditFacilityService.getAllCreditFacilityTemplatesTemp(pageable);
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(creditFacilityTemplateTempRepository).findAllTemplates(pageableCaptor.capture());
+    assertEquals(2, pageableCaptor.getValue().getPageNumber());
+    assertEquals(20, pageableCaptor.getValue().getPageSize());
+  }
+
+  @Test
+  void testGetAllCreditFacilityTemplatesTemp_SuccessResponseMessageMatches() {
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<CftResponse> cftResponsePage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+
+    when(creditFacilityTemplateTempRepository.findAllTemplates(pageable)).thenReturn(cftResponsePage);
+
+    ResponseEntity<StandardResponse<Page<CftResponse>>> response =
+        creditFacilityService.getAllCreditFacilityTemplatesTemp(pageable);
+
+    assertEquals("Success", response.getBody().getMessage());
   }
 
   /** getCreditFacilityTemplateTempByID * */
@@ -289,30 +381,132 @@ class CreditFacilityTemplateServiceImplTest {
     assertEquals("Credit Facility Template Temp with2Does Not Exists", thrown.getMessage());
   }
 
+  @Test
+  void testGetCreditFacilityTemplateTempByID_MapsFieldsCorrectly() {
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> response =
+        creditFacilityService.getCreditFacilityTemplateTempByID(1);
+
+    CreditFacilityTemplateDTO returnedDTO =
+        (CreditFacilityTemplateDTO) response.getBody().getResponse();
+    assertEquals(creditFacilityTemplateTemp.getCreditFacilityName(), returnedDTO.getCreditFacilityName());
+    assertEquals(creditFacilityTemplateTemp.getMaxFacilityAmount(), returnedDTO.getMaxFacilityAmount());
+  }
+
+  @Test
+  void testGetCreditFacilityTemplateTempByID_VerifiesRepositoryCalledOnce() {
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+
+    creditFacilityService.getCreditFacilityTemplateTempByID(1);
+
+    verify(creditFacilityTemplateTempRepository, times(1)).findById(1);
+  }
+
+  @Test
+  void testGetCreditFacilityTemplateTempByID_DifferentIdReturnsCorrespondingRecord() {
+    CreditFacilityTemplateTemp anotherTemp = new CreditFacilityTemplateTemp();
+    anotherTemp.setCreditFacilityTemplateID(5);
+    anotherTemp.setCreditFacilityName("Another Facility");
+    anotherTemp.setCftVitalInfos(new HashSet<>());
+    anotherTemp.setCftInterestRates(new HashSet<>());
+    anotherTemp.setCftSupportingDocs(new HashSet<>());
+    anotherTemp.setCftOtherFacilityInformations(new HashSet<>());
+    anotherTemp.setCftCustomFacilityInfos(new HashSet<>());
+
+    when(creditFacilityTemplateTempRepository.findById(5)).thenReturn(Optional.of(anotherTemp));
+
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> response =
+        creditFacilityService.getCreditFacilityTemplateTempByID(5);
+
+    CreditFacilityTemplateDTO returnedDTO =
+        (CreditFacilityTemplateDTO) response.getBody().getResponse();
+    assertEquals("Another Facility", returnedDTO.getCreditFacilityName());
+  }
+
   /** getAllCreditFacilityTemplates * */
   @Test
   void testGetAllCreditFacilityTemplates_EmptyList() {
-    when(creditFacilityTemplateRepository.findAll()).thenReturn(new ArrayList<>());
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<CftResponse> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+    when(creditFacilityTemplateRepository.findAllTemplates(pageable)).thenReturn(emptyPage);
 
-    ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> response =
-        creditFacilityService.getAllCreditFacilityTemplates();
+    ResponseEntity<StandardResponse<Page<CftResponse>>> response =
+        creditFacilityService.getAllCreditFacilityTemplates(pageable);
 
     assertNotNull(response);
     assertEquals(200, response.getStatusCodeValue());
+    Page<CftResponse> returnedPage = (Page<CftResponse>) response.getBody().getResponse();
+    assertTrue(returnedPage.getContent().isEmpty());
   }
 
   @Test
   void testGetAllCreditFacilityTemplates_Success() {
-    List<CreditFacilityTemplate> templates = new ArrayList<>();
-    templates.add(creditFacilityTemplate);
+    Pageable pageable = PageRequest.of(0, 10);
+    CftResponse cftResponse = new CftResponse();
+    cftResponse.setCreditFacilityTemplateID(1);
+    cftResponse.setCreditFacilityName("Test Facility");
+    Page<CftResponse> cftResponsePage = new PageImpl<>(Arrays.asList(cftResponse), pageable, 1);
 
-    when(creditFacilityTemplateRepository.findAll()).thenReturn(templates);
+    when(creditFacilityTemplateRepository.findAllTemplates(pageable)).thenReturn(cftResponsePage);
 
-    ResponseEntity<StandardResponse<List<CreditFacilityTemplateDTO>>> response =
-        creditFacilityService.getAllCreditFacilityTemplates();
+    ResponseEntity<StandardResponse<Page<CftResponse>>> response =
+        creditFacilityService.getAllCreditFacilityTemplates(pageable);
 
     assertNotNull(response);
     assertEquals(200, response.getStatusCodeValue());
+    Page<CftResponse> returnedPage = (Page<CftResponse>) response.getBody().getResponse();
+    assertEquals(1, returnedPage.getTotalElements());
+    verify(creditFacilityTemplateRepository, times(1)).findAllTemplates(pageable);
+  }
+
+  @Test
+  void testGetAllCreditFacilityTemplates_MultipleRecords() {
+    Pageable pageable = PageRequest.of(0, 5);
+    CftResponse first = new CftResponse();
+    first.setCreditFacilityTemplateID(1);
+    CftResponse second = new CftResponse();
+    second.setCreditFacilityTemplateID(2);
+    Page<CftResponse> cftResponsePage = new PageImpl<>(Arrays.asList(first, second), pageable, 2);
+
+    when(creditFacilityTemplateRepository.findAllTemplates(pageable)).thenReturn(cftResponsePage);
+
+    ResponseEntity<StandardResponse<Page<CftResponse>>> response =
+        creditFacilityService.getAllCreditFacilityTemplates(pageable);
+
+    Page<CftResponse> returnedPage = (Page<CftResponse>) response.getBody().getResponse();
+    assertEquals(2, returnedPage.getContent().size());
+  }
+
+  @Test
+  void testGetAllCreditFacilityTemplates_UsesGivenPageable() {
+    Pageable pageable = PageRequest.of(3, 15);
+    Page<CftResponse> cftResponsePage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+
+    when(creditFacilityTemplateRepository.findAllTemplates(any(Pageable.class)))
+        .thenReturn(cftResponsePage);
+
+    creditFacilityService.getAllCreditFacilityTemplates(pageable);
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(creditFacilityTemplateRepository).findAllTemplates(pageableCaptor.capture());
+    assertEquals(3, pageableCaptor.getValue().getPageNumber());
+    assertEquals(15, pageableCaptor.getValue().getPageSize());
+  }
+
+  @Test
+  void testGetAllCreditFacilityTemplates_SuccessResponseMessageMatches() {
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<CftResponse> cftResponsePage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+
+    when(creditFacilityTemplateRepository.findAllTemplates(pageable)).thenReturn(cftResponsePage);
+
+    ResponseEntity<StandardResponse<Page<CftResponse>>> response =
+        creditFacilityService.getAllCreditFacilityTemplates(pageable);
+
+    assertEquals("Success", response.getBody().getMessage());
   }
 
   /** getCreditFacilityTemplateByID * */
@@ -340,6 +534,51 @@ class CreditFacilityTemplateServiceImplTest {
             });
 
     assertEquals("Credit Facility Template  with2Does Not Exists", thrown.getMessage());
+  }
+
+  @Test
+  void testGetCreditFacilityTemplateByID_MapsFieldsCorrectly() {
+    when(creditFacilityTemplateRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplate));
+
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> response =
+        creditFacilityService.getCreditFacilityTemplateByID(1);
+
+    CreditFacilityTemplateDTO returnedDTO =
+        (CreditFacilityTemplateDTO) response.getBody().getResponse();
+    assertEquals(creditFacilityTemplate.getCreditFacilityName(), returnedDTO.getCreditFacilityName());
+    assertEquals(creditFacilityTemplate.getMinFacilityAmount(), returnedDTO.getMinFacilityAmount());
+  }
+
+  @Test
+  void testGetCreditFacilityTemplateByID_VerifiesRepositoryCalledOnce() {
+    when(creditFacilityTemplateRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplate));
+
+    creditFacilityService.getCreditFacilityTemplateByID(1);
+
+    verify(creditFacilityTemplateRepository, times(1)).findById(1);
+  }
+
+  @Test
+  void testGetCreditFacilityTemplateByID_DifferentIdReturnsCorrespondingRecord() {
+    CreditFacilityTemplate anotherTemplate = new CreditFacilityTemplate();
+    anotherTemplate.setCreditFacilityTemplateID(7);
+    anotherTemplate.setCreditFacilityName("Another Master Facility");
+    anotherTemplate.setCftVitalInfos(new HashSet<>());
+    anotherTemplate.setCftInterestRates(new HashSet<>());
+    anotherTemplate.setCftSupportingDocs(new HashSet<>());
+    anotherTemplate.setCftOtherFacilityInformations(new HashSet<>());
+    anotherTemplate.setCftCustomFacilityInfos(new HashSet<>());
+
+    when(creditFacilityTemplateRepository.findById(7)).thenReturn(Optional.of(anotherTemplate));
+
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> response =
+        creditFacilityService.getCreditFacilityTemplateByID(7);
+
+    CreditFacilityTemplateDTO returnedDTO =
+        (CreditFacilityTemplateDTO) response.getBody().getResponse();
+    assertEquals("Another Master Facility", returnedDTO.getCreditFacilityName());
   }
 
   /** saveCtfInterestRateTemp * */
@@ -592,6 +831,87 @@ class CreditFacilityTemplateServiceImplTest {
         "Credit Facility Template Name Already Exists in Temp Table", exception.getMessage());
   }
 
+  @Test
+  void testSaveCreditFacilityTemplateTemp_Success_CreatesNewTemplate() {
+    creditFacilityTemplateDTO.setIsCftInterestRateDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftVitalInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftCustomFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftSupportingDocDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftOtherFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+
+    when(creditFacilityTemplateTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(new ArrayList<>());
+    when(creditFacilityTemplateRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(new ArrayList<>());
+    when(creditFacilityTemplateTempRepository.getNextSequenceValue()).thenReturn(5);
+    when(creditFacilityTemplateTempRepository.saveAndFlush(any(CreditFacilityTemplateTemp.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> response =
+        creditFacilityService.saveCreditFacilityTemplateTemp(creditFacilityTemplateDTO);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().getSuccess());
+    CreditFacilityTemplateDTO returnedDTO =
+        (CreditFacilityTemplateDTO) response.getBody().getResponse();
+    assertEquals(creditFacilityTemplateDTO.getCreditFacilityName(), returnedDTO.getCreditFacilityName());
+    verify(creditFacilityTemplateTempRepository, times(1))
+        .saveAndFlush(any(CreditFacilityTemplateTemp.class));
+  }
+
+  @Test
+  void testSaveCreditFacilityTemplateTemp_CapturesSavedEntityFields() {
+    creditFacilityTemplateDTO.setIsCftInterestRateDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftVitalInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftCustomFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftSupportingDocDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftOtherFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+
+    when(creditFacilityTemplateTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(new ArrayList<>());
+    when(creditFacilityTemplateRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(new ArrayList<>());
+    when(creditFacilityTemplateTempRepository.getNextSequenceValue()).thenReturn(9);
+    when(creditFacilityTemplateTempRepository.saveAndFlush(any(CreditFacilityTemplateTemp.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    creditFacilityService.saveCreditFacilityTemplateTemp(creditFacilityTemplateDTO);
+
+    ArgumentCaptor<CreditFacilityTemplateTemp> captor =
+        ArgumentCaptor.forClass(CreditFacilityTemplateTemp.class);
+    verify(creditFacilityTemplateTempRepository).saveAndFlush(captor.capture());
+
+    CreditFacilityTemplateTemp captured = captor.getValue();
+    assertEquals(9, captured.getCreditFacilityTemplateID());
+    assertEquals(creditFacilityTemplateDTO.getCreditFacilityName(), captured.getCreditFacilityName());
+    assertEquals(creditFacilityTemplateDTO.getDescription(), captured.getDescription());
+  }
+
+  @Test
+  void testSaveCreditFacilityTemplateTemp_BothListsNonEmpty_PrefersTempExistsException() {
+    List<CreditFacilityTemplateTemp> tempList = new ArrayList<>();
+    tempList.add(creditFacilityTemplateTemp);
+    List<CreditFacilityTemplate> masterList = new ArrayList<>();
+    masterList.add(creditFacilityTemplate);
+
+    when(creditFacilityTemplateTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(tempList);
+    when(creditFacilityTemplateRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(masterList);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> creditFacilityService.saveCreditFacilityTemplateTemp(creditFacilityTemplateDTO));
+
+    assertEquals(
+        "Credit Facility Template Name Already Exists in Temp Table", exception.getMessage());
+    verify(creditFacilityTemplateTempRepository, never())
+        .saveAndFlush(any(CreditFacilityTemplateTemp.class));
+  }
+
   /** updateCreditFacilityTemplateTemp * */
   @Test
   void testUpdateCreditFacilityTemplateTemp_Success() {
@@ -627,6 +947,99 @@ class CreditFacilityTemplateServiceImplTest {
                     1, creditFacilityTemplateDTO));
 
     assertEquals("Not Found", exception.getMessage());
+  }
+
+  @Test
+  void testUpdateCreditFacilityTemplateTemp_NameConflictInTemp_ThrowsException() {
+    creditFacilityTemplateDTO.setCreditFacilityName("Different Facility Name");
+
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+    when(creditFacilityTemplateRepository.findById(1)).thenReturn(Optional.empty());
+    when(creditFacilityTemplateTempRepository.exists(any(BooleanBuilder.class))).thenReturn(true);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () ->
+                creditFacilityService.updateCreditFacilityTemplateTemp(
+                    1, creditFacilityTemplateDTO));
+
+    assertEquals(
+        "Credit Facility Template Name Already Exists in Temporary Records",
+        exception.getMessage());
+    verify(creditFacilityTemplateTempRepository, never()).saveAndFlush(any());
+  }
+
+  @Test
+  void testUpdateCreditFacilityTemplateTemp_NameConflictInMaster_ThrowsException() {
+    creditFacilityTemplateDTO.setCreditFacilityName("Different Facility Name");
+
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+    when(creditFacilityTemplateRepository.findById(1)).thenReturn(Optional.empty());
+    when(creditFacilityTemplateTempRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
+    when(creditFacilityTemplateRepository.exists(any(BooleanBuilder.class))).thenReturn(true);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () ->
+                creditFacilityService.updateCreditFacilityTemplateTemp(
+                    1, creditFacilityTemplateDTO));
+
+    assertEquals(
+        "Credit Facility Template Name Already Exists in Master Records", exception.getMessage());
+  }
+
+  @Test
+  void testUpdateCreditFacilityTemplateTemp_CreditFacilityTypeNotFound_ThrowsException() {
+    creditFacilityTemplateDTO.setCreditFacilityTypeID(42);
+
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+    when(creditFacilityTemplateRepository.findById(1)).thenReturn(Optional.empty());
+    when(creditFacilityTypeRepository.findById(42)).thenReturn(Optional.empty());
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () ->
+                creditFacilityService.updateCreditFacilityTemplateTemp(
+                    1, creditFacilityTemplateDTO));
+
+    assertEquals("Credit Facility Type with ID 42 does not exist.", exception.getMessage());
+  }
+
+  @Test
+  void testUpdateCreditFacilityTemplateTemp_Success_WithCreditFacilityTypeUpdate_CapturesSavedEntity() {
+    creditFacilityTemplateDTO.setCreditFacilityTypeID(3);
+    creditFacilityTemplateDTO.setIsCftCustomFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftOtherFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftInterestRateDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftSupportingDocDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftVitalInfoDTOListChange(AppsConstants.YesNo.N);
+
+    CreditFacilityType creditFacilityType = new CreditFacilityType();
+    creditFacilityType.setCreditFacilityTypeID(3);
+
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+    when(creditFacilityTemplateRepository.findById(1)).thenReturn(Optional.empty());
+    when(creditFacilityTypeRepository.findById(3)).thenReturn(Optional.of(creditFacilityType));
+    when(creditFacilityTemplateTempRepository.saveAndFlush(any(CreditFacilityTemplateTemp.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> response =
+        creditFacilityService.updateCreditFacilityTemplateTemp(1, creditFacilityTemplateDTO);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+
+    ArgumentCaptor<CreditFacilityTemplateTemp> captor =
+        ArgumentCaptor.forClass(CreditFacilityTemplateTemp.class);
+    verify(creditFacilityTemplateTempRepository).saveAndFlush(captor.capture());
+    assertEquals(creditFacilityType, captor.getValue().getCreditFacilityType());
   }
 
   /** insertToCftVitalInfoAuditTable * */
@@ -806,5 +1219,316 @@ class CreditFacilityTemplateServiceImplTest {
     assertEquals(
         "Cannot invoke \"lk.sampath.casadminportalms.entity.creditfacilitytemplate.CftCustomFacilityInfo.getCftCustomFacilityInfoID()\" because \"cftCustomFacilityInfo\" is null",
         exception.getMessage());
+  }
+
+  /** authorizeCreditFacilityTemplate * */
+  @Test
+  void testAuthorizeCreditFacilityTemplate_NullDataID_ThrowsException() {
+    ApproveRejectRQ approveRejectRQ = new ApproveRejectRQ();
+    approveRejectRQ.setApproveStatus(MasterDataApproveStatus.APPROVED);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> creditFacilityService.authorizeCreditFacilityTemplate(approveRejectRQ));
+
+    assertEquals("Invalid ApproveRejectRQ: DataID cannot be null", exception.getMessage());
+  }
+
+  @Test
+  void testAuthorizeCreditFacilityTemplate_RecordNotFound_ThrowsException() {
+    ApproveRejectRQ approveRejectRQ = new ApproveRejectRQ();
+    approveRejectRQ.setApproveRejectDataID(1);
+    approveRejectRQ.setApproveStatus(MasterDataApproveStatus.APPROVED);
+
+    when(creditFacilityTemplateTempRepository.findById(1)).thenReturn(Optional.empty());
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> creditFacilityService.authorizeCreditFacilityTemplate(approveRejectRQ));
+
+    assertEquals("Not Found", exception.getMessage());
+  }
+
+  @Test
+  void testAuthorizeCreditFacilityTemplate_Approval_CreatesNewMasterRecord_Success() {
+    creditFacilityTemplateTemp.setCreditFacilityType(new CreditFacilityType());
+
+    ApproveRejectRQ approveRejectRQ = new ApproveRejectRQ();
+    approveRejectRQ.setApproveRejectDataID(1);
+    approveRejectRQ.setApproveStatus(MasterDataApproveStatus.APPROVED);
+
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+    when(creditFacilityTemplateRepository.findById(1)).thenReturn(Optional.empty());
+    when(creditFacilityTemplateTempRepository.saveAndFlush(any(CreditFacilityTemplateTemp.class)))
+        .thenReturn(creditFacilityTemplateTemp);
+
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> response =
+        creditFacilityService.authorizeCreditFacilityTemplate(approveRejectRQ);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().getSuccess());
+    verify(creditFacilityTemplateRepository, times(1)).save(any(CreditFacilityTemplate.class));
+    verify(creditFacilityTemplateTempRepository, times(1)).delete(creditFacilityTemplateTemp);
+    verify(creditFacilityTemplateAudRepo, times(1))
+        .saveAndFlush(any(CreditFacilityTemplateAud.class));
+  }
+
+  @Test
+  void testAuthorizeCreditFacilityTemplate_Approval_UpdatesExistingMasterRecord_Success() {
+    creditFacilityTemplateTemp.setCreditFacilityType(new CreditFacilityType());
+
+    ApproveRejectRQ approveRejectRQ = new ApproveRejectRQ();
+    approveRejectRQ.setApproveRejectDataID(1);
+    approveRejectRQ.setApproveStatus(MasterDataApproveStatus.APPROVED);
+
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+    when(creditFacilityTemplateRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplate));
+    when(creditFacilityTemplateTempRepository.saveAndFlush(any(CreditFacilityTemplateTemp.class)))
+        .thenReturn(creditFacilityTemplateTemp);
+
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> response =
+        creditFacilityService.authorizeCreditFacilityTemplate(approveRejectRQ);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+    verify(creditFacilityTemplateRepository, times(1)).save(creditFacilityTemplate);
+    verify(cftVitalInfoRepository, times(1))
+        .findAllByCreditFacilityTemplateCreditFacilityTemplateID(1);
+    verify(creditFacilityTemplateTempRepository, times(1)).delete(creditFacilityTemplateTemp);
+  }
+
+  @Test
+  void testAuthorizeCreditFacilityTemplate_Rejection_Success() {
+    creditFacilityTemplateTemp.setCreditFacilityType(new CreditFacilityType());
+
+    ApproveRejectRQ approveRejectRQ = new ApproveRejectRQ();
+    approveRejectRQ.setApproveRejectDataID(1);
+    approveRejectRQ.setApproveStatus(MasterDataApproveStatus.REJECTED);
+
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+    when(creditFacilityTemplateRepository.findById(1)).thenReturn(Optional.empty());
+    when(creditFacilityTemplateTempRepository.saveAndFlush(any(CreditFacilityTemplateTemp.class)))
+        .thenReturn(creditFacilityTemplateTemp);
+
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> response =
+        creditFacilityService.authorizeCreditFacilityTemplate(approveRejectRQ);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+    assertTrue(response.getBody().getSuccess());
+    verify(creditFacilityTemplateAudRepo, times(1))
+        .saveAndFlush(any(CreditFacilityTemplateAud.class));
+    verify(creditFacilityTemplateTempRepository, never()).delete(any());
+  }
+
+  @Test
+  void testAuthorizeCreditFacilityTemplate_UnknownStatus_ThrowsException() {
+    ApproveRejectRQ approveRejectRQ = new ApproveRejectRQ();
+    approveRejectRQ.setApproveRejectDataID(1);
+    approveRejectRQ.setApproveStatus(MasterDataApproveStatus.PENDING);
+
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+    when(creditFacilityTemplateRepository.findById(1)).thenReturn(Optional.empty());
+    when(creditFacilityTemplateTempRepository.saveAndFlush(any(CreditFacilityTemplateTemp.class)))
+        .thenReturn(creditFacilityTemplateTemp);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> creditFacilityService.authorizeCreditFacilityTemplate(approveRejectRQ));
+
+    assertTrue(exception.getMessage().contains("Unknown approval status"));
+  }
+
+  /** updateCreditFacilityTemplate * */
+  @Test
+  void testUpdateCreditFacilityTemplate_RecordNotFound_ThrowsException() {
+    when(creditFacilityTemplateRepository.findById(2)).thenReturn(Optional.empty());
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () ->
+                creditFacilityService.updateCreditFacilityTemplate(2, creditFacilityTemplateDTO));
+
+    assertEquals("ROLE_WITH_ID2Does Not Exists", exception.getMessage());
+  }
+
+  @Test
+  void testUpdateCreditFacilityTemplate_Success_SetsTemplateIdFromMaster() {
+    creditFacilityTemplateDTO.setIsCftInterestRateDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftVitalInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftCustomFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftSupportingDocDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftOtherFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setCreditFacilityTypeID(null);
+
+    when(creditFacilityTemplateRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplate));
+    when(creditFacilityTemplateTempRepository.saveAndFlush(any(CreditFacilityTemplateTemp.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> response =
+        creditFacilityService.updateCreditFacilityTemplate(1, creditFacilityTemplateDTO);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+
+    ArgumentCaptor<CreditFacilityTemplateTemp> captor =
+        ArgumentCaptor.forClass(CreditFacilityTemplateTemp.class);
+    verify(creditFacilityTemplateTempRepository).saveAndFlush(captor.capture());
+    assertEquals(1, captor.getValue().getCreditFacilityTemplateID());
+    assertEquals(creditFacilityTemplateDTO.getApproveStatus(), captor.getValue().getApproveStatus());
+  }
+
+  @Test
+  void testUpdateCreditFacilityTemplate_CreditFacilityTypeNotFound_ThrowsException() {
+    creditFacilityTemplateDTO.setCreditFacilityTypeID(99);
+
+    when(creditFacilityTemplateRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplate));
+    when(creditFacilityTypeRepository.findById(99)).thenReturn(Optional.empty());
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () ->
+                creditFacilityService.updateCreditFacilityTemplate(1, creditFacilityTemplateDTO));
+
+    assertEquals("Credit Facility Type Id with 99 does not exist", exception.getMessage());
+  }
+
+  @Test
+  void testUpdateCreditFacilityTemplate_WithInterestRateChange_Success() {
+    creditFacilityTemplateDTO.setIsCftInterestRateDTOListChange(AppsConstants.YesNo.Y);
+    creditFacilityTemplateDTO.setIsCftVitalInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftCustomFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftSupportingDocDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftOtherFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setCreditFacilityTypeID(null);
+
+    CftInterestRateDTO rateDTO = new CftInterestRateDTO();
+    rateDTO.setRateName("New Rate");
+    rateDTO.setRateCode("NR001");
+    List<CftInterestRateDTO> rateDTOList = new ArrayList<>();
+    rateDTOList.add(rateDTO);
+    creditFacilityTemplateDTO.setCftInterestRateDTOList(rateDTOList);
+
+    when(creditFacilityTemplateRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplate));
+    when(cftInterestRateTempRepository.findAllByCreditFacilityTemplateCreditFacilityTemplateID(
+            anyInt()))
+        .thenReturn(new ArrayList<>());
+    when(cftInterestRateTempRepository.getNextSequenceValue()).thenReturn(11);
+    when(creditFacilityTemplateTempRepository.saveAndFlush(any(CreditFacilityTemplateTemp.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    creditFacilityService.updateCreditFacilityTemplate(1, creditFacilityTemplateDTO);
+
+    ArgumentCaptor<CreditFacilityTemplateTemp> captor =
+        ArgumentCaptor.forClass(CreditFacilityTemplateTemp.class);
+    verify(creditFacilityTemplateTempRepository).saveAndFlush(captor.capture());
+    assertEquals(1, captor.getValue().getCftInterestRates().size());
+  }
+
+  @Test
+  void testUpdateCreditFacilityTemplate_MapsDtoFieldsOntoTempEntity() {
+    creditFacilityTemplateDTO.setIsCftInterestRateDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftVitalInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftCustomFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftSupportingDocDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setIsCftOtherFacilityInfoDTOListChange(AppsConstants.YesNo.N);
+    creditFacilityTemplateDTO.setCreditFacilityTypeID(null);
+    creditFacilityTemplateDTO.setDescription("Updated Description");
+    creditFacilityTemplateDTO.setMaxFacilityAmount(BigDecimal.valueOf(999999));
+
+    when(creditFacilityTemplateRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplate));
+    when(creditFacilityTemplateTempRepository.saveAndFlush(any(CreditFacilityTemplateTemp.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ResponseEntity<StandardResponse<CreditFacilityTemplateDTO>> response =
+        creditFacilityService.updateCreditFacilityTemplate(1, creditFacilityTemplateDTO);
+
+    CreditFacilityTemplateDTO returnedDTO =
+        (CreditFacilityTemplateDTO) response.getBody().getResponse();
+    assertEquals("Updated Description", returnedDTO.getDescription());
+    assertEquals(BigDecimal.valueOf(999999), returnedDTO.getMaxFacilityAmount());
+  }
+
+  /** deleteCreditFacilityTemplateTemp * */
+  @Test
+  void testDeleteCreditFacilityTemplateTemp_Success() {
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+
+    ResponseEntity<StandardResponse<Void>> response =
+        creditFacilityService.deleteCreditFacilityTemplateTemp(1);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().getSuccess());
+    assertEquals(1, response.getBody().getResponse());
+    verify(creditFacilityTemplateTempRepository, times(1)).delete(creditFacilityTemplateTemp);
+  }
+
+  @Test
+  void testDeleteCreditFacilityTemplateTemp_RecordNotFound_ThrowsException() {
+    when(creditFacilityTemplateTempRepository.findById(2)).thenReturn(Optional.empty());
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> creditFacilityService.deleteCreditFacilityTemplateTemp(2));
+
+    assertEquals("Not Found", exception.getMessage());
+    verify(creditFacilityTemplateTempRepository, never()).delete(any());
+  }
+
+  @Test
+  void testDeleteCreditFacilityTemplateTemp_VerifiesCorrectEntityDeleted() {
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+
+    creditFacilityService.deleteCreditFacilityTemplateTemp(1);
+
+    ArgumentCaptor<CreditFacilityTemplateTemp> captor =
+        ArgumentCaptor.forClass(CreditFacilityTemplateTemp.class);
+    verify(creditFacilityTemplateTempRepository).delete(captor.capture());
+    assertEquals(1, captor.getValue().getCreditFacilityTemplateID());
+  }
+
+  @Test
+  void testDeleteCreditFacilityTemplateTemp_DifferentId_Success() {
+    CreditFacilityTemplateTemp anotherTemp = new CreditFacilityTemplateTemp();
+    anotherTemp.setCreditFacilityTemplateID(100);
+
+    when(creditFacilityTemplateTempRepository.findById(100)).thenReturn(Optional.of(anotherTemp));
+
+    ResponseEntity<StandardResponse<Void>> response =
+        creditFacilityService.deleteCreditFacilityTemplateTemp(100);
+
+    assertEquals(100, response.getBody().getResponse());
+    verify(creditFacilityTemplateTempRepository, times(1)).delete(anotherTemp);
+  }
+
+  @Test
+  void testDeleteCreditFacilityTemplateTemp_VerifiesFindByIdCalledOnce() {
+    when(creditFacilityTemplateTempRepository.findById(1))
+        .thenReturn(Optional.of(creditFacilityTemplateTemp));
+
+    creditFacilityService.deleteCreditFacilityTemplateTemp(1);
+
+    verify(creditFacilityTemplateTempRepository, times(1)).findById(1);
   }
 }

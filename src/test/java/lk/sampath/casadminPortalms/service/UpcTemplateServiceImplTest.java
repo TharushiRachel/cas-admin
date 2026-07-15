@@ -21,11 +21,14 @@ import lk.sampath.casadminportalms.repository.upctemplate.*;
 import lk.sampath.casadminportalms.service.impl.UpcTemplateServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -67,10 +70,12 @@ class UpcTemplateServiceImplTest {
     upcTemplateTempList.add(template1);
     upcTemplateTempList.add(template2);
 
-    when(upcTemplateTempRepository.findAll()).thenReturn(upcTemplateTempList);
+    Pageable pageable = Pageable.unpaged();
+    when(upcTemplateTempRepository.findAll(pageable))
+        .thenReturn(new PageImpl<>(upcTemplateTempList));
 
     ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> response =
-        upcTemplateService.findAllUpcTemplateTempList();
+        upcTemplateService.findAllUpcTemplateTempList(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -82,10 +87,12 @@ class UpcTemplateServiceImplTest {
   @Test
   void testFindAllUpcTemplateTempList_EmptyList() throws ApiRequestException {
     List<UpcTemplateTemp> upcTemplateTempList = new ArrayList<>();
-    when(upcTemplateTempRepository.findAll()).thenReturn(upcTemplateTempList);
+    Pageable pageable = Pageable.unpaged();
+    when(upcTemplateTempRepository.findAll(pageable))
+        .thenReturn(new PageImpl<>(upcTemplateTempList));
 
     ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> response =
-        upcTemplateService.findAllUpcTemplateTempList();
+        upcTemplateService.findAllUpcTemplateTempList(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -114,11 +121,13 @@ class UpcTemplateServiceImplTest {
     upcTemplateTempList.add(validTemplate);
     upcTemplateTempList.add(invalidTemplate);
 
-    when(upcTemplateTempRepository.findAll()).thenReturn(upcTemplateTempList);
+    Pageable pageable = Pageable.unpaged();
+    when(upcTemplateTempRepository.findAll(pageable))
+        .thenReturn(new PageImpl<>(upcTemplateTempList));
 
     // Act
     ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> response =
-        upcTemplateService.findAllUpcTemplateTempList();
+        upcTemplateService.findAllUpcTemplateTempList(pageable);
 
     // Assert
     assertNotNull(response);
@@ -145,11 +154,13 @@ class UpcTemplateServiceImplTest {
       upcTemplateTempList.add(template);
     }
 
-    when(upcTemplateTempRepository.findAll()).thenReturn(upcTemplateTempList);
+    Pageable pageable = Pageable.unpaged();
+    when(upcTemplateTempRepository.findAll(pageable))
+        .thenReturn(new PageImpl<>(upcTemplateTempList));
 
     // Act
     ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> response =
-        upcTemplateService.findAllUpcTemplateTempList();
+        upcTemplateService.findAllUpcTemplateTempList(pageable);
 
     // Assert
     assertNotNull(response);
@@ -163,6 +174,24 @@ class UpcTemplateServiceImplTest {
 
     assertNotNull(responseList);
     assertEquals(1000, responseList.size());
+  }
+
+  @Test
+  void testFindAllUpcTemplateTempList_VerifyRepositoryInteractionWithGivenPageable()
+      throws ApiRequestException {
+    Pageable pageable = Pageable.ofSize(10);
+    when(upcTemplateTempRepository.findAll(any(Pageable.class)))
+        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+    ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> response =
+        upcTemplateService.findAllUpcTemplateTempList(pageable);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(upcTemplateTempRepository, times(1)).findAll(pageableCaptor.capture());
+    assertEquals(pageable, pageableCaptor.getValue());
   }
 
   /** Test when findUpcTemplateTempById() */
@@ -233,6 +262,42 @@ class UpcTemplateServiceImplTest {
     verify(upcTemplateTempRepository, times(1)).findById(templateID);
   }
 
+  @Test
+  void testFindUpcTemplateTempById_VerifyRepositoryInteraction() throws ApiRequestException {
+    Integer upcTemplateID = 5;
+    UpcTemplateTemp upcTemplateTemp = new UpcTemplateTemp();
+    upcTemplateTemp.setUpcTemplateID(upcTemplateID);
+    upcTemplateTemp.setTemplateName("Verify Template");
+
+    when(upcTemplateTempRepository.findById(upcTemplateID))
+        .thenReturn(Optional.of(upcTemplateTemp));
+
+    upcTemplateService.findUpcTemplateTempById(upcTemplateID);
+
+    ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
+    verify(upcTemplateTempRepository, times(1)).findById(idCaptor.capture());
+    assertEquals(upcTemplateID, idCaptor.getValue());
+  }
+
+  @Test
+  void testFindUpcTemplateTempById_WithEmptyTemplateDataList() throws ApiRequestException {
+    Integer upcTemplateID = 6;
+    UpcTemplateTemp upcTemplateTemp = new UpcTemplateTemp();
+    upcTemplateTemp.setUpcTemplateID(upcTemplateID);
+    upcTemplateTemp.setTemplateName("Template With No Data");
+    upcTemplateTemp.setUpcTemplateDataTempList(Collections.emptyList());
+
+    when(upcTemplateTempRepository.findById(upcTemplateID))
+        .thenReturn(Optional.of(upcTemplateTemp));
+
+    ResponseEntity<StandardResponse<Object>> response =
+        upcTemplateService.findUpcTemplateTempById(upcTemplateID);
+
+    UpcTemplateDTO upcTemplateDTO = (UpcTemplateDTO) response.getBody().getResponse();
+    assertNotNull(upcTemplateDTO.getUpcTemplateDataDTOList());
+    assertTrue(upcTemplateDTO.getUpcTemplateDataDTOList().isEmpty());
+  }
+
   /** Test when findAllApprovedUpcTemplates() */
   @Test
   void testFindAllApprovedUpcTemplates_Success() throws ApiRequestException {
@@ -243,10 +308,11 @@ class UpcTemplateServiceImplTest {
 
     List<UpcTemplate> upcTemplateList = Arrays.asList(upcTemplate);
 
-    when(upcTemplateRepository.findAll()).thenReturn(upcTemplateList);
+    Pageable pageable = Pageable.unpaged();
+    when(upcTemplateRepository.findAll(pageable)).thenReturn(new PageImpl<>(upcTemplateList));
 
     ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> response =
-        upcTemplateService.findAllApprovedUpcTemplates();
+        upcTemplateService.findAllApprovedUpcTemplates(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -262,11 +328,12 @@ class UpcTemplateServiceImplTest {
 
   @Test
   void testFindAllApprovedUpcTemplates_EmptyList() throws ApiRequestException {
-
-    when(upcTemplateRepository.findAll()).thenReturn(Collections.emptyList());
+    Pageable pageable = Pageable.unpaged();
+    when(upcTemplateRepository.findAll(pageable))
+        .thenReturn(new PageImpl<>(Collections.emptyList()));
 
     ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> response =
-        upcTemplateService.findAllApprovedUpcTemplates();
+        upcTemplateService.findAllApprovedUpcTemplates(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -277,6 +344,55 @@ class UpcTemplateServiceImplTest {
     List<UpcTemplateDTO> responseDTOList = (List<UpcTemplateDTO>) response.getBody().getResponse();
     assertNotNull(responseDTOList);
     assertTrue(responseDTOList.isEmpty());
+  }
+
+  @Test
+  void testFindAllApprovedUpcTemplates_MultipleTemplates() throws ApiRequestException {
+    UpcTemplate template1 = new UpcTemplate();
+    template1.setUpcTemplateID(1);
+    template1.setTemplateName("Template 1");
+
+    UpcTemplate template2 = new UpcTemplate();
+    template2.setUpcTemplateID(2);
+    template2.setTemplateName("Template 2");
+
+    Pageable pageable = Pageable.unpaged();
+    when(upcTemplateRepository.findAll(pageable))
+        .thenReturn(new PageImpl<>(Arrays.asList(template1, template2)));
+
+    ResponseEntity<StandardResponse<List<UpcTemplateDTO>>> response =
+        upcTemplateService.findAllApprovedUpcTemplates(pageable);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    List<UpcTemplateDTO> responseDTOList = (List<UpcTemplateDTO>) response.getBody().getResponse();
+    assertEquals(2, responseDTOList.size());
+  }
+
+  @Test
+  void testFindAllApprovedUpcTemplates_VerifyRepositoryInteraction() throws ApiRequestException {
+    Pageable pageable = Pageable.ofSize(5);
+    when(upcTemplateRepository.findAll(any(Pageable.class)))
+        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+    upcTemplateService.findAllApprovedUpcTemplates(pageable);
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(upcTemplateRepository, times(1)).findAll(pageableCaptor.capture());
+    assertEquals(pageable, pageableCaptor.getValue());
+  }
+
+  @Test
+  void testFindAllApprovedUpcTemplates_RuntimeException() {
+    Pageable pageable = Pageable.unpaged();
+    when(upcTemplateRepository.findAll(pageable))
+        .thenThrow(new RuntimeException("Database connection error"));
+
+    RuntimeException exception =
+        assertThrows(
+            RuntimeException.class, () -> upcTemplateService.findAllApprovedUpcTemplates(pageable));
+
+    assertEquals("Database connection error", exception.getMessage());
   }
 
   /** Test when findApprovedUpcTemplateById() */
@@ -323,6 +439,75 @@ class UpcTemplateServiceImplTest {
         "Exception message should match the thrown RuntimeException.");
 
     verify(upcTemplateRepository, times(1)).findById(templateID);
+  }
+
+  @Test
+  void testFindApprovedUpcTemplateById_Success() throws ApiRequestException {
+    Integer upcTemplateID = 1;
+    UpcTemplate upcTemplate = new UpcTemplate();
+    upcTemplate.setUpcTemplateID(upcTemplateID);
+    upcTemplate.setTemplateName("Approved Template");
+
+    when(upcTemplateRepository.findById(upcTemplateID)).thenReturn(Optional.of(upcTemplate));
+
+    ResponseEntity<StandardResponse<Object>> response =
+        upcTemplateService.findApprovedUpcTemplateById(upcTemplateID);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
+    assertEquals(ErrorEnums.SUCCESS_CODE.getLabel(), response.getBody().getMessage());
+
+    UpcTemplateDTO upcTemplateDTO = (UpcTemplateDTO) response.getBody().getResponse();
+    assertNotNull(upcTemplateDTO);
+    assertEquals(upcTemplateID, upcTemplateDTO.getUpcTemplateID());
+    assertEquals("Approved Template", upcTemplateDTO.getTemplateName());
+  }
+
+  @Test
+  void testFindApprovedUpcTemplateById_VerifyRepositoryInteraction() throws ApiRequestException {
+    Integer upcTemplateID = 3;
+    UpcTemplate upcTemplate = new UpcTemplate();
+    upcTemplate.setUpcTemplateID(upcTemplateID);
+
+    when(upcTemplateRepository.findById(upcTemplateID)).thenReturn(Optional.of(upcTemplate));
+
+    upcTemplateService.findApprovedUpcTemplateById(upcTemplateID);
+
+    ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
+    verify(upcTemplateRepository, times(1)).findById(idCaptor.capture());
+    assertEquals(upcTemplateID, idCaptor.getValue());
+  }
+
+  @Test
+  void testFindApprovedUpcTemplateById_WithTemplateDataList() throws ApiRequestException {
+    Integer upcTemplateID = 4;
+    UpcTemplate upcTemplate = new UpcTemplate();
+    upcTemplate.setUpcTemplateID(upcTemplateID);
+    upcTemplate.setTemplateName("Template With Data");
+
+    UpcSection upcSection = new UpcSection();
+    upcSection.setUpcSectionID(10);
+    upcSection.setUpcSectionName("Section 10");
+
+    UpcTemplateData upcTemplateData = new UpcTemplateData();
+    upcTemplateData.setUpcTemplateDataID(100);
+    upcTemplateData.setUpcTemplate(upcTemplate);
+    upcTemplateData.setUpcSection(upcSection);
+    upcTemplateData.setDisplayOrder(1);
+
+    upcTemplate.setUpcTemplateDataList(Collections.singletonList(upcTemplateData));
+
+    when(upcTemplateRepository.findById(upcTemplateID)).thenReturn(Optional.of(upcTemplate));
+
+    ResponseEntity<StandardResponse<Object>> response =
+        upcTemplateService.findApprovedUpcTemplateById(upcTemplateID);
+
+    UpcTemplateDTO upcTemplateDTO = (UpcTemplateDTO) response.getBody().getResponse();
+    assertNotNull(upcTemplateDTO.getUpcTemplateDataDTOList());
+    assertEquals(1, upcTemplateDTO.getUpcTemplateDataDTOList().size());
+    assertEquals(100, upcTemplateDTO.getUpcTemplateDataDTOList().get(0).getUpcTemplateDataID());
   }
 
   /** Test when saveUpcTemplate() */
@@ -412,6 +597,60 @@ class UpcTemplateServiceImplTest {
     assertEquals(ErrorEnums.SUCCESS_CODE.getLabel(), response.getBody().getMessage());
   }
 
+  @Test
+  void testSaveUpcTemplate_WithEmptyDataList() throws ApiRequestException {
+    UpcTemplateDTO upcTemplateDTO = new UpcTemplateDTO();
+    upcTemplateDTO.setTemplateName("Template With Empty Data List");
+    upcTemplateDTO.setIsModified(AppsConstants.YesNo.N);
+    upcTemplateDTO.setUpcTemplateDataDTOList(Collections.emptyList());
+
+    when(upcTemplateTempRepository.getCurrentSequenceValue()).thenReturn(10);
+    when(upcTemplateTempRepository.saveAndFlush(any(UpcTemplateTemp.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ResponseEntity<StandardResponse<Object>> response =
+        upcTemplateService.saveUpcTemplate(upcTemplateDTO);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    UpcTemplateDTO savedTemplate = (UpcTemplateDTO) response.getBody().getResponse();
+    assertNotNull(savedTemplate.getUpcTemplateDataDTOList());
+    assertTrue(savedTemplate.getUpcTemplateDataDTOList().isEmpty());
+  }
+
+  @Test
+  void testSaveUpcTemplate_VerifySavedTemplateFieldsViaArgumentCaptor()
+      throws ApiRequestException {
+    UpcTemplateDTO upcTemplateDTO = new UpcTemplateDTO();
+    upcTemplateDTO.setTemplateName("Captured Template");
+    upcTemplateDTO.setUpcLabel("Captured Label");
+    upcTemplateDTO.setDescription("Captured Description");
+    upcTemplateDTO.setUpcLabelFontColor("Red");
+    upcTemplateDTO.setUpcLabelBackgroundColor("Blue");
+    upcTemplateDTO.setStatus(Status.ACT);
+    upcTemplateDTO.setApproveStatus(MasterDataApproveStatus.PENDING);
+    upcTemplateDTO.setIsModified(AppsConstants.YesNo.N);
+
+    when(upcTemplateTempRepository.getCurrentSequenceValue()).thenReturn(20);
+    when(upcTemplateTempRepository.saveAndFlush(any(UpcTemplateTemp.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    upcTemplateService.saveUpcTemplate(upcTemplateDTO);
+
+    ArgumentCaptor<UpcTemplateTemp> captor = ArgumentCaptor.forClass(UpcTemplateTemp.class);
+    verify(upcTemplateTempRepository, times(1)).saveAndFlush(captor.capture());
+
+    UpcTemplateTemp captured = captor.getValue();
+    assertEquals(20, captured.getUpcTemplateID());
+    assertEquals("Captured Template", captured.getTemplateName());
+    assertEquals("Captured Label", captured.getUpcLabel());
+    assertEquals("Captured Description", captured.getDescription());
+    assertEquals("Red", captured.getUpcLabelFontColor());
+    assertEquals("Blue", captured.getUpcLabelBackgroundColor());
+    assertEquals(Status.ACT, captured.getStatus());
+    assertEquals(MasterDataApproveStatus.PENDING, captured.getApproveStatus());
+  }
+
   /** Test when updateUpcTemplateTemp() */
   @Test
   void testUpdateUpcTemplateTemp_Success() {
@@ -451,6 +690,73 @@ class UpcTemplateServiceImplTest {
             ApiRequestException.class,
             () -> upcTemplateService.updateUpcTemplateTemp(upcTemplateID, upcTemplateDTO));
     assertEquals("UPC Template with1does not exist", exception.getMessage());
+  }
+
+  @Test
+  void testUpdateUpcTemplateTemp_NullTemplateNameThrowsException() {
+    Integer upcTemplateID = 1;
+    UpcTemplateTemp upcTemplateTemp = new UpcTemplateTemp();
+    upcTemplateTemp.setUpcTemplateID(upcTemplateID);
+    upcTemplateTemp.setTemplateName("Existing Template");
+
+    UpcTemplateDTO upcTemplateDTO = new UpcTemplateDTO();
+    upcTemplateDTO.setTemplateName(null);
+
+    when(upcTemplateTempRepository.findById(upcTemplateID))
+        .thenReturn(Optional.of(upcTemplateTemp));
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> upcTemplateService.updateUpcTemplateTemp(upcTemplateID, upcTemplateDTO));
+
+    assertEquals("Upc Template cannot be empty or null", exception.getMessage());
+    verify(upcTemplateTempRepository, never()).saveAndFlush(any(UpcTemplateTemp.class));
+  }
+
+  @Test
+  void testUpdateUpcTemplateTemp_BlankTemplateNameThrowsException() {
+    Integer upcTemplateID = 1;
+    UpcTemplateTemp upcTemplateTemp = new UpcTemplateTemp();
+    upcTemplateTemp.setUpcTemplateID(upcTemplateID);
+    upcTemplateTemp.setTemplateName("Existing Template");
+
+    UpcTemplateDTO upcTemplateDTO = new UpcTemplateDTO();
+    upcTemplateDTO.setTemplateName("   ");
+
+    when(upcTemplateTempRepository.findById(upcTemplateID))
+        .thenReturn(Optional.of(upcTemplateTemp));
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> upcTemplateService.updateUpcTemplateTemp(upcTemplateID, upcTemplateDTO));
+
+    assertEquals("Upc Template cannot be empty or null", exception.getMessage());
+  }
+
+  @Test
+  void testUpdateUpcTemplateTemp_DuplicateTemplateNameThrowsException() {
+    Integer upcTemplateID = 1;
+    UpcTemplateTemp upcTemplateTemp = new UpcTemplateTemp();
+    upcTemplateTemp.setUpcTemplateID(upcTemplateID);
+    upcTemplateTemp.setTemplateName("Existing Template");
+
+    UpcTemplateDTO upcTemplateDTO = new UpcTemplateDTO();
+    upcTemplateDTO.setTemplateName("Duplicate Template");
+
+    when(upcTemplateTempRepository.findById(upcTemplateID))
+        .thenReturn(Optional.of(upcTemplateTemp));
+    when(upcTemplateTempRepository.exists(any(BooleanBuilder.class))).thenReturn(true);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> upcTemplateService.updateUpcTemplateTemp(upcTemplateID, upcTemplateDTO));
+
+    assertEquals(
+        "User name 'Duplicate Template' already exists in the system.", exception.getMessage());
+    verify(upcTemplateTempRepository, never()).saveAndFlush(any(UpcTemplateTemp.class));
   }
 
   @Test
@@ -570,6 +876,27 @@ class UpcTemplateServiceImplTest {
         assertThrows(
             ApiRequestException.class, () -> upcTemplateService.approveRejectUpcTemplate(request));
     assertEquals("UPC Template with ID 1does not exist", exception.getMessage());
+  }
+
+  @Test
+  void testApproveRejectUpcTemplate_UnknownStatus_ThrowsException() {
+    ApproveRejectRQ request = new ApproveRejectRQ();
+    request.setApproveRejectDataID(1);
+    request.setApproveStatus(MasterDataApproveStatus.PENDING);
+
+    UpcTemplateTemp upcTemplateTemp = new UpcTemplateTemp();
+    upcTemplateTemp.setUpcTemplateID(1);
+    upcTemplateTemp.setTemplateName("Test Template");
+
+    when(upcTemplateTempRepository.findById(1)).thenReturn(Optional.of(upcTemplateTemp));
+    when(upcTemplateTempRepository.saveAndFlush(any(UpcTemplateTemp.class)))
+        .thenReturn(upcTemplateTemp);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class, () -> upcTemplateService.approveRejectUpcTemplate(request));
+
+    assertTrue(exception.getMessage().contains("Unknown approval status"));
   }
 
   /** Test when updateApprovedUpcTemplate() */
@@ -786,6 +1113,75 @@ class UpcTemplateServiceImplTest {
     verify(upcTemplateTempRepository, times(0)).deleteById(upcTemplateID);
     verify(upcTemplateDataTempRepository, times(0))
         .deleteByUpcTemplateTempUpcTemplateID(upcTemplateID);
+  }
+
+  @Test
+  void testDeleteUpcTemplateFromTemp_Success() throws ApiRequestException {
+    Integer upcTemplateID = 1;
+
+    when(upcTemplateTempRepository.existsById(upcTemplateID)).thenReturn(true);
+
+    ResponseEntity<StandardResponse<Void>> response =
+        upcTemplateService.deleteUpcTemplateFromTemp(upcTemplateID);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
+    assertEquals(ErrorEnums.SUCCESS_CODE.getLabel(), response.getBody().getMessage());
+    assertEquals(upcTemplateID, response.getBody().getResponse());
+
+    verify(upcTemplateDataTempRepository, times(1))
+        .deleteByUpcTemplateTempUpcTemplateID(upcTemplateID);
+    verify(upcTemplateTempRepository, times(1)).deleteById(upcTemplateID);
+  }
+
+  @Test
+  void testDeleteUpcTemplateFromTemp_VerifyDeletionOrderOfDataThenTemplate()
+      throws ApiRequestException {
+    Integer upcTemplateID = 8;
+
+    when(upcTemplateTempRepository.existsById(upcTemplateID)).thenReturn(true);
+
+    upcTemplateService.deleteUpcTemplateFromTemp(upcTemplateID);
+
+    ArgumentCaptor<Integer> dataDeleteCaptor = ArgumentCaptor.forClass(Integer.class);
+    ArgumentCaptor<Integer> tempDeleteCaptor = ArgumentCaptor.forClass(Integer.class);
+
+    verify(upcTemplateDataTempRepository, times(1))
+        .deleteByUpcTemplateTempUpcTemplateID(dataDeleteCaptor.capture());
+    verify(upcTemplateTempRepository, times(1)).deleteById(tempDeleteCaptor.capture());
+
+    assertEquals(upcTemplateID, dataDeleteCaptor.getValue());
+    assertEquals(upcTemplateID, tempDeleteCaptor.getValue());
+  }
+
+  @Test
+  void testDeleteUpcTemplateFromTemp_ResponseContainsCorrectTemplateID()
+      throws ApiRequestException {
+    Integer upcTemplateID = 42;
+
+    when(upcTemplateTempRepository.existsById(upcTemplateID)).thenReturn(true);
+
+    ResponseEntity<StandardResponse<Void>> response =
+        upcTemplateService.deleteUpcTemplateFromTemp(upcTemplateID);
+
+    assertEquals(42, response.getBody().getResponse());
+  }
+
+  @Test
+  void testDeleteUpcTemplateFromTemp_NotFound_ExceptionMessageContainsID() {
+    Integer upcTemplateID = 7;
+
+    when(upcTemplateTempRepository.existsById(upcTemplateID)).thenReturn(false);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> upcTemplateService.deleteUpcTemplateFromTemp(upcTemplateID));
+
+    assertEquals("UPC Template with ID 7 does not exist", exception.getMessage());
+    verify(upcTemplateDataTempRepository, never()).deleteByUpcTemplateTempUpcTemplateID(any());
   }
 
   /** Test when saveOrUpdateMasterTemplateData() */

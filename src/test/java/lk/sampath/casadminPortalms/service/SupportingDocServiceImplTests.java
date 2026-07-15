@@ -28,6 +28,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -80,32 +85,84 @@ class SupportingDocServiceImplTests {
   /** findAllSupportingDocTempList * */
   @Test
   void testFindSupportingDocTempList_Success() throws Exception {
-    List<SupportingDocTemp> supportingDocTempList = Arrays.asList(supportingDocTemp);
-    when(supportingDocTempRepository.findAll()).thenReturn(supportingDocTempList);
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<SupportingDocTemp> supportingDocTempPage = new PageImpl<>(Arrays.asList(supportingDocTemp));
+    when(supportingDocTempRepository.findAll(pageable)).thenReturn(supportingDocTempPage);
 
     ResponseEntity<StandardResponse<List<SupportingDocDTO>>> response =
-        supportingDocService.findAllSupportingDocTempList();
+        supportingDocService.findAllSupportingDocTempList(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(supportingDocTempRepository, times(1)).findAll();
+    verify(supportingDocTempRepository, times(1)).findAll(pageable);
   }
 
   @Test
   void testFindSupportingDocTempList_EmptyList() throws Exception {
-    List<SupportingDocTemp> supportingDocTempList = Collections.emptyList();
-    when(supportingDocTempRepository.findAll()).thenReturn(supportingDocTempList);
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<SupportingDocTemp> supportingDocTempPage = new PageImpl<>(Collections.emptyList());
+    when(supportingDocTempRepository.findAll(pageable)).thenReturn(supportingDocTempPage);
 
     ResponseEntity<StandardResponse<List<SupportingDocDTO>>> response =
-        supportingDocService.findAllSupportingDocTempList();
+        supportingDocService.findAllSupportingDocTempList(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(supportingDocTempRepository, times(1)).findAll();
+    verify(supportingDocTempRepository, times(1)).findAll(pageable);
+  }
+
+  @Test
+  void testFindSupportingDocTempList_WithMultipleItems() throws Exception {
+    Pageable pageable = PageRequest.of(0, 10);
+    SupportingDocTemp secondSupportingDocTemp = new SupportingDocTemp();
+    secondSupportingDocTemp.setSupportingDocID(2);
+    secondSupportingDocTemp.setDocumentName("Second Unit Testing");
+    Page<SupportingDocTemp> supportingDocTempPage =
+        new PageImpl<>(Arrays.asList(supportingDocTemp, secondSupportingDocTemp));
+    when(supportingDocTempRepository.findAll(pageable)).thenReturn(supportingDocTempPage);
+
+    ResponseEntity<StandardResponse<List<SupportingDocDTO>>> response =
+        supportingDocService.findAllSupportingDocTempList(pageable);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(true, response.getBody().getSuccess());
+
+    verify(supportingDocTempRepository, times(1)).findAll(pageable);
+  }
+
+  @Test
+  void testFindSupportingDocTempList_VerifiesPageableArgumentPassedThrough() throws Exception {
+    Pageable pageable = PageRequest.of(2, 5);
+    Page<SupportingDocTemp> supportingDocTempPage = new PageImpl<>(Arrays.asList(supportingDocTemp));
+    when(supportingDocTempRepository.findAll(any(Pageable.class))).thenReturn(supportingDocTempPage);
+
+    supportingDocService.findAllSupportingDocTempList(pageable);
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(supportingDocTempRepository, times(1)).findAll(pageableCaptor.capture());
+    assertEquals(2, pageableCaptor.getValue().getPageNumber());
+    assertEquals(5, pageableCaptor.getValue().getPageSize());
+  }
+
+  @Test
+  void testFindSupportingDocTempList_ResponseSuccessAndMessageFields() throws Exception {
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<SupportingDocTemp> supportingDocTempPage = new PageImpl<>(Arrays.asList(supportingDocTemp));
+    when(supportingDocTempRepository.findAll(pageable)).thenReturn(supportingDocTempPage);
+
+    ResponseEntity<StandardResponse<List<SupportingDocDTO>>> response =
+        supportingDocService.findAllSupportingDocTempList(pageable);
+
+    assertNotNull(response.getBody());
+    assertEquals(true, response.getBody().getSuccess());
+    assertEquals("Success", response.getBody().getMessage());
+    assertNotNull(response.getBody().getResponse());
   }
 
   /** findSupportingDocTempById * */
@@ -140,35 +197,131 @@ class SupportingDocServiceImplTests {
     verify(supportingDocTempRepository, times(1)).findById(2);
   }
 
+  @Test
+  void testFindSupportingDocTempById_ReturnsCorrectDocumentDetails() throws ApiRequestException {
+    when(supportingDocTempRepository.findById(supportingDocTemp.getSupportingDocID()))
+        .thenReturn(Optional.of(supportingDocTemp));
+
+    ResponseEntity<StandardResponse<SupportingDocDTO>> response =
+        supportingDocService.findSupportingDocTempById(supportingDocTemp.getSupportingDocID());
+
+    assertNotNull(response.getBody());
+    SupportingDocTemp foundDoc = (SupportingDocTemp) response.getBody().getResponse();
+    assertEquals(supportingDocTemp.getDocumentName(), foundDoc.getDocumentName());
+    assertEquals(supportingDocTemp.getDescription(), foundDoc.getDescription());
+    assertEquals(supportingDocTemp.getApproveStatus(), foundDoc.getApproveStatus());
+  }
+
+  @Test
+  void testFindSupportingDocTempById_ResponseSuccessAndMessageFields()
+      throws ApiRequestException {
+    when(supportingDocTempRepository.findById(supportingDocTemp.getSupportingDocID()))
+        .thenReturn(Optional.of(supportingDocTemp));
+
+    ResponseEntity<StandardResponse<SupportingDocDTO>> response =
+        supportingDocService.findSupportingDocTempById(supportingDocTemp.getSupportingDocID());
+
+    assertEquals(true, response.getBody().getSuccess());
+    assertEquals("Success", response.getBody().getMessage());
+  }
+
+  @Test
+  void testFindSupportingDocTempById_NotFound_DoesNotInteractWithMasterRepository() {
+    when(supportingDocTempRepository.findById(99)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ApiRequestException.class,
+        () -> {
+          supportingDocService.findSupportingDocTempById(99);
+        });
+
+    verify(supportingDocTempRepository, times(1)).findById(99);
+    verifyNoInteractions(supportingDocRepository);
+  }
+
   /** searchSupportingDocGroups * */
   @Test
-  void testFindAllApprovedSupportingDoc_Success() {
-    List<SupportingDoc> supportingDocs = Arrays.asList(supportingDoc);
-    when(supportingDocRepository.findAll()).thenReturn(supportingDocs);
+  void testFindAllApprovedSupportingDoc_Success() throws ApiRequestException {
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<SupportingDoc> supportingDocPage = new PageImpl<>(Arrays.asList(supportingDoc));
+    when(supportingDocRepository.findAll(pageable)).thenReturn(supportingDocPage);
 
     ResponseEntity<StandardResponse<List<SupportingDocDTO>>> response =
-        supportingDocService.searchSupportingDocGroups();
+        supportingDocService.searchSupportingDocGroups(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(supportingDocRepository, times(1)).findAll();
+    verify(supportingDocRepository, times(1)).findAll(pageable);
   }
 
   @Test
   void testFindAllApprovedSupportingDoc_EmptyList() throws ApiRequestException {
-    List<SupportingDoc> supportingDocs = Collections.emptyList();
-    when(supportingDocRepository.findAll()).thenReturn(supportingDocs);
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<SupportingDoc> supportingDocPage = new PageImpl<>(Collections.emptyList());
+    when(supportingDocRepository.findAll(pageable)).thenReturn(supportingDocPage);
 
     ResponseEntity<StandardResponse<List<SupportingDocDTO>>> response =
-        supportingDocService.searchSupportingDocGroups();
+        supportingDocService.searchSupportingDocGroups(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(supportingDocRepository, times(1)).findAll();
+    verify(supportingDocRepository, times(1)).findAll(pageable);
+  }
+
+  @Test
+  void testFindAllApprovedSupportingDoc_WithMultipleItems() throws ApiRequestException {
+    Pageable pageable = PageRequest.of(0, 10);
+    SupportingDoc secondSupportingDoc = new SupportingDoc();
+    secondSupportingDoc.setSupportingDocID(2);
+    secondSupportingDoc.setDocumentName("Second Approved Doc");
+    Page<SupportingDoc> supportingDocPage =
+        new PageImpl<>(Arrays.asList(supportingDoc, secondSupportingDoc));
+    when(supportingDocRepository.findAll(pageable)).thenReturn(supportingDocPage);
+
+    ResponseEntity<StandardResponse<List<SupportingDocDTO>>> response =
+        supportingDocService.searchSupportingDocGroups(pageable);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(true, response.getBody().getSuccess());
+
+    verify(supportingDocRepository, times(1)).findAll(pageable);
+  }
+
+  @Test
+  void testFindAllApprovedSupportingDoc_VerifiesPageableArgumentPassedThrough()
+      throws ApiRequestException {
+    Pageable pageable = PageRequest.of(1, 20);
+    Page<SupportingDoc> supportingDocPage = new PageImpl<>(Arrays.asList(supportingDoc));
+    when(supportingDocRepository.findAll(any(Pageable.class))).thenReturn(supportingDocPage);
+
+    supportingDocService.searchSupportingDocGroups(pageable);
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(supportingDocRepository, times(1)).findAll(pageableCaptor.capture());
+    assertEquals(1, pageableCaptor.getValue().getPageNumber());
+    assertEquals(20, pageableCaptor.getValue().getPageSize());
+  }
+
+  @Test
+  void testFindAllApprovedSupportingDoc_ResponseSuccessAndMessageFields()
+      throws ApiRequestException {
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<SupportingDoc> supportingDocPage = new PageImpl<>(Arrays.asList(supportingDoc));
+    when(supportingDocRepository.findAll(pageable)).thenReturn(supportingDocPage);
+
+    ResponseEntity<StandardResponse<List<SupportingDocDTO>>> response =
+        supportingDocService.searchSupportingDocGroups(pageable);
+
+    assertNotNull(response.getBody());
+    assertEquals(true, response.getBody().getSuccess());
+    assertEquals("Success", response.getBody().getMessage());
+    assertNotNull(response.getBody().getResponse());
   }
 
   /** findSupportingDocById * */
@@ -201,6 +354,49 @@ class SupportingDocServiceImplTests {
     assertEquals("Supporting Doc with 2does not exists", exception.getMessage());
 
     verify(supportingDocRepository, times(1)).findById(2);
+  }
+
+  @Test
+  void testFindApprovedSupportingDocById_ReturnsCorrectDocumentDetails()
+      throws ApiRequestException {
+    when(supportingDocRepository.findById(supportingDoc.getSupportingDocID()))
+        .thenReturn(Optional.of(supportingDoc));
+
+    ResponseEntity<StandardResponse<SupportingDocDTO>> response =
+        supportingDocService.findSupportingDocById(supportingDoc.getSupportingDocID());
+
+    assertNotNull(response.getBody());
+    SupportingDoc foundDoc = (SupportingDoc) response.getBody().getResponse();
+    assertEquals(supportingDoc.getDocumentName(), foundDoc.getDocumentName());
+    assertEquals(supportingDoc.getDescription(), foundDoc.getDescription());
+    assertEquals(supportingDoc.getApproveStatus(), foundDoc.getApproveStatus());
+  }
+
+  @Test
+  void testFindApprovedSupportingDocById_ResponseSuccessAndMessageFields()
+      throws ApiRequestException {
+    when(supportingDocRepository.findById(supportingDoc.getSupportingDocID()))
+        .thenReturn(Optional.of(supportingDoc));
+
+    ResponseEntity<StandardResponse<SupportingDocDTO>> response =
+        supportingDocService.findSupportingDocById(supportingDoc.getSupportingDocID());
+
+    assertEquals(true, response.getBody().getSuccess());
+    assertEquals("Success", response.getBody().getMessage());
+  }
+
+  @Test
+  void testFindApprovedSupportingDocById_NotFound_DoesNotInteractWithTempRepository() {
+    when(supportingDocRepository.findById(99)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ApiRequestException.class,
+        () -> {
+          supportingDocService.findSupportingDocById(99);
+        });
+
+    verify(supportingDocRepository, times(1)).findById(99);
+    verifyNoInteractions(supportingDocTempRepository);
   }
 
   /** saveSupportingDocTemp * */
@@ -242,6 +438,56 @@ class SupportingDocServiceImplTests {
 
     verify(supportingDocTempRepository, times(1)).findAll(any(BooleanBuilder.class));
     verify(supportingDocTempRepository, never()).saveAndFlush(any(SupportingDocTemp.class));
+  }
+
+  @Test
+  void testSaveSupportingDocTemp_NullDTO_ThrowsException() {
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              supportingDocService.saveSupportingDocTemp(null);
+            });
+
+    assertEquals("Supporting Doc name cannot be empty or null", exception.getMessage());
+    verify(supportingDocTempRepository, never()).findAll(any(BooleanBuilder.class));
+  }
+
+  @Test
+  void testSaveSupportingDocTemp_BlankDocumentName_ThrowsException() {
+    supportingDocDTO.setDocumentName("   ");
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              supportingDocService.saveSupportingDocTemp(supportingDocDTO);
+            });
+
+    assertEquals("Supporting Doc name cannot be empty or null", exception.getMessage());
+    verify(supportingDocTempRepository, never()).saveAndFlush(any(SupportingDocTemp.class));
+  }
+
+  @Test
+  void testSaveSupportingDocTemp_VerifiesSavedFieldsViaArgumentCaptor() throws ApiRequestException {
+    when(supportingDocTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(Collections.emptyList());
+    when(supportingDocTempRepository.getCurrentSequenceValue()).thenReturn(5);
+    when(supportingDocTempRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
+    when(supportingDocRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
+    when(supportingDocTempRepository.saveAndFlush(any(SupportingDocTemp.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    supportingDocService.saveSupportingDocTemp(supportingDocDTO);
+
+    ArgumentCaptor<SupportingDocTemp> captor = ArgumentCaptor.forClass(SupportingDocTemp.class);
+    verify(supportingDocTempRepository, times(1)).saveAndFlush(captor.capture());
+
+    SupportingDocTemp savedDoc = captor.getValue();
+    assertEquals(5, savedDoc.getSupportingDocID());
+    assertEquals(supportingDocDTO.getDocumentName(), savedDoc.getDocumentName());
+    assertEquals(supportingDocDTO.getDescription(), savedDoc.getDescription());
+    assertEquals(supportingDocDTO.getSupportDocumentType(), savedDoc.getSupportDocumentType());
   }
 
   /** approveRejectSupportingDoc * */
@@ -415,6 +661,45 @@ class SupportingDocServiceImplTests {
     assertEquals("Supporting Doc Temp with Old Unit Testingalready exists", exception.getMessage());
   }
 
+  @Test
+  void testUpdateSupportingDocTemp_BlankDocumentName_ThrowsException() {
+    supportingDocDTO.setDocumentName("   ");
+    when(supportingDocTempRepository.findById(1)).thenReturn(Optional.of(supportingDocTemp));
+    when(supportingDocTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(Collections.emptyList());
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              supportingDocService.updateSupportingDocTemp(1, supportingDocDTO);
+            });
+
+    assertEquals("Supporting Doc name cannot be empty or null", exception.getMessage());
+    verify(supportingDocTempRepository, never()).save(any(SupportingDocTemp.class));
+  }
+
+  @Test
+  void testUpdateSupportingDocTemp_VerifiesUpdatedFieldsViaArgumentCaptor()
+      throws ApiRequestException {
+    when(supportingDocTempRepository.findById(1)).thenReturn(Optional.of(supportingDocTemp));
+    when(supportingDocTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(Collections.emptyList());
+    when(supportingDocTempRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
+    when(supportingDocRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
+
+    supportingDocService.updateSupportingDocTemp(1, supportingDocDTO);
+
+    ArgumentCaptor<SupportingDocTemp> captor = ArgumentCaptor.forClass(SupportingDocTemp.class);
+    verify(supportingDocTempRepository, times(1)).save(captor.capture());
+
+    SupportingDocTemp updatedDoc = captor.getValue();
+    assertEquals(supportingDocDTO.getDocumentName(), updatedDoc.getDocumentName());
+    assertEquals(supportingDocDTO.getDescription(), updatedDoc.getDescription());
+    assertEquals(supportingDocDTO.getSupportDocumentType(), updatedDoc.getSupportDocumentType());
+    assertEquals(supportingDocDTO.getStatus(), updatedDoc.getStatus());
+  }
+
   /** Update Approved Supporting Doc* */
   @Test
   void testUpdateApprovedSupportingDoc_Success() throws ApiRequestException {
@@ -487,6 +772,24 @@ class SupportingDocServiceImplTests {
         "Document name 'Old Unit Testing' already exists in the system.", exception.getMessage());
   }
 
+  @Test
+  void testUpdateApprovedSupportingDoc_SameBlankDocumentName_ThrowsEmptyNullException() {
+    supportingDoc.setDocumentName("");
+    supportingDocDTO.setDocumentName("");
+    when(supportingDocRepository.findById(supportingDocDTO.getSupportingDocID()))
+        .thenReturn(Optional.of(supportingDoc));
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              supportingDocService.updateApprovedSupportingDoc(1, supportingDocDTO);
+            });
+
+    assertEquals("Supporting Doc name cannot be empty or null", exception.getMessage());
+    verify(supportingDocTempRepository, never()).saveAndFlush(any(SupportingDocTemp.class));
+  }
+
   /** delete SupportingDocFromTemp * */
   @Test
   void testDeleteSupportingDocFromTemp_Success() throws ApiRequestException {
@@ -501,6 +804,59 @@ class SupportingDocServiceImplTests {
     assertEquals(1, response.getBody().getResponse());
 
     verify(supportingDocTempRepository, times(1)).deleteById(1);
+  }
+
+  @Test
+  void testDeleteSupportingDocFromTemp_ResponseSuccessAndMessageFields()
+      throws ApiRequestException {
+    doNothing().when(supportingDocTempRepository).deleteById(1);
+
+    ResponseEntity<StandardResponse<Void>> response =
+        supportingDocService.deleteSupportingDocTemp(1);
+
+    assertEquals(true, response.getBody().getSuccess());
+    assertEquals("Success", response.getBody().getMessage());
+  }
+
+  @Test
+  void testDeleteSupportingDocFromTemp_DifferentId_DeletesCorrectRecord()
+      throws ApiRequestException {
+    doNothing().when(supportingDocTempRepository).deleteById(42);
+
+    ResponseEntity<StandardResponse<Void>> response =
+        supportingDocService.deleteSupportingDocTemp(42);
+
+    assertNotNull(response.getBody());
+    assertEquals(42, response.getBody().getResponse());
+    verify(supportingDocTempRepository, times(1)).deleteById(42);
+    verify(supportingDocTempRepository, never()).deleteById(1);
+  }
+
+  @Test
+  void testDeleteSupportingDocFromTemp_RepositoryThrowsException_PropagatesException() {
+    doThrow(new EmptyResultDataAccessException(1))
+        .when(supportingDocTempRepository)
+        .deleteById(99);
+
+    assertThrows(
+        EmptyResultDataAccessException.class,
+        () -> {
+          supportingDocService.deleteSupportingDocTemp(99);
+        });
+
+    verify(supportingDocTempRepository, times(1)).deleteById(99);
+  }
+
+  @Test
+  void testDeleteSupportingDocFromTemp_VerifiesNoOtherRepositoryInteractions()
+      throws ApiRequestException {
+    doNothing().when(supportingDocTempRepository).deleteById(1);
+
+    supportingDocService.deleteSupportingDocTemp(1);
+
+    verify(supportingDocTempRepository, times(1)).deleteById(1);
+    verifyNoInteractions(supportingDocRepository);
+    verifyNoInteractions(supportingDocTempAudRepository);
   }
 
   @Test

@@ -25,6 +25,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
@@ -233,6 +237,52 @@ class CreditFacilityTypeServiceImplTest {
             () -> creditFacilityTypeService.findCreditFacilityTypeTempByID(1));
 
     assertEquals("Unable to Fetch Credit Facility Type", exception.getMessage());
+  }
+
+  @Test
+  void testFindCreditFacilityTypeTempByID_Success_VerifiesAllMappedFields()
+      throws ApiRequestException {
+
+    when(creditFacilityTypeTempRepository.findById(30))
+        .thenReturn(Optional.of(creditFacilityTypeTemp));
+
+    ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
+        creditFacilityTypeService.findCreditFacilityTypeTempByID(30);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    CreditFacilityTypeDTO responseDto =
+        (CreditFacilityTypeDTO) Objects.requireNonNull(response.getBody()).getResponse();
+    assertEquals(
+        creditFacilityTypeTemp.getCreditFacilityTypeID(), responseDto.getCreditFacilityTypeID());
+    assertEquals(creditFacilityTypeTemp.getDescription(), responseDto.getDescription());
+    assertEquals(creditFacilityTypeTemp.getApproveStatus(), responseDto.getApproveStatus());
+    assertEquals(creditFacilityTypeTemp.getStatus(), responseDto.getStatus());
+
+    verify(creditFacilityTypeTempRepository, times(1)).findById(30);
+  }
+
+  @Test
+  void testFindCreditFacilityTypeTempByID_WithDifferentValidID() throws ApiRequestException {
+
+    CreditFacilityTypeTemp anotherTemp = new CreditFacilityTypeTemp();
+    anotherTemp.setCreditFacilityTypeID(99);
+    anotherTemp.setFacilityTypeName("Overdraft");
+    anotherTemp.setDescription("Overdraft Temp Description");
+    anotherTemp.setApproveStatus(MasterDataApproveStatus.PENDING);
+
+    when(creditFacilityTypeTempRepository.findById(99)).thenReturn(Optional.of(anotherTemp));
+
+    ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
+        creditFacilityTypeService.findCreditFacilityTypeTempByID(99);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    CreditFacilityTypeDTO responseDto =
+        (CreditFacilityTypeDTO) Objects.requireNonNull(response.getBody()).getResponse();
+    assertEquals("Overdraft", responseDto.getFacilityTypeName());
+    assertEquals(99, responseDto.getCreditFacilityTypeID());
+    verify(creditFacilityTypeTempRepository, never()).findById(30);
   }
 
   /** Test cases for update Credit Facility Type Temp */
@@ -769,52 +819,93 @@ class CreditFacilityTypeServiceImplTest {
   @Test
   void testSearchCreditFacilityTypes_Success() throws ApiRequestException {
 
-    List<CreditFacilityType> creditFacilityTypeList = Collections.singletonList(creditFacilityType);
-    when(creditFacilityTypeRepository.findAllApprovedCreditFacilityTypes())
-        .thenReturn(creditFacilityTypeList);
-
-    when(modelMapper.map(creditFacilityTypeList.get(0), CreditFacilityTypeDTO.class))
-        .thenReturn(new CreditFacilityTypeDTO(creditFacilityTypeList.get(0)));
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<CreditFacilityType> creditFacilityTypePage =
+        new PageImpl<>(Collections.singletonList(creditFacilityType));
+    when(creditFacilityTypeRepository.findAll(pageable)).thenReturn(creditFacilityTypePage);
 
     ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
-        creditFacilityTypeService.searchCreditFacilityTypes();
+        creditFacilityTypeService.searchCreditFacilityTypes(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Success", Objects.requireNonNull(response.getBody()).getMessage());
 
-    List<CreditFacilityTypeDTO> responseLIst =
-        (List<CreditFacilityTypeDTO>) response.getBody().getResponse();
+    Page<CreditFacilityType> responsePage =
+        (Page<CreditFacilityType>) response.getBody().getResponse();
 
-    assertEquals("Loan", responseLIst.get(0).getFacilityTypeName());
+    assertNotNull(responsePage);
+    assertEquals("Loan", responsePage.getContent().get(0).getFacilityTypeName());
   }
 
   @Test
   void testSearchCreditFacilityTypes_EmptyResult() throws ApiRequestException {
 
-    when(creditFacilityTypeRepository.findAllApprovedCreditFacilityTypes())
-        .thenReturn(new ArrayList<>());
+    Pageable pageable = PageRequest.of(0, 10);
+    when(creditFacilityTypeRepository.findAll(pageable))
+        .thenReturn(new PageImpl<>(new ArrayList<>()));
 
     ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
-        creditFacilityTypeService.searchCreditFacilityTypes();
+        creditFacilityTypeService.searchCreditFacilityTypes(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Success", response.getBody().getMessage());
-    assertEquals(0, ((List<CreditFacilityTypeDTO>) response.getBody().getResponse()).size());
+    Page<CreditFacilityType> responsePage =
+        (Page<CreditFacilityType>) response.getBody().getResponse();
+    assertEquals(0, responsePage.getContent().size());
   }
 
   @Test
   void testSearchCreditFacilityTypes_UnhandledException() {
 
-    when(creditFacilityTypeRepository.findAllApprovedCreditFacilityTypes())
+    Pageable pageable = PageRequest.of(0, 10);
+    when(creditFacilityTypeRepository.findAll(pageable))
         .thenThrow(new RuntimeException("Database error"));
 
-    ApiRequestException exception =
+    RuntimeException exception =
         assertThrows(
-            ApiRequestException.class, () -> creditFacilityTypeService.searchCreditFacilityTypes());
+            RuntimeException.class,
+            () -> creditFacilityTypeService.searchCreditFacilityTypes(pageable));
 
-    assertEquals("Unable to Fetch Credit Facility Types", exception.getMessage());
+    assertEquals("Database error", exception.getMessage());
+  }
+
+  @Test
+  void testSearchCreditFacilityTypes_VerifiesRepositoryCalledWithGivenPageable()
+      throws ApiRequestException {
+
+    Pageable pageable = PageRequest.of(2, 5);
+    Page<CreditFacilityType> creditFacilityTypePage =
+        new PageImpl<>(Collections.singletonList(creditFacilityType));
+    when(creditFacilityTypeRepository.findAll(pageable)).thenReturn(creditFacilityTypePage);
+
+    creditFacilityTypeService.searchCreditFacilityTypes(pageable);
+
+    verify(creditFacilityTypeRepository, times(1)).findAll(pageable);
+  }
+
+  @Test
+  void testSearchCreditFacilityTypes_MultipleItems() throws ApiRequestException {
+
+    CreditFacilityType secondType = new CreditFacilityType();
+    secondType.setCreditFacilityTypeID(31);
+    secondType.setFacilityTypeName("Overdraft");
+    secondType.setDescription("Overdraft Master");
+
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<CreditFacilityType> creditFacilityTypePage =
+        new PageImpl<>(Arrays.asList(creditFacilityType, secondType));
+    when(creditFacilityTypeRepository.findAll(pageable)).thenReturn(creditFacilityTypePage);
+
+    ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
+        creditFacilityTypeService.searchCreditFacilityTypes(pageable);
+
+    Page<CreditFacilityType> responsePage =
+        (Page<CreditFacilityType>) Objects.requireNonNull(response.getBody()).getResponse();
+
+    assertEquals(2, responsePage.getContent().size());
+    assertEquals("Overdraft", responsePage.getContent().get(1).getFacilityTypeName());
   }
 
   /** Test cases for Search Credit Facility Type by ID */
@@ -863,55 +954,139 @@ class CreditFacilityTypeServiceImplTest {
     assertEquals("Unable to Fetch Credit Facility Type", exception.getMessage());
   }
 
+  @Test
+  void testFindCreditFacilityTypeByID_VerifiesModelMapperInvokedWithCorrectArguments()
+      throws ApiRequestException {
+
+    creditFacilityType.setCreditFacilityTypeID(30);
+    CreditFacilityTypeDTO expectedDTO = new CreditFacilityTypeDTO(creditFacilityType);
+    when(creditFacilityTypeRepository.findById(30)).thenReturn(Optional.of(creditFacilityType));
+    when(modelMapper.map(creditFacilityType, CreditFacilityTypeDTO.class)).thenReturn(expectedDTO);
+
+    creditFacilityTypeService.findCreditFacilityTypeByID(30);
+
+    verify(creditFacilityTypeRepository, times(1)).findById(30);
+    verify(modelMapper, times(1)).map(creditFacilityType, CreditFacilityTypeDTO.class);
+  }
+
+  @Test
+  void testFindCreditFacilityTypeByID_WithDifferentID() throws ApiRequestException {
+
+    CreditFacilityType anotherType = new CreditFacilityType();
+    anotherType.setCreditFacilityTypeID(42);
+    anotherType.setFacilityTypeName("Term Loan");
+    anotherType.setDescription("Term Loan Master Record");
+
+    CreditFacilityTypeDTO expectedDTO = new CreditFacilityTypeDTO(anotherType);
+    when(creditFacilityTypeRepository.findById(42)).thenReturn(Optional.of(anotherType));
+    when(modelMapper.map(anotherType, CreditFacilityTypeDTO.class)).thenReturn(expectedDTO);
+
+    ResponseEntity<StandardResponse<CreditFacilityTypeDTO>> response =
+        creditFacilityTypeService.findCreditFacilityTypeByID(42);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    CreditFacilityTypeDTO responseDTO =
+        (CreditFacilityTypeDTO) Objects.requireNonNull(response.getBody()).getResponse();
+    assertEquals("Term Loan", responseDTO.getFacilityTypeName());
+    assertEquals(42, responseDTO.getCreditFacilityTypeID());
+  }
+
   /** Test cases for Search Credit Facility Type List in Temp */
   @Test
   void testFindAllCreditFacilityTypeTempList_Success() throws ApiRequestException {
 
-    List<CreditFacilityTypeTemp> creditFacilityTypeTempList =
-        Collections.singletonList(creditFacilityTypeTemp);
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<CreditFacilityTypeTemp> creditFacilityTypeTempPage =
+        new PageImpl<>(Collections.singletonList(creditFacilityTypeTemp));
 
-    when(creditFacilityTypeTempRepository.findAll()).thenReturn(creditFacilityTypeTempList);
+    when(creditFacilityTypeTempRepository.findAll(pageable))
+        .thenReturn(creditFacilityTypeTempPage);
 
     ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
-        creditFacilityTypeService.findAllCreditFacilityTypeTempList();
+        creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Success", response.getBody().getMessage());
 
-    List<CreditFacilityTypeDTO> responseLIst =
-        (List<CreditFacilityTypeDTO>) response.getBody().getResponse();
-    assertEquals("Loan", responseLIst.get(0).getFacilityTypeName());
+    Page<CreditFacilityTypeTemp> responsePage =
+        (Page<CreditFacilityTypeTemp>) response.getBody().getResponse();
+    assertEquals("Loan", responsePage.getContent().get(0).getFacilityTypeName());
   }
 
   @Test
   void testFindAllCreditFacilityTypeTempList_EmptyResult() throws ApiRequestException {
 
-    when(creditFacilityTypeTempRepository.findAll()).thenReturn(new ArrayList<>());
+    Pageable pageable = PageRequest.of(0, 10);
+    when(creditFacilityTypeTempRepository.findAll(pageable))
+        .thenReturn(new PageImpl<>(new ArrayList<>()));
 
     ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
-        creditFacilityTypeService.findAllCreditFacilityTypeTempList();
+        creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Success", response.getBody().getMessage());
-    List<CreditFacilityTypeDTO> responseLIst =
-        (List<CreditFacilityTypeDTO>) response.getBody().getResponse();
-    assertEquals(0, responseLIst.size());
+    Page<CreditFacilityTypeTemp> responsePage =
+        (Page<CreditFacilityTypeTemp>) response.getBody().getResponse();
+    assertEquals(0, responsePage.getContent().size());
   }
 
   @Test
   void testFindAllCreditFacilityTypeTempList_UnhandledException() {
 
-    when(creditFacilityTypeTempRepository.findAll())
+    Pageable pageable = PageRequest.of(0, 10);
+    when(creditFacilityTypeTempRepository.findAll(pageable))
         .thenThrow(new RuntimeException("Database error"));
 
-    ApiRequestException exception =
+    RuntimeException exception =
         assertThrows(
-            ApiRequestException.class,
-            () -> creditFacilityTypeService.findAllCreditFacilityTypeTempList());
+            RuntimeException.class,
+            () -> creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable));
 
-    assertEquals("Unable to Fetch Credit Facility Types", exception.getMessage());
+    assertEquals("Database error", exception.getMessage());
+  }
+
+  @Test
+  void testFindAllCreditFacilityTypeTempList_VerifiesRepositoryCalledWithGivenPageable()
+      throws ApiRequestException {
+
+    Pageable pageable = PageRequest.of(1, 20);
+    Page<CreditFacilityTypeTemp> creditFacilityTypeTempPage =
+        new PageImpl<>(Collections.singletonList(creditFacilityTypeTemp));
+
+    when(creditFacilityTypeTempRepository.findAll(pageable))
+        .thenReturn(creditFacilityTypeTempPage);
+
+    creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
+
+    verify(creditFacilityTypeTempRepository, times(1)).findAll(pageable);
+  }
+
+  @Test
+  void testFindAllCreditFacilityTypeTempList_MultipleItems() throws ApiRequestException {
+
+    CreditFacilityTypeTemp secondTemp = new CreditFacilityTypeTemp();
+    secondTemp.setCreditFacilityTypeID(31);
+    secondTemp.setFacilityTypeName("Overdraft Temp");
+    secondTemp.setDescription("Overdraft Temp Description");
+
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<CreditFacilityTypeTemp> creditFacilityTypeTempPage =
+        new PageImpl<>(Arrays.asList(creditFacilityTypeTemp, secondTemp));
+
+    when(creditFacilityTypeTempRepository.findAll(pageable))
+        .thenReturn(creditFacilityTypeTempPage);
+
+    ResponseEntity<StandardResponse<List<CreditFacilityTypeDTO>>> response =
+        creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
+
+    Page<CreditFacilityTypeTemp> responsePage =
+        (Page<CreditFacilityTypeTemp>) Objects.requireNonNull(response.getBody()).getResponse();
+
+    assertEquals(2, responsePage.getContent().size());
+    assertEquals("Overdraft Temp", responsePage.getContent().get(1).getFacilityTypeName());
   }
 
   /** Test cases for Delete Credit Facility Type */
@@ -961,6 +1136,44 @@ class CreditFacilityTypeServiceImplTest {
             ApiRequestException.class,
             () ->
                 creditFacilityTypeService.deleteCreditFacilityTypeTemp(tempCreditFacilityTypeDTO));
+
+    assertEquals("Deletion failed", exception.getMessage());
+
+    verify(creditFacilityTypeTempRepository, never()).deleteById(anyInt());
+  }
+
+  @Test
+  void testDeleteCreditFacilityTypeTemp_VerifyCorrectIdUsedForDeletion()
+      throws ApiRequestException {
+
+    CreditFacilityTypeTemp anotherTemp = new CreditFacilityTypeTemp();
+    anotherTemp.setCreditFacilityTypeID(77);
+    anotherTemp.setFacilityTypeName("Bridge Loan");
+
+    CreditFacilityTypeDTO deleteDto = new CreditFacilityTypeDTO();
+    deleteDto.setCreditFacilityTypeID(77);
+
+    when(creditFacilityTypeTempRepository.findById(77)).thenReturn(Optional.of(anotherTemp));
+
+    ResponseEntity<StandardResponse<Integer>> response =
+        creditFacilityTypeService.deleteCreditFacilityTypeTemp(deleteDto);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    Integer responseId = (Integer) Objects.requireNonNull(response.getBody()).getResponse();
+    assertEquals(77, responseId);
+
+    verify(creditFacilityTypeTempRepository, times(1)).deleteById(77);
+    verify(creditFacilityTypeTempRepository, never()).deleteById(1);
+  }
+
+  @Test
+  void testDeleteCreditFacilityTypeTemp_NullDTO_ThrowsApiRequestException() {
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> creditFacilityTypeService.deleteCreditFacilityTypeTemp(null));
 
     assertEquals("Deletion failed", exception.getMessage());
 

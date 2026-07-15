@@ -16,6 +16,7 @@ import lk.sampath.casadminportalms.entity.upmgroup.UpmGroupTemp;
 import lk.sampath.casadminportalms.entity.upmgroup.UpmGroupTempAud;
 import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
 import lk.sampath.casadminportalms.exception.ApiRequestException;
+import lk.sampath.casadminportalms.repository.upmgroup.UpmGroupJdbc;
 import lk.sampath.casadminportalms.repository.upmgroup.UpmGroupRepository;
 import lk.sampath.casadminportalms.repository.upmgroup.UpmGroupTempAudRepository;
 import lk.sampath.casadminportalms.repository.upmgroup.UpmGroupTempRepository;
@@ -36,6 +37,8 @@ class UpmGroupServiceImplTest {
   @Mock private UpmGroupRepository upmGroupRepository;
 
   @Mock private UpmGroupTempAudRepository upmGroupTempAudRepository;
+
+  @Mock private UpmGroupJdbc upmGroupJdbc;
 
   @InjectMocks private UpmGroupServiceImpl upmGroupService;
 
@@ -114,6 +117,55 @@ class UpmGroupServiceImplTest {
     verify(upmGroupTempRepository, times(1)).findAll();
   }
 
+  @Test
+  void testFindAllUpmGroupTempList_Success_UsingJdbc() throws ApiRequestException {
+    List<UpmGroupDTO> jdbcList = Arrays.asList(upmGroupDTO);
+    when(upmGroupJdbc.findAllUpmGroupTempList()).thenReturn(jdbcList);
+
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> response =
+        upmGroupService.findAllUpmGroupTempList();
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(jdbcList, response.getBody().getResponse());
+
+    verify(upmGroupJdbc, times(1)).findAllUpmGroupTempList();
+  }
+
+  @Test
+  void testFindAllUpmGroupTempList_EmptyList_UsingJdbc() throws ApiRequestException {
+    when(upmGroupJdbc.findAllUpmGroupTempList()).thenReturn(Collections.emptyList());
+
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> response =
+        upmGroupService.findAllUpmGroupTempList();
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertTrue(((List<?>) response.getBody().getResponse()).isEmpty());
+
+    verify(upmGroupJdbc, times(1)).findAllUpmGroupTempList();
+  }
+
+  @Test
+  void testFindAllUpmGroupTempList_MultipleRecords_UsingJdbc() throws ApiRequestException {
+    UpmGroupDTO secondDto = new UpmGroupDTO();
+    secondDto.setUpmGroupID(2);
+    secondDto.setGroupCode("SECOND_CODE");
+    List<UpmGroupDTO> jdbcList = Arrays.asList(upmGroupDTO, secondDto);
+    when(upmGroupJdbc.findAllUpmGroupTempList()).thenReturn(jdbcList);
+
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> response =
+        upmGroupService.findAllUpmGroupTempList();
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(2, ((List<?>) response.getBody().getResponse()).size());
+
+    verify(upmGroupJdbc, times(1)).findAllUpmGroupTempList();
+  }
+
   /** findUpmGroupTempByID * */
   @Test
   void testFindUpmGroupTempById_Success() throws ApiRequestException {
@@ -144,6 +196,48 @@ class UpmGroupServiceImplTest {
     assertEquals("UPM Group temp with 2Does not exists", exception.getMessage());
 
     verify(upmGroupTempRepository, times(1)).findById(2);
+  }
+
+  @Test
+  void testFindUpmGroupTempByID_Success_ReturnsMappedDTO() throws ApiRequestException {
+    when(upmGroupJdbc.findUpmGroupTempById(1)).thenReturn(upmGroupDTO);
+
+    ResponseEntity<StandardResponse<UpmGroupDTO>> response =
+        upmGroupService.findUpmGroupTempByID(1);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(upmGroupDTO, response.getBody().getResponse());
+
+    verify(upmGroupJdbc, times(1)).findUpmGroupTempById(1);
+  }
+
+  @Test
+  void testFindUpmGroupTempByID_NotFound_ThrowsException() {
+    when(upmGroupJdbc.findUpmGroupTempById(5)).thenReturn(null);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              upmGroupService.findUpmGroupTempByID(5);
+            });
+
+    assertEquals("UPM Group temp with 5Does not exists", exception.getMessage());
+    verify(upmGroupJdbc, times(1)).findUpmGroupTempById(5);
+  }
+
+  @Test
+  void testFindUpmGroupTempByID_VerifiesSuccessResponseFields() throws ApiRequestException {
+    when(upmGroupJdbc.findUpmGroupTempById(1)).thenReturn(upmGroupDTO);
+
+    ResponseEntity<StandardResponse<UpmGroupDTO>> response =
+        upmGroupService.findUpmGroupTempByID(1);
+
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().getSuccess());
+    assertEquals("Success", response.getBody().getMessage());
   }
 
   /** searchUpmGroups * */
@@ -177,6 +271,50 @@ class UpmGroupServiceImplTest {
     verify(upmGroupRepository, times(1)).findAll();
   }
 
+  @Test
+  void testSearchUpmGroups_Success_UsingJdbc() {
+    List<UpmGroupDTO> jdbcList = Arrays.asList(upmGroupDTO);
+    when(upmGroupJdbc.findAllUpmGroupList()).thenReturn(jdbcList);
+
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> response = upmGroupService.searchUpmGroups();
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(jdbcList, response.getBody().getResponse());
+
+    verify(upmGroupJdbc, times(1)).findAllUpmGroupList();
+  }
+
+  @Test
+  void testSearchUpmGroups_EmptyList_UsingJdbc() {
+    when(upmGroupJdbc.findAllUpmGroupList()).thenReturn(Collections.emptyList());
+
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> response = upmGroupService.searchUpmGroups();
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertTrue(((List<?>) response.getBody().getResponse()).isEmpty());
+
+    verify(upmGroupJdbc, times(1)).findAllUpmGroupList();
+  }
+
+  @Test
+  void testSearchUpmGroups_MultipleRecords_UsingJdbc() {
+    UpmGroupDTO secondDto = new UpmGroupDTO();
+    secondDto.setUpmGroupID(2);
+    secondDto.setGroupCode("SECOND_CODE");
+    when(upmGroupJdbc.findAllUpmGroupList()).thenReturn(Arrays.asList(upmGroupDTO, secondDto));
+
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> response = upmGroupService.searchUpmGroups();
+
+    assertNotNull(response);
+    assertEquals(2, ((List<?>) response.getBody().getResponse()).size());
+
+    verify(upmGroupJdbc, times(1)).findAllUpmGroupList();
+    verifyNoInteractions(upmGroupRepository);
+  }
+
   /** findUpmGroupById * */
   @Test
   void testFindApprovedUpmGroupById_Success() throws ApiRequestException {
@@ -206,6 +344,45 @@ class UpmGroupServiceImplTest {
     assertEquals("UPM group with 2Does not exists", exception.getMessage());
 
     verify(upmGroupRepository, times(1)).findById(2);
+  }
+
+  @Test
+  void testFindUpmGroupById_Success_UsingJdbc() {
+    when(upmGroupJdbc.findUpmGroupById(1)).thenReturn(upmGroupDTO);
+
+    ResponseEntity<StandardResponse<UpmGroupDTO>> response = upmGroupService.findUpmGroupById(1);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(upmGroupDTO, response.getBody().getResponse());
+
+    verify(upmGroupJdbc, times(1)).findUpmGroupById(1);
+  }
+
+  @Test
+  void testFindUpmGroupById_NotFound_UsingJdbc() {
+    when(upmGroupJdbc.findUpmGroupById(9)).thenReturn(null);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              upmGroupService.findUpmGroupById(9);
+            });
+
+    assertEquals("UPM Group with 9Does not exists", exception.getMessage());
+    verify(upmGroupJdbc, times(1)).findUpmGroupById(9);
+  }
+
+  @Test
+  void testFindUpmGroupById_VerifiesJdbcCalledOnceAndNoOtherRepoUsed() {
+    when(upmGroupJdbc.findUpmGroupById(1)).thenReturn(upmGroupDTO);
+
+    upmGroupService.findUpmGroupById(1);
+
+    verify(upmGroupJdbc, times(1)).findUpmGroupById(1);
+    verifyNoInteractions(upmGroupRepository, upmGroupTempRepository);
   }
 
   /** saveUPMGroupTemp * */
@@ -246,6 +423,59 @@ class UpmGroupServiceImplTest {
 
     verify(upmGroupTempRepository, times(1)).findAll(any(BooleanBuilder.class));
     verify(upmGroupTempRepository, never()).saveAndFlush(any(UpmGroupTemp.class));
+  }
+
+  @Test
+  void testSaveUpmGroupTemp_NullDTO_ThrowsException() {
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              upmGroupService.saveUPMGroupTemp(null);
+            });
+
+    assertEquals("Upm group code name cannot be empty or null.", exception.getMessage());
+    verify(upmGroupTempRepository, never()).save(any(UpmGroupTemp.class));
+  }
+
+  @Test
+  void testSaveUpmGroupTemp_BlankGroupCode_ThrowsException() {
+    upmGroupDTO.setGroupCode("   ");
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              upmGroupService.saveUPMGroupTemp(upmGroupDTO);
+            });
+
+    assertEquals("Upm group code name cannot be empty or null.", exception.getMessage());
+    verify(upmGroupTempRepository, never()).save(any(UpmGroupTemp.class));
+  }
+
+  @Test
+  void testSaveUpmGroupTemp_CapturesSavedEntityFields() throws ApiRequestException {
+    when(upmGroupTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(Collections.emptyList());
+    when(upmGroupTempRepository.getCurrentSequenceValue()).thenReturn(5);
+    when(upmGroupTempRepository.save(any(UpmGroupTemp.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ResponseEntity<StandardResponse<UpmGroupDTO>> response =
+        upmGroupService.saveUPMGroupTemp(upmGroupDTO);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    ArgumentCaptor<UpmGroupTemp> captor = ArgumentCaptor.forClass(UpmGroupTemp.class);
+    verify(upmGroupTempRepository, times(1)).save(captor.capture());
+    UpmGroupTemp captured = captor.getValue();
+
+    assertEquals(5, captured.getUpmGroupID());
+    assertEquals(upmGroupDTO.getGroupCode(), captured.getGroupCode());
+    assertEquals(upmGroupDTO.getReferenceName(), captured.getReferenceName());
+    assertEquals(upmGroupDTO.getWorkFlowLevel(), captured.getWorkFlowLevel());
+    assertEquals(upmGroupDTO.getApproveStatus(), captured.getApproveStatus());
   }
 
   /** approveRejectUpmGroup * */
@@ -416,6 +646,46 @@ class UpmGroupServiceImplTest {
   }
 
   @Test
+  void testUpdateUpmGroupTemp_UnchangedBlankGroupCode_ThrowsException() {
+    upmGroupTemp.setGroupCode("");
+    upmGroupDTO.setGroupCode("");
+    when(upmGroupTempRepository.findById(1)).thenReturn(Optional.of(upmGroupTemp));
+    when(upmGroupTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(Collections.emptyList());
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              upmGroupService.updateUpmGroupTemp(1, upmGroupDTO);
+            });
+
+    assertEquals("Upm group code name cannot be empty or null.", exception.getMessage());
+    verify(upmGroupTempRepository, never()).save(any(UpmGroupTemp.class));
+  }
+
+  @Test
+  void testUpdateUpmGroupTemp_GroupCodeChanged_AlreadyExistsInMaster_ThrowsException() {
+    upmGroupDTO.setGroupCode("NEW_CODE");
+    when(upmGroupTempRepository.findById(1)).thenReturn(Optional.of(upmGroupTemp));
+    when(upmGroupTempRepository.findAll(any(BooleanBuilder.class)))
+        .thenReturn(Collections.emptyList());
+    when(upmGroupTempRepository.exists(any(BooleanBuilder.class))).thenReturn(false);
+    when(upmGroupRepository.exists(any(BooleanBuilder.class))).thenReturn(true);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              upmGroupService.updateUpmGroupTemp(1, upmGroupDTO);
+            });
+
+    assertEquals(
+        "Group Code 'NEW_CODE' already exists in the system.", exception.getMessage());
+    verify(upmGroupTempRepository, never()).save(any(UpmGroupTemp.class));
+  }
+
+  @Test
   void testUpdateApprovedUpmGroup_Success() throws ApiRequestException {
     when(upmGroupRepository.findById(upmGroupDTO.getUpmGroupID()))
         .thenReturn(Optional.of(upmGroup));
@@ -485,6 +755,25 @@ class UpmGroupServiceImplTest {
         "Group Code 'Old Unit Testing' already exists in the system.", exception.getMessage());
   }
 
+  @Test
+  void testUpdateApprovedUpmGroup_UnchangedBlankGroupCode_ThrowsException() {
+    UpmGroupDTO dbDto = new UpmGroupDTO();
+    dbDto.setUpmGroupID(1);
+    dbDto.setGroupCode("");
+    upmGroupDTO.setGroupCode("");
+    when(upmGroupJdbc.findUpmGroupById(1)).thenReturn(dbDto);
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class,
+            () -> {
+              upmGroupService.updateApprovedUpmGroup(1, upmGroupDTO);
+            });
+
+    assertEquals("Upm group code name cannot be empty or null.", exception.getMessage());
+    verify(upmGroupTempRepository, never()).save(any(UpmGroupTemp.class));
+  }
+
   /** delete UpmGroupTemp * */
   @Test
   void testDeleteUpmGroupFromTemp_Success() throws ApiRequestException {
@@ -501,6 +790,60 @@ class UpmGroupServiceImplTest {
   }
 
   @Test
+  void testDeleteUpmGroup_DifferentID_Success() throws ApiRequestException {
+    doNothing().when(upmGroupTempRepository).deleteById(5);
+
+    ResponseEntity<StandardResponse<Void>> response = upmGroupService.deleteUpmGroup(5);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(5, response.getBody().getResponse());
+
+    verify(upmGroupTempRepository, times(1)).deleteById(5);
+  }
+
+  @Test
+  void testDeleteUpmGroup_NullID_DoesNotThrow() throws ApiRequestException {
+    doNothing().when(upmGroupTempRepository).deleteById(null);
+
+    ResponseEntity<StandardResponse<Void>> response = upmGroupService.deleteUpmGroup(null);
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertNull(response.getBody().getResponse());
+
+    verify(upmGroupTempRepository, times(1)).deleteById(null);
+  }
+
+  @Test
+  void testDeleteUpmGroup_RepositoryThrowsException_PropagatesException() {
+    doThrow(new RuntimeException("DB error")).when(upmGroupTempRepository).deleteById(1);
+
+    RuntimeException exception =
+        assertThrows(
+            RuntimeException.class,
+            () -> {
+              upmGroupService.deleteUpmGroup(1);
+            });
+
+    assertEquals("DB error", exception.getMessage());
+    verify(upmGroupTempRepository, times(1)).deleteById(1);
+  }
+
+  @Test
+  void testDeleteUpmGroup_VerifiesResponseBodyFields() throws ApiRequestException {
+    doNothing().when(upmGroupTempRepository).deleteById(1);
+
+    ResponseEntity<StandardResponse<Void>> response = upmGroupService.deleteUpmGroup(1);
+
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().getSuccess());
+    assertEquals("Success", response.getBody().getMessage());
+  }
+
+  @Test
   void testApproveRejectUpmGroup_RejectionSuccess_WithAudit() throws ApiRequestException {
     approveRejectRQ.setApproveStatus(MasterDataApproveStatus.REJECTED);
 
@@ -511,8 +854,7 @@ class UpmGroupServiceImplTest {
         .thenAnswer(
             invocation -> {
               UpmGroupTempAud audit = invocation.getArgument(0);
-              audit.setRev(1);
-              audit.setRevType(1);
+              audit.setUpmGroupHistoryID(1);
               return audit;
             });
 
@@ -532,13 +874,83 @@ class UpmGroupServiceImplTest {
     UpmGroupTempAud capturedAudit = auditCaptor.getValue();
 
     assertNotNull(capturedAudit);
-    assertEquals(1, capturedAudit.getRev());
-    assertEquals(1, capturedAudit.getRevType());
+    assertEquals(1, capturedAudit.getUpmGroupHistoryID());
     assertEquals(upmGroupTemp.getUpmGroupID(), capturedAudit.getUpmGroupID());
     assertEquals(upmGroupTemp.getStatus(), capturedAudit.getStatus());
     assertEquals(upmGroupTemp.getApproveStatus(), capturedAudit.getApproveStatus());
     assertEquals(upmGroupTemp.getReferenceName(), capturedAudit.getReferenceName());
     assertEquals(upmGroupTemp.getGroupCode(), capturedAudit.getGroupCode());
     assertEquals(upmGroupTemp.getWorkFlowLevel(), capturedAudit.getWorkFlowLevel());
+  }
+
+  /** findAllActiveUpmGroups * */
+  @Test
+  void testFindAllActiveUpmGroups_Success() throws ApiRequestException {
+    List<UpmGroupDTO> activeList = Arrays.asList(upmGroupDTO);
+    when(upmGroupJdbc.findAllActiveUpmGroups()).thenReturn(activeList);
+
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> response =
+        upmGroupService.findAllActiveUpmGroups();
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(activeList, response.getBody().getResponse());
+
+    verify(upmGroupJdbc, times(1)).findAllActiveUpmGroups();
+  }
+
+  @Test
+  void testFindAllActiveUpmGroups_EmptyList() throws ApiRequestException {
+    when(upmGroupJdbc.findAllActiveUpmGroups()).thenReturn(Collections.emptyList());
+
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> response =
+        upmGroupService.findAllActiveUpmGroups();
+
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertTrue(((List<?>) response.getBody().getResponse()).isEmpty());
+
+    verify(upmGroupJdbc, times(1)).findAllActiveUpmGroups();
+  }
+
+  @Test
+  void testFindAllActiveUpmGroups_MultipleRecords() throws ApiRequestException {
+    UpmGroupDTO secondDto = new UpmGroupDTO();
+    secondDto.setUpmGroupID(2);
+    secondDto.setGroupCode("SECOND_ACTIVE_CODE");
+    when(upmGroupJdbc.findAllActiveUpmGroups())
+        .thenReturn(Arrays.asList(upmGroupDTO, secondDto));
+
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> response =
+        upmGroupService.findAllActiveUpmGroups();
+
+    assertNotNull(response);
+    assertEquals(2, ((List<?>) response.getBody().getResponse()).size());
+
+    verify(upmGroupJdbc, times(1)).findAllActiveUpmGroups();
+  }
+
+  @Test
+  void testFindAllActiveUpmGroups_VerifiesSuccessResponseFields() throws ApiRequestException {
+    when(upmGroupJdbc.findAllActiveUpmGroups()).thenReturn(Collections.emptyList());
+
+    ResponseEntity<StandardResponse<List<UpmGroupDTO>>> response =
+        upmGroupService.findAllActiveUpmGroups();
+
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().getSuccess());
+    assertEquals("Success", response.getBody().getMessage());
+  }
+
+  @Test
+  void testFindAllActiveUpmGroups_VerifiesJdbcCalledExactlyOnceAndNoOtherRepoUsed()
+      throws ApiRequestException {
+    when(upmGroupJdbc.findAllActiveUpmGroups()).thenReturn(Collections.emptyList());
+
+    upmGroupService.findAllActiveUpmGroups();
+
+    verify(upmGroupJdbc, times(1)).findAllActiveUpmGroups();
+    verifyNoInteractions(upmGroupTempRepository, upmGroupRepository, upmGroupTempAudRepository);
   }
 }

@@ -9,6 +9,7 @@ import java.util.*;
 import lk.sampath.casadminportalms.controller.basecontroller.StandardResponse;
 import lk.sampath.casadminportalms.dto.common.ApproveRejectRQ;
 import lk.sampath.casadminportalms.dto.role.RoleDTO;
+import lk.sampath.casadminportalms.dto.role.UpmRolePrivilegeDTO;
 import lk.sampath.casadminportalms.entity.role.*;
 import lk.sampath.casadminportalms.enums.ErrorEnums;
 import lk.sampath.casadminportalms.enums.MasterDataApproveStatus;
@@ -23,6 +24,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -42,6 +47,8 @@ class RoleServiceImplTest {
   @Mock private RoleAudRepository roleAudRepository;
 
   @Mock private RolePrivilegeAudRepository rolePrivilegeAudRepository;
+
+  @Mock private RoleJdbc roleJdbc;
 
   /** Test when the findAllPrivilegeCategories() */
   @Test
@@ -115,6 +122,58 @@ class RoleServiceImplTest {
     assertEquals(1000, responseMap.size());
   }
 
+  @Test
+  void testFindAllPrivilegeCategories_PassesPageableToRepository() {
+    Pageable pageable = PageRequest.of(2, 5);
+    when(privilegeCategoryRepository.findAll(any(Pageable.class)))
+        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+    ResponseEntity<StandardResponse<List<PrivilegeCategory>>> response =
+        roleService.findAllPrivilegeCategories(pageable);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(privilegeCategoryRepository).findAll(pageableCaptor.capture());
+    assertEquals(pageable, pageableCaptor.getValue());
+  }
+
+  @Test
+  void testFindAllPrivilegeCategories_PrivilegeFieldsAreCopiedCorrectly() {
+    PrivilegeCategory category = new PrivilegeCategory();
+    category.setPrivilegeCategoryID(5);
+    category.setCategory("Security");
+
+    Privilege privilege = new Privilege();
+    privilege.setPrivilegeID(50);
+    privilege.setPrivilegeName("View");
+    privilege.setCode("VIEW");
+    privilege.setDescription("View access");
+    privilege.setStatus(Status.ACT);
+
+    when(privilegeCategoryRepository.findAll(any(Pageable.class)))
+        .thenReturn(new PageImpl<>(List.of(category)));
+    when(privilegeRepository.findByPrivilegeCategoryPrivilegeCategoryID(5))
+        .thenReturn(List.of(privilege));
+
+    ResponseEntity<StandardResponse<List<PrivilegeCategory>>> response =
+        roleService.findAllPrivilegeCategories(PageRequest.of(0, 10));
+
+    assertNotNull(response);
+    Map<String, List<Privilege>> responseMap =
+        (Map<String, List<Privilege>>) response.getBody().getResponse();
+    List<Privilege> mappedPrivileges = responseMap.get("Security");
+    assertEquals(1, mappedPrivileges.size());
+
+    Privilege mapped = mappedPrivileges.get(0);
+    assertEquals(50, mapped.getPrivilegeID());
+    assertEquals("View", mapped.getPrivilegeName());
+    assertEquals("VIEW", mapped.getCode());
+    assertEquals("View access", mapped.getDescription());
+    assertEquals(Status.ACT, mapped.getStatus());
+  }
+
   /** Test when the findAllUpcTemplateTempList() */
   @Test
   void testFindRolesTempByID_Success() {
@@ -174,6 +233,71 @@ class RoleServiceImplTest {
 
     assertEquals("Role Temp with" + roleID + "Does not exists", exception.getMessage());
     verify(roleTempRepository, times(1)).findById(roleID);
+  }
+
+  @Test
+  void testFindRolesTempByID_WithMultiplePrivileges_ReturnsAllPrivilegeIds() {
+
+    Integer roleID = 2;
+    RoleTemp mockRoleTemp = new RoleTemp();
+    mockRoleTemp.setRoleID(roleID);
+    mockRoleTemp.setRoleName("Manager");
+    mockRoleTemp.setStatus(Status.ACT);
+    mockRoleTemp.setApproveStatus(MasterDataApproveStatus.PENDING);
+
+    Privilege privilege1 = new Privilege();
+    privilege1.setPrivilegeID(201);
+    Privilege privilege2 = new Privilege();
+    privilege2.setPrivilegeID(202);
+    mockRoleTemp.setPrivileges(new LinkedHashSet<>(List.of(privilege1, privilege2)));
+
+    when(roleTempRepository.findById(roleID)).thenReturn(Optional.of(mockRoleTemp));
+
+    ResponseEntity<StandardResponse<Object>> response = roleService.findRolesTempByID(roleID);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+
+    RoleDTO roleTempDTO = (RoleDTO) response.getBody().getResponse();
+    assertEquals(2, roleTempDTO.getPrivileges().size());
+    assertTrue(roleTempDTO.getPrivileges().containsAll(List.of(201, 202)));
+  }
+
+  @Test
+  void testFindRolesTempByID_WithEmptyPrivilegeSet_ReturnsEmptyPrivilegeList() {
+
+    Integer roleID = 3;
+    RoleTemp mockRoleTemp = new RoleTemp();
+    mockRoleTemp.setRoleID(roleID);
+    mockRoleTemp.setRoleName("Viewer");
+    mockRoleTemp.setStatus(Status.ACT);
+    mockRoleTemp.setApproveStatus(MasterDataApproveStatus.PENDING);
+    mockRoleTemp.setPrivileges(Collections.emptySet());
+
+    when(roleTempRepository.findById(roleID)).thenReturn(Optional.of(mockRoleTemp));
+
+    ResponseEntity<StandardResponse<Object>> response = roleService.findRolesTempByID(roleID);
+
+    assertNotNull(response);
+    RoleDTO roleTempDTO = (RoleDTO) response.getBody().getResponse();
+    assertTrue(roleTempDTO.getPrivileges().isEmpty());
+  }
+
+  @Test
+  void testFindRolesTempByID_VerifiesRepositoryCalledExactlyOnce() {
+
+    Integer roleID = 4;
+    RoleTemp mockRoleTemp = new RoleTemp();
+    mockRoleTemp.setRoleID(roleID);
+    mockRoleTemp.setRoleName("Auditor");
+    mockRoleTemp.setPrivileges(Collections.emptySet());
+
+    when(roleTempRepository.findById(roleID)).thenReturn(Optional.of(mockRoleTemp));
+
+    roleService.findRolesTempByID(roleID);
+
+    verify(roleTempRepository, times(1)).findById(roleID);
+    verifyNoMoreInteractions(roleTempRepository);
   }
 
   /** Test when the findAllRolesTempList() */
@@ -240,6 +364,57 @@ class RoleServiceImplTest {
 
     List<RoleDTO> roleDTOList = (List<RoleDTO>) standardResponse.getResponse();
     assertTrue(roleDTOList.isEmpty());
+  }
+
+  @Test
+  void testFindAllRolesTempList_WithPageable_Success() {
+    RoleTemp roleTemp = new RoleTemp();
+    roleTemp.setRoleID(10);
+    roleTemp.setRoleName("Pageable Role");
+    roleTemp.setStatus(Status.ACT);
+    roleTemp.setApproveStatus(MasterDataApproveStatus.PENDING);
+    roleTemp.setPrivileges(Collections.emptySet());
+
+    Pageable pageable = PageRequest.of(0, 10);
+    when(roleTempRepository.findAll(pageable))
+        .thenReturn(new PageImpl<>(List.of(roleTemp), pageable, 1));
+
+    ResponseEntity<StandardResponse<List<RoleDTO>>> response =
+        roleService.findAllRolesTempList(pageable);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+
+    List<RoleDTO> roleDTOList = (List<RoleDTO>) response.getBody().getResponse();
+    assertEquals(1, roleDTOList.size());
+    assertEquals("Pageable Role", roleDTOList.get(0).getRoleName());
+  }
+
+  @Test
+  void testFindAllRolesTempList_WithPageable_EmptyList() {
+    Pageable pageable = PageRequest.of(0, 10);
+    when(roleTempRepository.findAll(pageable))
+        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+    ResponseEntity<StandardResponse<List<RoleDTO>>> response =
+        roleService.findAllRolesTempList(pageable);
+
+    assertNotNull(response);
+    List<RoleDTO> roleDTOList = (List<RoleDTO>) response.getBody().getResponse();
+    assertTrue(roleDTOList.isEmpty());
+  }
+
+  @Test
+  void testFindAllRolesTempList_VerifiesPageableIsPassedToRepository() {
+    Pageable pageable = PageRequest.of(3, 20);
+    when(roleTempRepository.findAll(any(Pageable.class)))
+        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+    roleService.findAllRolesTempList(pageable);
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(roleTempRepository).findAll(pageableCaptor.capture());
+    assertEquals(pageable, pageableCaptor.getValue());
   }
 
   /** Test when the findAllApprovedRoles() */
@@ -315,6 +490,53 @@ class RoleServiceImplTest {
     assertTrue(roleDTOList.isEmpty());
   }
 
+  @Test
+  void testFindAllApprovedRoles_WithPageable_Success() {
+    Role role = new Role();
+    role.setRoleID(20);
+    role.setRoleName("Pageable Approved Role");
+    role.setStatus(Status.ACT);
+    role.setApproveStatus(MasterDataApproveStatus.APPROVED);
+    role.setPrivileges(Collections.emptySet());
+
+    Pageable pageable = PageRequest.of(0, 10);
+    when(roleRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(role), pageable, 1));
+
+    ResponseEntity<StandardResponse<Page<RoleDTO>>> response =
+        roleService.findAllApprovedRoles(pageable);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+
+    Page<RoleDTO> dtoPage = (Page<RoleDTO>) response.getBody().getResponse();
+    assertEquals(1, dtoPage.getContent().size());
+    assertEquals("Pageable Approved Role", dtoPage.getContent().get(0).getRoleName());
+  }
+
+  @Test
+  void testFindAllApprovedRoles_WithPageable_EmptyList() {
+    Pageable pageable = PageRequest.of(0, 10);
+    when(roleRepository.findAll(pageable)).thenReturn(new PageImpl<>(Collections.emptyList()));
+
+    ResponseEntity<StandardResponse<Page<RoleDTO>>> response =
+        roleService.findAllApprovedRoles(pageable);
+
+    assertNotNull(response);
+    Page<RoleDTO> dtoPage = (Page<RoleDTO>) response.getBody().getResponse();
+    assertTrue(dtoPage.getContent().isEmpty());
+  }
+
+  @Test
+  void testFindAllApprovedRoles_WhenRepositoryThrowsException_WrapsInApiRequestException() {
+    Pageable pageable = PageRequest.of(0, 10);
+    when(roleRepository.findAll(pageable)).thenThrow(new RuntimeException("DB error"));
+
+    ApiRequestException exception =
+        assertThrows(ApiRequestException.class, () -> roleService.findAllApprovedRoles(pageable));
+
+    assertEquals("Failed to retrieve approved roles.", exception.getMessage());
+  }
+
   /** Test when the findApprovedRoleById() */
   @Test
   void testFindApprovedRoleById_Success() {
@@ -373,6 +595,69 @@ class RoleServiceImplTest {
             });
 
     assertEquals(" Role with1Does not exists", thrown.getMessage());
+  }
+
+  @Test
+  void testFindApprovedRoleById_WithMultiplePrivileges() {
+
+    int roleID = 5;
+    Role role = new Role();
+    role.setRoleID(roleID);
+    role.setRoleName("Multi Privilege Role");
+    role.setStatus(Status.ACT);
+    role.setApproveStatus(MasterDataApproveStatus.APPROVED);
+
+    Privilege privilege1 = new Privilege();
+    privilege1.setPrivilegeID(301);
+    Privilege privilege2 = new Privilege();
+    privilege2.setPrivilegeID(302);
+    role.setPrivileges(new LinkedHashSet<>(List.of(privilege1, privilege2)));
+
+    when(roleRepository.findById(roleID)).thenReturn(Optional.of(role));
+
+    ResponseEntity<StandardResponse<Object>> response = roleService.findApprovedRoleById(roleID);
+
+    assertNotNull(response);
+    RoleDTO roleDTO = (RoleDTO) response.getBody().getResponse();
+    assertEquals(2, roleDTO.getPrivileges().size());
+    assertTrue(roleDTO.getPrivileges().containsAll(List.of(301, 302)));
+  }
+
+  @Test
+  void testFindApprovedRoleById_WithEmptyPrivileges() {
+
+    int roleID = 6;
+    Role role = new Role();
+    role.setRoleID(roleID);
+    role.setRoleName("No Privilege Role");
+    role.setStatus(Status.ACT);
+    role.setApproveStatus(MasterDataApproveStatus.APPROVED);
+    role.setPrivileges(Collections.emptySet());
+
+    when(roleRepository.findById(roleID)).thenReturn(Optional.of(role));
+
+    ResponseEntity<StandardResponse<Object>> response = roleService.findApprovedRoleById(roleID);
+
+    assertNotNull(response);
+    RoleDTO roleDTO = (RoleDTO) response.getBody().getResponse();
+    assertTrue(roleDTO.getPrivileges().isEmpty());
+  }
+
+  @Test
+  void testFindApprovedRoleById_VerifiesRepositoryInteraction() {
+
+    int roleID = 7;
+    Role role = new Role();
+    role.setRoleID(roleID);
+    role.setRoleName("Verify Role");
+    role.setPrivileges(Collections.emptySet());
+
+    when(roleRepository.findById(roleID)).thenReturn(Optional.of(role));
+
+    roleService.findApprovedRoleById(roleID);
+
+    verify(roleRepository, times(1)).findById(roleID);
+    verifyNoMoreInteractions(roleRepository);
   }
 
   /** Test when the saveRoleTemp() */
@@ -621,6 +906,55 @@ class RoleServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals("admin", ((RoleDTO) response.getBody().getResponse()).getRoleName());
+  }
+
+  @Test
+  void testUpdateRoleTemp_NullRoleName_ThrowsApiRequestException() {
+    Integer roleID = 2;
+    RoleDTO roleDTO = new RoleDTO();
+    roleDTO.setRoleName(null);
+
+    RoleTemp roleDb = new RoleTemp();
+    roleDb.setRoleID(roleID);
+    roleDb.setRoleName("existing");
+
+    when(roleTempRepository.findById(roleID)).thenReturn(Optional.of(roleDb));
+
+    ApiRequestException exception =
+        assertThrows(ApiRequestException.class, () -> roleService.updateRoleTemp(roleID, roleDTO));
+
+    assertEquals("NOT_NUL", exception.getMessage());
+    verify(roleTempRepository, never()).save(any(RoleTemp.class));
+  }
+
+  @Test
+  void testUpdateRoleTemp_CapturesUpdatedFieldsOnSave() {
+    Integer roleID = 3;
+    RoleDTO roleDTO = new RoleDTO();
+    roleDTO.setRoleName("Updated Name");
+    roleDTO.setUpmPrivilegeCode("UPM999");
+    roleDTO.setStatus(Status.INA);
+    roleDTO.setApproveStatus(MasterDataApproveStatus.PENDING);
+    roleDTO.setPrivileges(List.of());
+
+    RoleTemp roleDb = new RoleTemp();
+    roleDb.setRoleID(roleID);
+    roleDb.setRoleName("Old Name");
+    roleDb.setPrivileges(new HashSet<>());
+
+    when(roleTempRepository.findById(roleID)).thenReturn(Optional.of(roleDb));
+    when(privilegeRepository.findByPrivilegeIDIn(anyList())).thenReturn(new HashSet<>());
+
+    roleService.updateRoleTemp(roleID, roleDTO);
+
+    ArgumentCaptor<RoleTemp> captor = ArgumentCaptor.forClass(RoleTemp.class);
+    verify(roleTempRepository).save(captor.capture());
+
+    RoleTemp saved = captor.getValue();
+    assertEquals("Updated Name", saved.getRoleName());
+    assertEquals("UPM999", saved.getUpmPrivilegeCode());
+    assertEquals(Status.INA, saved.getStatus());
+    assertEquals(MasterDataApproveStatus.PENDING, saved.getApproveStatus());
   }
 
   /** Test when the saveRoleToMaster() */
@@ -1254,6 +1588,57 @@ class RoleServiceImplTest {
     verify(roleTempRepository).save(any(RoleTemp.class));
   }
 
+  @Test
+  void testUpdateApprovedRole_UnchangedEmptyRoleName_ThrowsApiRequestException() {
+
+    Integer roleId = 8;
+    Role existingRole = new Role();
+    existingRole.setRoleID(roleId);
+    existingRole.setRoleName("");
+
+    RoleDTO roleDTO = new RoleDTO();
+    roleDTO.setRoleName("");
+
+    when(roleRepository.findById(roleId)).thenReturn(Optional.of(existingRole));
+
+    ApiRequestException exception =
+        assertThrows(
+            ApiRequestException.class, () -> roleService.updateApprovedRole(roleId, roleDTO));
+
+    assertEquals("Upc Template cannot be empty or null", exception.getMessage());
+    verify(roleTempRepository, never()).save(any(RoleTemp.class));
+  }
+
+  @Test
+  void testUpdateApprovedRole_CapturesSavedRoleTempFields() {
+
+    Integer roleId = 9;
+    Role existingRole = new Role();
+    existingRole.setRoleID(roleId);
+    existingRole.setRoleName("Same Name");
+
+    RoleDTO roleDTO = new RoleDTO();
+    roleDTO.setRoleName("Same Name");
+    roleDTO.setUpmPrivilegeCode("UPM777");
+    roleDTO.setStatus(Status.ACT);
+    roleDTO.setApproveStatus(MasterDataApproveStatus.PENDING);
+    roleDTO.setPrivileges(List.of());
+
+    when(roleRepository.findById(roleId)).thenReturn(Optional.of(existingRole));
+    when(privilegeRepository.findByPrivilegeIDIn(anyList())).thenReturn(new HashSet<>());
+
+    roleService.updateApprovedRole(roleId, roleDTO);
+
+    ArgumentCaptor<RoleTemp> captor = ArgumentCaptor.forClass(RoleTemp.class);
+    verify(roleTempRepository).save(captor.capture());
+
+    RoleTemp saved = captor.getValue();
+    assertEquals(roleId, saved.getRoleID());
+    assertEquals("Same Name", saved.getRoleName());
+    assertEquals("UPM777", saved.getUpmPrivilegeCode());
+    assertEquals(MasterDataApproveStatus.PENDING, saved.getApproveStatus());
+  }
+
   /** Test when the findAllPrivileges() */
   @Test
   void testFindAllPrivileges_WhenPrivilegesExist() {
@@ -1298,6 +1683,35 @@ class RoleServiceImplTest {
 
     assertEquals("Database connection error", exception.getMessage());
     verify(privilegeRepository).findAll();
+  }
+
+  @Test
+  void testFindAllPrivileges_WithCustomPageAndSize_Success() {
+
+    List<Privilege> privileges = List.of(new Privilege(10), new Privilege(11), new Privilege(12));
+    when(privilegeRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(privileges));
+
+    ResponseEntity<StandardResponse<List<Privilege>>> response =
+        roleService.findAllPrivileges(1, 3);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+    assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
+    assertEquals(privileges, response.getBody().getResponse());
+  }
+
+  @Test
+  void testFindAllPrivileges_VerifiesPageableConstructedFromPageAndSize() {
+
+    when(privilegeRepository.findAll(any(Pageable.class)))
+        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+    roleService.findAllPrivileges(2, 15);
+
+    ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(privilegeRepository).findAll(pageableCaptor.capture());
+    assertEquals(2, pageableCaptor.getValue().getPageNumber());
+    assertEquals(15, pageableCaptor.getValue().getPageSize());
   }
 
   /** Test when the deleteRoleTempById() */
@@ -1345,5 +1759,130 @@ class RoleServiceImplTest {
     assertEquals("Database error", exception.getMessage());
 
     verify(roleTempRepository).deleteById(roleID);
+  }
+
+  @Test
+  void testDeleteRoleTempById_WithZeroId_StillCallsRepository() {
+
+    int roleID = 0;
+
+    ResponseEntity<StandardResponse<Void>> response = roleService.deleteRoleTempById(roleID);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+    verify(roleTempRepository, times(1)).deleteById(roleID);
+  }
+
+  @Test
+  void testDeleteRoleTempById_ResponseContainsCorrectSuccessMessage() {
+
+    int roleID = 99;
+
+    ResponseEntity<StandardResponse<Void>> response = roleService.deleteRoleTempById(roleID);
+
+    assertNotNull(response);
+    StandardResponse<Void> body = response.getBody();
+    assertNotNull(body);
+    assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), body.getSuccess());
+    assertEquals(ErrorEnums.SUCCESS_CODE.getLabel(), body.getMessage());
+    assertEquals(roleID, body.getResponse());
+  }
+
+  /** Test when the getUserPrivilegesByUMPCode() */
+  @Test
+  void testGetUserPrivilegesByUMPCode_Success_ReturnsPrivilegeList() {
+
+    int groupCode = 100;
+    UpmRolePrivilegeDTO privilegeDTO = new UpmRolePrivilegeDTO();
+    privilegeDTO.setCode("PRIV_CODE");
+    privilegeDTO.setAllowedSolIds("1,2");
+    privilegeDTO.setRestrictedSolIds("3,4");
+
+    when(roleJdbc.getUserPrivilegesByUMPCode("100")).thenReturn(List.of(privilegeDTO));
+
+    ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> response =
+        roleService.getUserPrivilegesByUMPCode(groupCode);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+    assertNotNull(response.getBody());
+    assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
+
+    List<UpmRolePrivilegeDTO> privileges =
+        (List<UpmRolePrivilegeDTO>) response.getBody().getResponse();
+    assertEquals(1, privileges.size());
+    assertEquals("PRIV_CODE", privileges.get(0).getCode());
+  }
+
+  @Test
+  void testGetUserPrivilegesByUMPCode_EmptyList() {
+
+    int groupCode = 200;
+    when(roleJdbc.getUserPrivilegesByUMPCode("200")).thenReturn(Collections.emptyList());
+
+    ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> response =
+        roleService.getUserPrivilegesByUMPCode(groupCode);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+    List<UpmRolePrivilegeDTO> privileges =
+        (List<UpmRolePrivilegeDTO>) response.getBody().getResponse();
+    assertTrue(privileges.isEmpty());
+  }
+
+  @Test
+  void testGetUserPrivilegesByUMPCode_ConvertsGroupCodeToStringCorrectly() {
+
+    int groupCode = 305;
+    when(roleJdbc.getUserPrivilegesByUMPCode(anyString())).thenReturn(Collections.emptyList());
+
+    roleService.getUserPrivilegesByUMPCode(groupCode);
+
+    ArgumentCaptor<String> codeCaptor = ArgumentCaptor.forClass(String.class);
+    verify(roleJdbc, times(1)).getUserPrivilegesByUMPCode(codeCaptor.capture());
+    assertEquals("305", codeCaptor.getValue());
+  }
+
+  @Test
+  void testGetUserPrivilegesByUMPCode_WithNegativeGroupCode() {
+
+    int groupCode = -1;
+    when(roleJdbc.getUserPrivilegesByUMPCode("-1")).thenReturn(Collections.emptyList());
+
+    ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> response =
+        roleService.getUserPrivilegesByUMPCode(groupCode);
+
+    assertNotNull(response);
+    assertEquals(200, response.getStatusCodeValue());
+    verify(roleJdbc, times(1)).getUserPrivilegesByUMPCode("-1");
+  }
+
+  @Test
+  void testGetUserPrivilegesByUMPCode_VerifiesResponseFieldsMatchPrivilegeData() {
+
+    int groupCode = 400;
+    UpmRolePrivilegeDTO privilegeDTO1 = new UpmRolePrivilegeDTO();
+    privilegeDTO1.setCode("CODE_A");
+    privilegeDTO1.setAllowedSolIds("10");
+    privilegeDTO1.setRestrictedSolIds("20");
+
+    UpmRolePrivilegeDTO privilegeDTO2 = new UpmRolePrivilegeDTO();
+    privilegeDTO2.setCode("CODE_B");
+    privilegeDTO2.setAllowedSolIds("30");
+    privilegeDTO2.setRestrictedSolIds("40");
+
+    when(roleJdbc.getUserPrivilegesByUMPCode("400"))
+        .thenReturn(List.of(privilegeDTO1, privilegeDTO2));
+
+    ResponseEntity<StandardResponse<List<UpmRolePrivilegeDTO>>> response =
+        roleService.getUserPrivilegesByUMPCode(groupCode);
+
+    List<UpmRolePrivilegeDTO> privileges =
+        (List<UpmRolePrivilegeDTO>) response.getBody().getResponse();
+    assertEquals(2, privileges.size());
+    assertEquals("CODE_A", privileges.get(0).getCode());
+    assertEquals("10", privileges.get(0).getAllowedSolIds());
+    assertEquals("20", privileges.get(0).getRestrictedSolIds());
+    assertEquals("CODE_B", privileges.get(1).getCode());
   }
 }
