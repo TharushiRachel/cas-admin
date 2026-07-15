@@ -25,6 +25,20 @@ public interface DADesignationRepository extends JpaRepository<DADesignationData
     List<DADesignationData> findAllByStatus(@Param("status") String status);
 
     /**
+     * Lightweight scalar lookup for the next display order, avoiding a full table
+     * fetch (used when auto-assigning display order for newly created designations).
+     */
+    @Query(
+            value = """
+                    SELECT MAX(DISPLAY_ORDER)
+                    FROM DA_DESIGNATION
+                    WHERE STATUS = :status
+                    """,
+            nativeQuery = true
+    )
+    Integer findMaxDisplayOrderByStatus(@Param("status") String status);
+
+    /**
      * One designation master per code (shared by committee and individual limit rows).
      */
     @Query(

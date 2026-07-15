@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -209,16 +210,22 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         DADesignationBulkSaveResponse bulkResponse = new DADesignationBulkSaveResponse();
         // Same designationCode (e.g. MD) in committee + individual reuses one DA_DESIGNATION row.
         Map<String, DADesignationData> designationByCode = new HashMap<>();
+        // Computed once (single scalar query) instead of re-scanning the whole table for every new row.
+        AtomicInteger nextDisplayOrder = new AtomicInteger(
+                Optional.ofNullable(daDesignationMasterRepository.findMaxDisplayOrderByStatus(Status.ACT.name()))
+                        .orElse(0) + 1);
 
         if (!CollectionUtils.isEmpty(request.getCommittee())) {
             for (DADesignationSaveRequest row : request.getCommittee()) {
-                bulkResponse.getCommittee().add(saveOrUpdateSingleRow(row, DaTableType.COMMITTEE, designationByCode));
+                bulkResponse.getCommittee().add(
+                        saveOrUpdateSingleRow(row, DaTableType.COMMITTEE, designationByCode, nextDisplayOrder));
             }
         }
 
         if (!CollectionUtils.isEmpty(request.getIndividual())) {
             for (DADesignationSaveRequest row : request.getIndividual()) {
-                bulkResponse.getIndividual().add(saveOrUpdateSingleRow(row, DaTableType.INDIVIDUAL, designationByCode));
+                bulkResponse.getIndividual().add(
+                        saveOrUpdateSingleRow(row, DaTableType.INDIVIDUAL, designationByCode, nextDisplayOrder));
             }
         }
 
@@ -233,7 +240,8 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
     private DADesignationSaveResponse saveOrUpdateSingleRow(DADesignationSaveRequest request,
                                                             DaTableType tableType,
-                                                            Map<String, DADesignationData> designationByCode) {
+                                                            Map<String, DADesignationData> designationByCode,
+                                                            AtomicInteger nextDisplayOrder) {
         validateSaveRequest(request, tableType);
 
         String dbTableType = tableType.name();
@@ -244,7 +252,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         Map<Integer, DATableHeader> columnHeadersBySubId = loadValidColumns(dbTableType);
         validateColumnValues(request.getColumnValues(), columnHeadersBySubId, tableType);
 
-        DADesignationData designation = upsertDesignation(request, designationByCode);
+        DADesignationData designation = upsertDesignation(request, designationByCode, nextDisplayOrder);
         replaceLimitTemps(designation, isCommittee, request.getColumnValues(), columnHeadersBySubId);
 
         return buildSaveResponse(designation, tableType, isCommittee);
@@ -266,7 +274,8 @@ public class DaDesignationServiceImpl implements DaDesignationService {
     }
 
     private DADesignationData upsertDesignation(DADesignationSaveRequest request,
-                                                Map<String, DADesignationData> designationByCode) {
+                                                Map<String, DADesignationData> designationByCode,
+                                                AtomicInteger nextDisplayOrder) {
         Date now = new Date();
         String username = UserContext.getUsername();
 
@@ -290,7 +299,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         designation.setStatus(Status.ACT);
         designation.setApproveStatus(MasterDataApproveStatus.PENDING);
         designation.setDisplayOrder(
-                resolveDisplayOrder(request.getDisplayOrder(), designation.getDisplayOrder()));
+                resolveDisplayOrder(request.getDisplayOrder(), designation.getDisplayOrder(), nextDisplayOrder));
         designation.setModifiedDate(now);
         designation.setModifiedBy(username);
 
@@ -339,18 +348,16 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         return designationCode.trim().toUpperCase(Locale.ROOT);
     }
 
-    private Integer resolveDisplayOrder(Integer requestedOrder, Integer existingOrder) {
+    private Integer resolveDisplayOrder(Integer requestedOrder, Integer existingOrder, AtomicInteger nextDisplayOrder) {
         if (requestedOrder != null) {
             return requestedOrder;
         }
         if (existingOrder != null) {
             return existingOrder;
         }
-        return daDesignationMasterRepository.findAllByStatus(Status.ACT.name()).stream()
-                .map(DADesignationData::getDisplayOrder)
-                .filter(Objects::nonNull)
-                .max(Integer::compareTo)
-                .orElse(0) + 1;
+        // nextDisplayOrder is seeded once per bulk-save call (see saveDaDesignationLimits) instead of
+        // re-scanning the whole DA_DESIGNATION table for every row that needs an auto-assigned order.
+        return nextDisplayOrder.getAndIncrement();
     }
 
     private Map<Integer, DATableHeader> loadValidColumns(String dbTableType) {
@@ -517,7 +524,18 @@ public class DaDesignationServiceImpl implements DaDesignationService {
     }
 
     private String buildLimitKey(String isCommittee, Integer columnId) {
-        return (isCommittee == null ? "" : isCommittee.trim().toUpperCase(Locale.ROOT)) + "|" + columnId;
+        return normalizeIsCommittee(isCommittee) + "|" + columnId;
+    }
+
+    /**
+     * Legacy DA_LIMITS / DA_LIMITS_TEMP rows can have a null IS_COMMITTEE.
+     * Following DA_DESIGNATION's convention (Y = committee, null = individual),
+     * any value other than "Y" is normalized to "N" (individual).
+     */
+    private String normalizeIsCommittee(String isCommittee) {
+        return AppsConstants.YesNo.Y.name().equalsIgnoreCase(isCommittee)
+                ? AppsConstants.YesNo.Y.name()
+                : AppsConstants.YesNo.N.name();
     }
 
     private void rejectTempLimits(List<DALimitTemp> tempLimits,
@@ -575,12 +593,12 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
         if (MasterDataApproveStatus.APPROVED.equals(approveStatus)) {
                 daLimitRepository.findAllByDesignationIdAndStatus(designationId, AppsConstants.Status.ACT.name()).stream()
-                    .filter(limit -> isCommittee.equalsIgnoreCase(limit.getIsCommittee()))
+                    .filter(limit -> isCommittee.equalsIgnoreCase(normalizeIsCommittee(limit.getIsCommittee())))
                     .sorted(Comparator.comparing(DALimit::getColumnId, Comparator.nullsLast(Integer::compareTo)))
                     .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
         } else {
             daLimitTempRepository.findAllByDesignationId(designationId).stream()
-                .filter(limit -> isCommittee.equalsIgnoreCase(limit.getIsCommittee()))
+                .filter(limit -> isCommittee.equalsIgnoreCase(normalizeIsCommittee(limit.getIsCommittee())))
                 .filter(limit -> AppsConstants.Status.ACT.equals(limit.getStatus()))
                 .sorted(Comparator.comparing(DALimitTemp::getColumnId, Comparator.nullsLast(Integer::compareTo)))
                     .forEach(limit -> values.put(String.valueOf(limit.getColumnId()), limit.getRiskValue()));
@@ -853,14 +871,14 @@ public class DaDesignationServiceImpl implements DaDesignationService {
         }
 
         for (DALimit limit : limits) {
-            if (limit == null || limit.getDesignationId() == null || !StringUtils.hasText(limit.getIsCommittee())
+            if (limit == null || limit.getDesignationId() == null
                     || limit.getColumnId() == null || limit.getRiskValue() == null) {
                 continue;
             }
 
             valueIndex
                     .computeIfAbsent(limit.getDesignationId(), k -> new HashMap<>())
-                    .computeIfAbsent(limit.getIsCommittee(), k -> new LinkedHashMap<>())
+                    .computeIfAbsent(normalizeIsCommittee(limit.getIsCommittee()), k -> new LinkedHashMap<>())
                     .put(limit.getColumnId(), limit.getRiskValue());
         }
 
@@ -875,14 +893,13 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
         for (DALimitTemp limit : limits) {
             if (limit == null || limit.getDesignation() == null || limit.getDesignation().getId() == null
-                    || !StringUtils.hasText(limit.getIsCommittee()) || limit.getColumnId() == null
-                    || limit.getRiskValue() == null) {
+                    || limit.getColumnId() == null || limit.getRiskValue() == null) {
                 continue;
             }
 
             valueIndex
                     .computeIfAbsent(limit.getDesignation().getId(), k -> new HashMap<>())
-                    .computeIfAbsent(limit.getIsCommittee(), k -> new LinkedHashMap<>())
+                    .computeIfAbsent(normalizeIsCommittee(limit.getIsCommittee()), k -> new LinkedHashMap<>())
                     .put(limit.getColumnId(), limit.getRiskValue());
         }
 
@@ -906,7 +923,8 @@ public class DaDesignationServiceImpl implements DaDesignationService {
             return Collections.emptyMap();
         }
 
-        return new LinkedHashMap<>(values);
+        // Values are only read downstream (row DTO + header population); avoid an extra copy per row.
+        return values;
     }
 
     /** Puts designationId -> riskValue onto each leaf header for the matching subId. */
