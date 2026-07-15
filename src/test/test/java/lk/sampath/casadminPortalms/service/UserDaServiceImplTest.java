@@ -24,10 +24,11 @@ import lk.sampath.casadminportalms.repository.userda.UserDaTempRepository;
 import lk.sampath.casadminportalms.service.impl.UserDaServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +36,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@ExtendWith(MockitoExtension.class)
 class UserDaServiceImplTest {
 
   @Mock private UserDaTempRepository userDaTempRepository;
@@ -55,7 +57,6 @@ class UserDaServiceImplTest {
 
   @BeforeEach
   void setup() {
-    MockitoAnnotations.openMocks(this);
 
     userDaTemp = new UserDaTemp();
     userDaTemp.setUserDaID(1);
@@ -99,7 +100,7 @@ class UserDaServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(userDaTempRepository, times(1)).findAll(pageable);
+    verify(userDaTempRepository).findAll(pageable);
   }
 
   @Test
@@ -115,7 +116,7 @@ class UserDaServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(userDaTempRepository, times(1)).findAll(pageable);
+    verify(userDaTempRepository).findAll(pageable);
   }
 
   @Test
@@ -138,7 +139,7 @@ class UserDaServiceImplTest {
     assertNotNull(response.getBody().getResponse());
     assertEquals(2, ((Page<UserDaTemp>) response.getBody().getResponse()).getContent().size());
 
-    verify(userDaTempRepository, times(1)).findAll(pageable);
+    verify(userDaTempRepository).findAll(pageable);
   }
 
   @Test
@@ -150,7 +151,7 @@ class UserDaServiceImplTest {
     userDaService.findAllUserDaTempList(pageable);
 
     ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-    verify(userDaTempRepository, times(1)).findAll(pageableCaptor.capture());
+    verify(userDaTempRepository).findAll(pageableCaptor.capture());
     assertEquals(pageable, pageableCaptor.getValue());
   }
 
@@ -180,7 +181,7 @@ class UserDaServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(userDaTempRepository, times(1)).findById(userDaTemp.getUserDaID());
+    verify(userDaTempRepository).findById(userDaTemp.getUserDaID());
   }
 
   @Test
@@ -196,7 +197,7 @@ class UserDaServiceImplTest {
 
     assertEquals("User Da with TEMP 2 does not exists", exception.getMessage());
 
-    verify(userDaTempRepository, times(1)).findById(2);
+    verify(userDaTempRepository).findById(2);
   }
 
   @Test
@@ -225,7 +226,7 @@ class UserDaServiceImplTest {
                     });
 
     assertEquals("User Da with TEMP 99 does not exists", exception.getMessage());
-    verify(userDaTempRepository, times(1)).findById(99);
+    verify(userDaTempRepository).findById(99);
   }
 
   @Test
@@ -255,7 +256,7 @@ class UserDaServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(userDaRepository, times(1)).findAll(pageable);
+    verify(userDaRepository).findAll(pageable);
   }
 
   @Test
@@ -271,7 +272,7 @@ class UserDaServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(userDaRepository, times(1)).findAll(pageable);
+    verify(userDaRepository).findAll(pageable);
   }
 
   @Test
@@ -292,7 +293,7 @@ class UserDaServiceImplTest {
     assertNotNull(response.getBody().getResponse());
     assertEquals(2, ((Page<UserDa>) response.getBody().getResponse()).getContent().size());
 
-    verify(userDaRepository, times(1)).findAll(pageable);
+    verify(userDaRepository).findAll(pageable);
   }
 
   @Test
@@ -305,7 +306,7 @@ class UserDaServiceImplTest {
     userDaService.findAllApprovedUserDa(pageable);
 
     ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-    verify(userDaRepository, times(1)).findAll(pageableCaptor.capture());
+    verify(userDaRepository).findAll(pageableCaptor.capture());
     assertEquals(pageable, pageableCaptor.getValue());
   }
 
@@ -334,7 +335,7 @@ class UserDaServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(userDaRepository, times(1)).findById(userDa.getUserDaID());
+    verify(userDaRepository).findById(userDa.getUserDaID());
   }
 
   @Test
@@ -350,7 +351,7 @@ class UserDaServiceImplTest {
 
     assertEquals("User Da with 2 does not exists", exception.getMessage());
 
-    verify(userDaRepository, times(1)).findById(2);
+    verify(userDaRepository).findById(2);
   }
 
   @Test
@@ -378,7 +379,7 @@ class UserDaServiceImplTest {
                     });
 
     assertEquals("User Da with 50 does not exists", exception.getMessage());
-    verify(userDaRepository, times(1)).findById(50);
+    verify(userDaRepository).findById(50);
   }
 
   @Test
@@ -410,8 +411,8 @@ class UserDaServiceImplTest {
     UserDaTemp savedUser = (UserDaTemp) response.getBody().getResponse();
     assertEquals(userDaTemp.getUserName(), savedUser.getUserName());
 
-    verify(userDaTempRepository, times(1)).findAll(any(BooleanBuilder.class));
-    verify(userDaTempRepository, times(1)).saveAndFlush(any(UserDaTemp.class));
+    verify(userDaTempRepository).findAll(any(BooleanBuilder.class));
+    verify(userDaTempRepository).saveAndFlush(any(UserDaTemp.class));
   }
 
   @Test
@@ -427,7 +428,7 @@ class UserDaServiceImplTest {
 
     assertEquals("UserDA Already Exists", exception.getMessage());
 
-    verify(userDaTempRepository, times(1)).findAll(any(BooleanBuilder.class));
+    verify(userDaTempRepository).findAll(any(BooleanBuilder.class));
     verify(userDaTempRepository, never()).saveAndFlush(any(UserDaTemp.class));
   }
 
@@ -505,7 +506,7 @@ class UserDaServiceImplTest {
     ResponseEntity<StandardResponse<UserDaDTO>> response = userDaService.saveUserDaTemp(userDaDTO);
 
     ArgumentCaptor<UserDaTemp> captor = ArgumentCaptor.forClass(UserDaTemp.class);
-    verify(userDaTempRepository, times(1)).saveAndFlush(captor.capture());
+    verify(userDaTempRepository).saveAndFlush(captor.capture());
 
     UserDaTemp saved = captor.getValue();
     assertEquals(5, saved.getUserDaID());
@@ -529,8 +530,8 @@ class UserDaServiceImplTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(userDaTempRepository, times(1)).findById(approveRejectRQ.getApproveRejectDataID());
-    verify(userDaTempRepository, times(1)).save(userDaTemp);
+    verify(userDaTempRepository).findById(approveRejectRQ.getApproveRejectDataID());
+    verify(userDaTempRepository).save(userDaTemp);
   }
 
   /** approveRejectUserDa - Reject Path * */
@@ -546,8 +547,8 @@ class UserDaServiceImplTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(userDaTempRepository, times(1)).findById(approveRejectRQ.getApproveRejectDataID());
-    verify(userDaTempRepository, times(1)).save(userDaTemp);
+    verify(userDaTempRepository).findById(approveRejectRQ.getApproveRejectDataID());
+    verify(userDaTempRepository).save(userDaTemp);
   }
 
   /** approveRejectUserDa - Invalid Request * */
@@ -607,8 +608,8 @@ class UserDaServiceImplTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(userDaTempRepository, times(1)).delete(userDaTemp);
-    verify(userDaRepository, times(1)).saveAndFlush(any(UserDa.class));
+    verify(userDaTempRepository).delete(userDaTemp);
+    verify(userDaRepository).saveAndFlush(any(UserDa.class));
   }
 
   @Test
@@ -625,8 +626,8 @@ class UserDaServiceImplTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(userDaTempRepository, times(1)).delete(userDaTemp);
-    verify(userDaRepository, times(1)).saveAndFlush(userDa);
+    verify(userDaTempRepository).delete(userDaTemp);
+    verify(userDaRepository).saveAndFlush(userDa);
   }
 
   /** updateUserDaTemp * */
@@ -642,7 +643,7 @@ class UserDaServiceImplTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(userDaTempRepository, times(1)).save(userDaTemp);
+    verify(userDaTempRepository).save(userDaTemp);
   }
 
   /** updateUserDaTemp - UserDaTemp Not Found * */
@@ -726,7 +727,7 @@ class UserDaServiceImplTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(userDaTempRepository, times(1)).saveAndFlush(any(UserDaTemp.class));
+    verify(userDaTempRepository).saveAndFlush(any(UserDaTemp.class));
   }
 
   /** updateApprovedUserDa - UserDa Not Found * */
@@ -806,7 +807,7 @@ class UserDaServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(userDaTempRepository, never()).exists(any(BooleanBuilder.class));
     verify(userDaRepository, never()).exists(any(BooleanBuilder.class));
-    verify(userDaTempRepository, times(1)).saveAndFlush(any(UserDaTemp.class));
+    verify(userDaTempRepository).saveAndFlush(any(UserDaTemp.class));
   }
 
   @Test
@@ -820,7 +821,7 @@ class UserDaServiceImplTest {
     userDaService.updateApprovedUserDa(1, userDaDTO);
 
     ArgumentCaptor<UserDaTemp> captor = ArgumentCaptor.forClass(UserDaTemp.class);
-    verify(userDaTempRepository, times(1)).saveAndFlush(captor.capture());
+    verify(userDaTempRepository).saveAndFlush(captor.capture());
 
     UserDaTemp mapped = captor.getValue();
     assertEquals(userDa.getUserDaID(), mapped.getUserDaID());
@@ -841,7 +842,7 @@ class UserDaServiceImplTest {
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().getResponse());
 
-    verify(userDaTempRepository, times(1)).deleteById(1);
+    verify(userDaTempRepository).deleteById(1);
   }
 
   @Test
@@ -852,7 +853,7 @@ class UserDaServiceImplTest {
 
     assertEquals(7, response.getBody().getResponse());
     ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
-    verify(userDaTempRepository, times(1)).deleteById(idCaptor.capture());
+    verify(userDaTempRepository).deleteById(idCaptor.capture());
     assertEquals(7, idCaptor.getValue());
   }
 
@@ -865,7 +866,7 @@ class UserDaServiceImplTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(99, response.getBody().getResponse());
-    verify(userDaTempRepository, times(1)).deleteById(99);
+    verify(userDaTempRepository).deleteById(99);
   }
 
   @Test
@@ -880,7 +881,7 @@ class UserDaServiceImplTest {
                     });
 
     assertEquals("Delete failed", exception.getMessage());
-    verify(userDaTempRepository, times(1)).deleteById(1);
+    verify(userDaTempRepository).deleteById(1);
   }
 
   @Test
@@ -924,11 +925,11 @@ class UserDaServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(userDaTempRepository, times(1)).findById(approveRejectRQ.getApproveRejectDataID());
-    verify(userDaAudRepository, times(1)).save(any(UserDaAud.class));
+    verify(userDaTempRepository).findById(approveRejectRQ.getApproveRejectDataID());
+    verify(userDaAudRepository).save(any(UserDaAud.class));
 
     ArgumentCaptor<UserDaAud> auditCaptor = ArgumentCaptor.forClass(UserDaAud.class);
-    verify(userDaAudRepository, times(1)).save(auditCaptor.capture());
+    verify(userDaAudRepository).save(auditCaptor.capture());
 
     UserDaAud capturedAudit = auditCaptor.getValue();
 

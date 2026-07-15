@@ -114,7 +114,7 @@ class SupportingDocControllerTest {
             MockMvcResultMatchers.jsonPath("$.response[0].description")
                 .value("Unit Testing Description"));
 
-    verify(supportingDocService, times(1)).findAllSupportingDocTempList();
+    verify(supportingDocService).findAllSupportingDocTempList();
   }
 
   @Test
@@ -130,7 +130,7 @@ class SupportingDocControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.response").isEmpty());
 
-    verify(supportingDocService, times(1)).findAllSupportingDocTempList();
+    verify(supportingDocService).findAllSupportingDocTempList();
   }
 
   @Test
@@ -143,7 +143,7 @@ class SupportingDocControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Error fetching supportingDoc list"));
 
-    verify(supportingDocService, times(1)).findAllSupportingDocTempList();
+    verify(supportingDocService).findAllSupportingDocTempList();
   }
 
   /** viewSupportingDocTempById * */
@@ -161,7 +161,7 @@ class SupportingDocControllerTest {
         .andExpect(
             jsonPath("$.response.approveStatus").value(MasterDataApproveStatus.PENDING.name()));
 
-    verify(supportingDocService, times(1)).findSupportingDocTempById(1);
+    verify(supportingDocService).findSupportingDocTempById(1);
   }
 
   @Test
@@ -174,7 +174,7 @@ class SupportingDocControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("SupportingDoc not found"));
 
-    verify(supportingDocService, times(1)).findSupportingDocTempById(1);
+    verify(supportingDocService).findSupportingDocTempById(1);
   }
 
   /** getApprovedSupportingDocData * */
@@ -194,7 +194,7 @@ class SupportingDocControllerTest {
         .andExpect(
             jsonPath("$.response[0].approveStatus").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(supportingDocService, times(1)).searchSupportingDocGroups();
+    verify(supportingDocService).searchSupportingDocGroups();
   }
 
   @Test
@@ -207,7 +207,7 @@ class SupportingDocControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Error retrieving document"));
 
-    verify(supportingDocService, times(1)).searchSupportingDocGroups();
+    verify(supportingDocService).searchSupportingDocGroups();
   }
 
   /** viewSupportingDocById * */
@@ -225,7 +225,7 @@ class SupportingDocControllerTest {
         .andExpect(
             jsonPath("$.response.approveStatus").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(supportingDocService, times(1)).findSupportingDocById(1);
+    verify(supportingDocService).findSupportingDocById(1);
   }
 
   @Test
@@ -238,7 +238,7 @@ class SupportingDocControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("SupportingDoc not found"));
 
-    verify(supportingDocService, times(1)).findSupportingDocById(1);
+    verify(supportingDocService).findSupportingDocById(1);
   }
 
   /** saveSupportingDoc * */
@@ -259,7 +259,7 @@ class SupportingDocControllerTest {
         .andExpect(jsonPath("$.response.documentName").value("Unit Testing"))
         .andExpect(jsonPath("$.response.description").value("Unit Testing Description"));
 
-    verify(supportingDocService, times(1)).saveSupportingDocTemp(any(SupportingDocDTO.class));
+    verify(supportingDocService).saveSupportingDocTemp(any(SupportingDocDTO.class));
   }
 
   @Test
@@ -276,7 +276,7 @@ class SupportingDocControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
 
-    verify(supportingDocService, times(1)).saveSupportingDocTemp(any(SupportingDocDTO.class));
+    verify(supportingDocService).saveSupportingDocTemp(any(SupportingDocDTO.class));
   }
 
   /** approveRejectSupportingDoc * */
@@ -295,7 +295,7 @@ class SupportingDocControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(supportingDocService, times(1)).approveRejectSupportingDoc(any(ApproveRejectRQ.class));
+    verify(supportingDocService).approveRejectSupportingDoc(any(ApproveRejectRQ.class));
   }
 
   @Test
@@ -311,7 +311,7 @@ class SupportingDocControllerTest {
                 .content(objectMapper.writeValueAsString(approveRejectRQ)))
         .andExpect(status().isBadRequest());
 
-    verify(supportingDocService, times(1)).approveRejectSupportingDoc(any(ApproveRejectRQ.class));
+    verify(supportingDocService).approveRejectSupportingDoc(any(ApproveRejectRQ.class));
   }
 
   /** updateSupportingDocTemp * */
@@ -331,7 +331,7 @@ class SupportingDocControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("Updated"));
 
-    verify(supportingDocService, times(1))
+    verify(supportingDocService)
         .updateSupportingDocTemp(eq(1), any(SupportingDocDTO.class));
   }
 
@@ -348,7 +348,7 @@ class SupportingDocControllerTest {
                 .content(objectMapper.writeValueAsString(pendingSupportingDoc)))
         .andExpect(status().isBadRequest());
 
-    verify(supportingDocService, times(1))
+    verify(supportingDocService)
         .updateSupportingDocTemp(eq(1), any(SupportingDocDTO.class));
   }
 
@@ -369,7 +369,7 @@ class SupportingDocControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("Updated"));
 
-    verify(supportingDocService, times(1))
+    verify(supportingDocService)
         .updateApprovedSupportingDoc(eq(1), any(SupportingDocDTO.class));
   }
 
@@ -386,7 +386,7 @@ class SupportingDocControllerTest {
                 .content(objectMapper.writeValueAsString(approvedSupportingDoc)))
         .andExpect(status().isBadRequest());
 
-    verify(supportingDocService, times(1))
+    verify(supportingDocService)
         .updateApprovedSupportingDoc(eq(1), any(SupportingDocDTO.class));
   }
 
@@ -405,7 +405,7 @@ class SupportingDocControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("DELETED"));
 
-    verify(supportingDocService, times(1)).deleteSupportingDocTemp(1);
+    verify(supportingDocService).deleteSupportingDocTemp(1);
   }
 
   @Test
@@ -421,6 +421,6 @@ class SupportingDocControllerTest {
                 .content(objectMapper.writeValueAsString(pendingSupportingDoc)))
         .andExpect(status().isBadRequest());
 
-    verify(supportingDocService, times(1)).deleteSupportingDocTemp(1);
+    verify(supportingDocService).deleteSupportingDocTemp(1);
   }
 }

@@ -62,7 +62,7 @@ class CommitteeTypeControllerTest {
         .perform(get("/api/committeeType/getCommitteeType"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.response").isArray());
-    verify(committeeTypeService, times(1)).getCommitteeTypes();
+    verify(committeeTypeService).getCommitteeTypes();
   }
 
   @Test
@@ -80,7 +80,7 @@ class CommitteeTypeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(mockObj)))
         .andExpect(status().isOk());
-    verify(committeeTypeService, times(1)).saveCommitteeType(mockObj);
+    verify(committeeTypeService).saveCommitteeType(mockObj);
   }
 
   @Test
@@ -101,6 +101,6 @@ class CommitteeTypeControllerTest {
                 .content(objectMapper.writeValueAsString(mockObj)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.response.committeeTypeId").value(mockId));
-    verify(committeeTypeService, times(1)).updateCommitteeType(mockId, mockObj);
+    verify(committeeTypeService).updateCommitteeType(mockId, mockObj);
   }
 }

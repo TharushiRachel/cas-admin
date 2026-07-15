@@ -40,14 +40,16 @@ import lk.sampath.casadminportalms.repository.daDesignation.DALimitTempRepositor
 import lk.sampath.casadminportalms.service.impl.DaDesignationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 
+@ExtendWith(MockitoExtension.class)
 class DaDesignationServiceImplTest {
 
     @Mock private DALimitHeadingRepository daLimitHeadingRepository;
@@ -66,8 +68,6 @@ class DaDesignationServiceImplTest {
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
-
         designation = new DADesignationData();
         designation.setId(1);
         designation.setDesignation("Managing Director");
@@ -145,6 +145,7 @@ class DaDesignationServiceImplTest {
         return rq;
     }
 
+    @SuppressWarnings("java:S1191")
     private HttpServer startHttpServer(int statusCode, String body) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
         server.createContext(
@@ -254,7 +255,7 @@ class DaDesignationServiceImplTest {
 
         assertTrue(response.getBody().getSuccess());
         assertEquals("Success", response.getBody().getMessage());
-        verify(daLimitHeadingRepository, times(1)).findAllOrderByDisplayOrderAsc();
+        verify(daLimitHeadingRepository).findAllOrderByDisplayOrderAsc();
     }
 
     // ---------------------------------------------------------------------
@@ -541,7 +542,7 @@ class DaDesignationServiceImplTest {
         DADesignationBulkSaveResponse body = (DADesignationBulkSaveResponse) response.getBody().getResponse();
         assertEquals(1, body.getCommittee().get(0).getDesignationId());
         assertEquals(3, body.getCommittee().get(0).getDisplayOrder());
-        verify(daDesignationMasterRepository, times(1)).findMaxDisplayOrderByStatus(Status.ACT.name());
+        verify(daDesignationMasterRepository).findMaxDisplayOrderByStatus(Status.ACT.name());
     }
 
     @Test
@@ -573,7 +574,7 @@ class DaDesignationServiceImplTest {
         DADesignationBulkSaveResponse body = (DADesignationBulkSaveResponse) response.getBody().getResponse();
         assertEquals(11, body.getCommittee().get(0).getDisplayOrder());
         assertEquals(12, body.getCommittee().get(1).getDisplayOrder());
-        verify(daDesignationMasterRepository, times(1)).findMaxDisplayOrderByStatus(Status.ACT.name());
+        verify(daDesignationMasterRepository).findMaxDisplayOrderByStatus(Status.ACT.name());
     }
 
     @Test

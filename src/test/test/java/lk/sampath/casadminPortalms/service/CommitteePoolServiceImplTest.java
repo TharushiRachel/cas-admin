@@ -30,13 +30,15 @@ import lk.sampath.casadminportalms.service.impl.CommitteePoolServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@ExtendWith(MockitoExtension.class)
 class CommitteePoolServiceImplTest {
 
     @Mock private CommitteePoolRepository committeePoolRepository;
@@ -63,8 +65,6 @@ class CommitteePoolServiceImplTest {
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
-
         UserContext.setUsername("unit.test.user");
 
         Date date = new Date();
@@ -134,7 +134,7 @@ class CommitteePoolServiceImplTest {
         assertEquals("Success", response.getBody().getMessage());
         assertEquals(tempList, response.getBody().getResponse());
 
-        verify(committeePoolJdbc, times(1)).findAllCommitteePoolTempList();
+        verify(committeePoolJdbc).findAllCommitteePoolTempList();
     }
 
     @Test
@@ -149,7 +149,7 @@ class CommitteePoolServiceImplTest {
         assertNotNull(response.getBody());
         assertEquals(Collections.emptyList(), response.getBody().getResponse());
 
-        verify(committeePoolJdbc, times(1)).findAllCommitteePoolTempList();
+        verify(committeePoolJdbc).findAllCommitteePoolTempList();
     }
 
     @Test
@@ -206,7 +206,7 @@ class CommitteePoolServiceImplTest {
         assertEquals("Success", response.getBody().getMessage());
         assertEquals(poolList, response.getBody().getResponse());
 
-        verify(committeePoolJdbc, times(1)).findAllCommitteePoolList();
+        verify(committeePoolJdbc).findAllCommitteePoolList();
     }
 
     @Test
@@ -273,8 +273,8 @@ class CommitteePoolServiceImplTest {
         List<?> resultList = (List<?>) response.getBody().getResponse();
         assertEquals(1, resultList.size());
 
-        verify(committeePoolRepository, times(1)).save(any(CommitteePool.class));
-        verify(committeePoolHistoryRepository, times(1)).save(any(CommitteePoolHistory.class));
+        verify(committeePoolRepository).save(any(CommitteePool.class));
+        verify(committeePoolHistoryRepository).save(any(CommitteePoolHistory.class));
     }
 
     @Test
@@ -339,7 +339,7 @@ class CommitteePoolServiceImplTest {
         committeePoolService.saveCommitteePoolUsers(List.of(committeePoolDTO));
 
         ArgumentCaptor<CommitteePool> captor = ArgumentCaptor.forClass(CommitteePool.class);
-        verify(committeePoolRepository, times(1)).save(captor.capture());
+        verify(committeePoolRepository).save(captor.capture());
 
         CommitteePool saved = captor.getValue();
         assertEquals(committeePoolDTO.getCommitteePoolId(), saved.getPoolId());
@@ -361,7 +361,7 @@ class CommitteePoolServiceImplTest {
 
         committeePoolService.saveCommitteePoolUsers(List.of(committeePoolDTO));
 
-        verify(committeePoolJdbc, times(1)).findAllCommitteePoolList();
+        verify(committeePoolJdbc).findAllCommitteePoolList();
     }
 
     /** saveTempCommitteePoolUser * */
@@ -379,7 +379,7 @@ class CommitteePoolServiceImplTest {
         assertNotNull(response.getBody());
 
         ArgumentCaptor<CommitteePoolTemp> captor = ArgumentCaptor.forClass(CommitteePoolTemp.class);
-        verify(committeePoolTempRepository, times(1)).saveAndFlush(captor.capture());
+        verify(committeePoolTempRepository).saveAndFlush(captor.capture());
         assertEquals(MasterDataApproveStatus.PENDING, captor.getValue().getApproveStatus());
     }
 
@@ -392,7 +392,7 @@ class CommitteePoolServiceImplTest {
         committeePoolService.saveTempCommitteePoolUser(committeePoolDTO);
 
         ArgumentCaptor<CommitteePoolTemp> captor = ArgumentCaptor.forClass(CommitteePoolTemp.class);
-        verify(committeePoolTempRepository, times(1)).saveAndFlush(captor.capture());
+        verify(committeePoolTempRepository).saveAndFlush(captor.capture());
         assertEquals(MasterDataApproveStatus.PENDING_RMV, captor.getValue().getApproveStatus());
     }
 
@@ -438,8 +438,8 @@ class CommitteePoolServiceImplTest {
         assertEquals(tempList, resp.getCommitteePoolTempList());
         assertEquals(masterList, resp.getCommitteePoolList());
 
-        verify(committeePoolJdbc, times(1)).findAllCommitteePoolTempList();
-        verify(committeePoolJdbc, times(1)).findAllCommitteePoolList();
+        verify(committeePoolJdbc).findAllCommitteePoolTempList();
+        verify(committeePoolJdbc).findAllCommitteePoolList();
     }
 
     @Test
@@ -450,7 +450,7 @@ class CommitteePoolServiceImplTest {
         committeePoolService.saveTempCommitteePoolUser(committeePoolDTO);
 
         ArgumentCaptor<CommitteePoolTemp> captor = ArgumentCaptor.forClass(CommitteePoolTemp.class);
-        verify(committeePoolTempRepository, times(1)).saveAndFlush(captor.capture());
+        verify(committeePoolTempRepository).saveAndFlush(captor.capture());
 
         CommitteePoolTemp saved = captor.getValue();
         assertEquals(committeePoolDTO.getUserId(), saved.getUserId());
@@ -499,10 +499,10 @@ class CommitteePoolServiceImplTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        verify(committeePoolRepository, times(1)).deleteById(committeePoolTemp.getUserId());
-        verify(committeePoolHistoryRepository, times(1)).save(any(CommitteePoolHistory.class));
-        verify(committeePoolTempRepository, times(1)).deleteById(committeePoolDTO.getUserId());
-        verify(committeePoolTempRepository, times(1)).flush();
+        verify(committeePoolRepository).deleteById(committeePoolTemp.getUserId());
+        verify(committeePoolHistoryRepository).save(any(CommitteePoolHistory.class));
+        verify(committeePoolTempRepository).deleteById(committeePoolDTO.getUserId());
+        verify(committeePoolTempRepository).flush();
         verify(committeePoolRepository, never()).saveAndFlush(any(CommitteePool.class));
     }
 
@@ -551,8 +551,8 @@ class CommitteePoolServiceImplTest {
 
         committeePoolService.approveRejectPoolUser(committeePoolDTO);
 
-        verify(committeePoolRepository, times(1)).saveAndFlush(any(CommitteePool.class));
-        verify(committeePoolHistoryRepository, times(1)).save(any(CommitteePoolHistory.class));
+        verify(committeePoolRepository).saveAndFlush(any(CommitteePool.class));
+        verify(committeePoolHistoryRepository).save(any(CommitteePoolHistory.class));
         verifyNoInteractions(committeeRepository);
         verifyNoInteractions(committeeService);
     }
@@ -581,9 +581,9 @@ class CommitteePoolServiceImplTest {
         committeePoolService.approveRejectPoolUser(committeePoolDTO);
 
         ArgumentCaptor<Committee> captor = ArgumentCaptor.forClass(Committee.class);
-        verify(committeeRepository, times(1)).saveAndFlush(captor.capture());
+        verify(committeeRepository).saveAndFlush(captor.capture());
         assertEquals(AppsConstants.CAPathType.REG, captor.getValue().getCurrentPath());
-        verify(committeeService, times(1)).saveMasterCommitteeHistory(any(Committee.class));
+        verify(committeeService).saveMasterCommitteeHistory(any(Committee.class));
         verify(committeePoolJdbc, never()).changeCommitteePaperCurrentLevel(any(), any());
     }
 
@@ -614,11 +614,11 @@ class CommitteePoolServiceImplTest {
         committeePoolService.approveRejectPoolUser(committeePoolDTO);
 
         ArgumentCaptor<Committee> captor = ArgumentCaptor.forClass(Committee.class);
-        verify(committeeRepository, times(1)).saveAndFlush(captor.capture());
+        verify(committeeRepository).saveAndFlush(captor.capture());
         assertEquals(AppsConstants.CAPathType.ALT, captor.getValue().getCurrentPath());
-        verify(committeePoolJdbc, times(1))
+        verify(committeePoolJdbc)
                 .changeCommitteePaperCurrentLevel(committee.getCommitteeId(), AppsConstants.CAPathType.ALT);
-        verify(committeeService, times(1)).saveMasterCommitteeHistory(any(Committee.class));
+        verify(committeeService).saveMasterCommitteeHistory(any(Committee.class));
     }
 
     @Test
@@ -640,14 +640,14 @@ class CommitteePoolServiceImplTest {
 
         ArgumentCaptor<CommitteePoolHistory> captor =
                 ArgumentCaptor.forClass(CommitteePoolHistory.class);
-        verify(committeePoolHistoryRepository, times(1)).save(captor.capture());
+        verify(committeePoolHistoryRepository).save(captor.capture());
         assertEquals(MasterDataApproveStatus.REJECTED, captor.getValue().getApproveStatus());
         assertEquals("unit.test.user", captor.getValue().getApprovedBy());
         assertNotNull(captor.getValue().getApprovedDate());
 
         verify(committeePoolRepository, never()).saveAndFlush(any(CommitteePool.class));
-        verify(committeePoolTempRepository, times(1)).deleteById(committeePoolDTO.getUserId());
-        verify(committeePoolTempRepository, times(1)).flush();
+        verify(committeePoolTempRepository).deleteById(committeePoolDTO.getUserId());
+        verify(committeePoolTempRepository).flush();
     }
 
     @Test
@@ -663,7 +663,7 @@ class CommitteePoolServiceImplTest {
 
         committeePoolService.approveRejectPoolUser(committeePoolDTO);
 
-        verify(committeePoolTempRepository, times(1)).deleteById(committeePoolDTO.getUserId());
-        verify(committeePoolTempRepository, times(1)).flush();
+        verify(committeePoolTempRepository).deleteById(committeePoolDTO.getUserId());
+        verify(committeePoolTempRepository).flush();
     }
 }

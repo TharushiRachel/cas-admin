@@ -24,10 +24,11 @@ import lk.sampath.casadminportalms.repository.supportingdoc.SupportingDocTempRep
 import lk.sampath.casadminportalms.service.impl.SupportingDocServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,6 +37,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@ExtendWith(MockitoExtension.class)
 class SupportingDocServiceImplTests {
 
   @Mock private SupportingDocTempRepository supportingDocTempRepository;
@@ -54,9 +56,8 @@ class SupportingDocServiceImplTests {
 
   private ApproveRejectRQ approveRejectRQ;
 
-  @BeforeEach()
+  @BeforeEach
   void setup() {
-    MockitoAnnotations.openMocks(this);
 
     supportingDocTemp = new SupportingDocTemp();
     supportingDocTemp.setSupportingDocID(1);
@@ -96,7 +97,7 @@ class SupportingDocServiceImplTests {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(supportingDocTempRepository, times(1)).findAll(pageable);
+    verify(supportingDocTempRepository).findAll(pageable);
   }
 
   @Test
@@ -112,7 +113,7 @@ class SupportingDocServiceImplTests {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(supportingDocTempRepository, times(1)).findAll(pageable);
+    verify(supportingDocTempRepository).findAll(pageable);
   }
 
   @Test
@@ -133,7 +134,7 @@ class SupportingDocServiceImplTests {
     assertNotNull(response.getBody());
     assertEquals(true, response.getBody().getSuccess());
 
-    verify(supportingDocTempRepository, times(1)).findAll(pageable);
+    verify(supportingDocTempRepository).findAll(pageable);
   }
 
   @Test
@@ -145,7 +146,7 @@ class SupportingDocServiceImplTests {
     supportingDocService.findAllSupportingDocTempList(pageable);
 
     ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-    verify(supportingDocTempRepository, times(1)).findAll(pageableCaptor.capture());
+    verify(supportingDocTempRepository).findAll(pageableCaptor.capture());
     assertEquals(2, pageableCaptor.getValue().getPageNumber());
     assertEquals(5, pageableCaptor.getValue().getPageSize());
   }
@@ -178,7 +179,7 @@ class SupportingDocServiceImplTests {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(supportingDocTempRepository, times(1)).findById(supportingDocTemp.getSupportingDocID());
+    verify(supportingDocTempRepository).findById(supportingDocTemp.getSupportingDocID());
   }
 
   @Test
@@ -194,7 +195,7 @@ class SupportingDocServiceImplTests {
 
     assertEquals("Supporting Doc with 2does not exists", exception.getMessage());
 
-    verify(supportingDocTempRepository, times(1)).findById(2);
+    verify(supportingDocTempRepository).findById(2);
   }
 
   @Test
@@ -235,7 +236,7 @@ class SupportingDocServiceImplTests {
               supportingDocService.findSupportingDocTempById(99);
             });
 
-    verify(supportingDocTempRepository, times(1)).findById(99);
+    verify(supportingDocTempRepository).findById(99);
     verifyNoInteractions(supportingDocRepository);
   }
 
@@ -253,7 +254,7 @@ class SupportingDocServiceImplTests {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(supportingDocRepository, times(1)).findAll(pageable);
+    verify(supportingDocRepository).findAll(pageable);
   }
 
   @Test
@@ -269,7 +270,7 @@ class SupportingDocServiceImplTests {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(supportingDocRepository, times(1)).findAll(pageable);
+    verify(supportingDocRepository).findAll(pageable);
   }
 
   @Test
@@ -290,7 +291,7 @@ class SupportingDocServiceImplTests {
     assertNotNull(response.getBody());
     assertEquals(true, response.getBody().getSuccess());
 
-    verify(supportingDocRepository, times(1)).findAll(pageable);
+    verify(supportingDocRepository).findAll(pageable);
   }
 
   @Test
@@ -303,7 +304,7 @@ class SupportingDocServiceImplTests {
     supportingDocService.searchSupportingDocGroups(pageable);
 
     ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-    verify(supportingDocRepository, times(1)).findAll(pageableCaptor.capture());
+    verify(supportingDocRepository).findAll(pageableCaptor.capture());
     assertEquals(1, pageableCaptor.getValue().getPageNumber());
     assertEquals(20, pageableCaptor.getValue().getPageSize());
   }
@@ -337,7 +338,7 @@ class SupportingDocServiceImplTests {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(supportingDocRepository, times(1)).findById(supportingDoc.getSupportingDocID());
+    verify(supportingDocRepository).findById(supportingDoc.getSupportingDocID());
   }
 
   @Test
@@ -353,7 +354,7 @@ class SupportingDocServiceImplTests {
 
     assertEquals("Supporting Doc with 2does not exists", exception.getMessage());
 
-    verify(supportingDocRepository, times(1)).findById(2);
+    verify(supportingDocRepository).findById(2);
   }
 
   @Test
@@ -395,7 +396,7 @@ class SupportingDocServiceImplTests {
               supportingDocService.findSupportingDocById(99);
             });
 
-    verify(supportingDocRepository, times(1)).findById(99);
+    verify(supportingDocRepository).findById(99);
     verifyNoInteractions(supportingDocTempRepository);
   }
 
@@ -418,8 +419,8 @@ class SupportingDocServiceImplTests {
     SupportingDocTemp savedUser = (SupportingDocTemp) response.getBody().getResponse();
     assertEquals(supportingDocTemp.getDocumentName(), savedUser.getDocumentName());
 
-    verify(supportingDocTempRepository, times(1)).findAll(any(BooleanBuilder.class));
-    verify(supportingDocTempRepository, times(1)).saveAndFlush(any(SupportingDocTemp.class));
+    verify(supportingDocTempRepository).findAll(any(BooleanBuilder.class));
+    verify(supportingDocTempRepository).saveAndFlush(any(SupportingDocTemp.class));
   }
 
   @Test
@@ -436,7 +437,7 @@ class SupportingDocServiceImplTests {
 
     assertEquals("Supporting Document Already Exists", exception.getMessage());
 
-    verify(supportingDocTempRepository, times(1)).findAll(any(BooleanBuilder.class));
+    verify(supportingDocTempRepository).findAll(any(BooleanBuilder.class));
     verify(supportingDocTempRepository, never()).saveAndFlush(any(SupportingDocTemp.class));
   }
 
@@ -481,7 +482,7 @@ class SupportingDocServiceImplTests {
     supportingDocService.saveSupportingDocTemp(supportingDocDTO);
 
     ArgumentCaptor<SupportingDocTemp> captor = ArgumentCaptor.forClass(SupportingDocTemp.class);
-    verify(supportingDocTempRepository, times(1)).saveAndFlush(captor.capture());
+    verify(supportingDocTempRepository).saveAndFlush(captor.capture());
 
     SupportingDocTemp savedDoc = captor.getValue();
     assertEquals(5, savedDoc.getSupportingDocID());
@@ -504,9 +505,9 @@ class SupportingDocServiceImplTests {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(supportingDocTempRepository, times(1))
+    verify(supportingDocTempRepository)
             .findById(approveRejectRQ.getApproveRejectDataID());
-    verify(supportingDocTempRepository, times(1)).saveAndFlush(supportingDocTemp);
+    verify(supportingDocTempRepository).saveAndFlush(supportingDocTemp);
   }
 
   /** approveRejectSupportingDoc - Reject Path * */
@@ -522,9 +523,9 @@ class SupportingDocServiceImplTests {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(supportingDocTempRepository, times(1))
+    verify(supportingDocTempRepository)
             .findById(approveRejectRQ.getApproveRejectDataID());
-    verify(supportingDocTempRepository, times(1)).saveAndFlush(supportingDocTemp);
+    verify(supportingDocTempRepository).saveAndFlush(supportingDocTemp);
   }
 
   /** approveRejectSupportingDoc - Invalid Request * */
@@ -587,8 +588,8 @@ class SupportingDocServiceImplTests {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(supportingDocTempRepository, times(1)).delete(supportingDocTemp);
-    verify(supportingDocRepository, times(1)).saveAndFlush(any(SupportingDoc.class));
+    verify(supportingDocTempRepository).delete(supportingDocTemp);
+    verify(supportingDocRepository).saveAndFlush(any(SupportingDoc.class));
   }
 
   @Test
@@ -607,8 +608,8 @@ class SupportingDocServiceImplTests {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(supportingDocTempRepository, times(1)).delete(supportingDocTemp);
-    verify(supportingDocRepository, times(1)).saveAndFlush(supportingDoc);
+    verify(supportingDocTempRepository).delete(supportingDocTemp);
+    verify(supportingDocRepository).saveAndFlush(supportingDoc);
   }
 
   /** updateSupportingDocTemp * */
@@ -624,7 +625,7 @@ class SupportingDocServiceImplTests {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(supportingDocTempRepository, times(1)).save(supportingDocTemp);
+    verify(supportingDocTempRepository).save(supportingDocTemp);
   }
 
   /** supportingDocTemp - SupportingDoc Not Found * */
@@ -691,7 +692,7 @@ class SupportingDocServiceImplTests {
     supportingDocService.updateSupportingDocTemp(1, supportingDocDTO);
 
     ArgumentCaptor<SupportingDocTemp> captor = ArgumentCaptor.forClass(SupportingDocTemp.class);
-    verify(supportingDocTempRepository, times(1)).save(captor.capture());
+    verify(supportingDocTempRepository).save(captor.capture());
 
     SupportingDocTemp updatedDoc = captor.getValue();
     assertEquals(supportingDocDTO.getDocumentName(), updatedDoc.getDocumentName());
@@ -716,7 +717,7 @@ class SupportingDocServiceImplTests {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(supportingDocTempRepository, times(1)).saveAndFlush(any(SupportingDocTemp.class));
+    verify(supportingDocTempRepository).saveAndFlush(any(SupportingDocTemp.class));
   }
 
   /** updateApprovedSupportingDoc - supporting doc Not Found * */
@@ -803,7 +804,7 @@ class SupportingDocServiceImplTests {
     assertNotNull(response.getBody());
     assertEquals(1, response.getBody().getResponse());
 
-    verify(supportingDocTempRepository, times(1)).deleteById(1);
+    verify(supportingDocTempRepository).deleteById(1);
   }
 
   @Test
@@ -828,7 +829,7 @@ class SupportingDocServiceImplTests {
 
     assertNotNull(response.getBody());
     assertEquals(42, response.getBody().getResponse());
-    verify(supportingDocTempRepository, times(1)).deleteById(42);
+    verify(supportingDocTempRepository).deleteById(42);
     verify(supportingDocTempRepository, never()).deleteById(1);
   }
 
@@ -844,7 +845,7 @@ class SupportingDocServiceImplTests {
               supportingDocService.deleteSupportingDocTemp(99);
             });
 
-    verify(supportingDocTempRepository, times(1)).deleteById(99);
+    verify(supportingDocTempRepository).deleteById(99);
   }
 
   @Test
@@ -854,7 +855,7 @@ class SupportingDocServiceImplTests {
 
     supportingDocService.deleteSupportingDocTemp(1);
 
-    verify(supportingDocTempRepository, times(1)).deleteById(1);
+    verify(supportingDocTempRepository).deleteById(1);
     verifyNoInteractions(supportingDocRepository);
     verifyNoInteractions(supportingDocTempAudRepository);
   }
@@ -881,12 +882,12 @@ class SupportingDocServiceImplTests {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(supportingDocTempRepository, times(1))
+    verify(supportingDocTempRepository)
             .findById(approveRejectRQ.getApproveRejectDataID());
-    verify(supportingDocTempAudRepository, times(1)).save(any(SupportingDocAud.class));
+    verify(supportingDocTempAudRepository).save(any(SupportingDocAud.class));
 
     ArgumentCaptor<SupportingDocAud> auditCaptor = ArgumentCaptor.forClass(SupportingDocAud.class);
-    verify(supportingDocTempAudRepository, times(1)).save(auditCaptor.capture());
+    verify(supportingDocTempAudRepository).save(auditCaptor.capture());
 
     SupportingDocAud capturedAudit = auditCaptor.getValue();
 

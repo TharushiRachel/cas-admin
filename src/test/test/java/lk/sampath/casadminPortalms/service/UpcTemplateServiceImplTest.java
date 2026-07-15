@@ -190,7 +190,7 @@ class UpcTemplateServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
 
     ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-    verify(upcTemplateTempRepository, times(1)).findAll(pageableCaptor.capture());
+    verify(upcTemplateTempRepository).findAll(pageableCaptor.capture());
     assertEquals(pageable, pageableCaptor.getValue());
   }
 
@@ -259,7 +259,7 @@ class UpcTemplateServiceImplTest {
             exception.getMessage(),
             "Exception message should match the thrown RuntimeException.");
 
-    verify(upcTemplateTempRepository, times(1)).findById(templateID);
+    verify(upcTemplateTempRepository).findById(templateID);
   }
 
   @Test
@@ -275,7 +275,7 @@ class UpcTemplateServiceImplTest {
     upcTemplateService.findUpcTemplateTempById(upcTemplateID);
 
     ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
-    verify(upcTemplateTempRepository, times(1)).findById(idCaptor.capture());
+    verify(upcTemplateTempRepository).findById(idCaptor.capture());
     assertEquals(upcTemplateID, idCaptor.getValue());
   }
 
@@ -378,7 +378,7 @@ class UpcTemplateServiceImplTest {
     upcTemplateService.findAllApprovedUpcTemplates(pageable);
 
     ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-    verify(upcTemplateRepository, times(1)).findAll(pageableCaptor.capture());
+    verify(upcTemplateRepository).findAll(pageableCaptor.capture());
     assertEquals(pageable, pageableCaptor.getValue());
   }
 
@@ -415,7 +415,7 @@ class UpcTemplateServiceImplTest {
             exception.getMessage(),
             "Exception message should match when template ID does not exist.");
 
-    verify(upcTemplateRepository, times(1)).findById(templateID);
+    verify(upcTemplateRepository).findById(templateID);
   }
 
   @Test
@@ -438,7 +438,7 @@ class UpcTemplateServiceImplTest {
             exception.getMessage(),
             "Exception message should match the thrown RuntimeException.");
 
-    verify(upcTemplateRepository, times(1)).findById(templateID);
+    verify(upcTemplateRepository).findById(templateID);
   }
 
   @Test
@@ -476,7 +476,7 @@ class UpcTemplateServiceImplTest {
     upcTemplateService.findApprovedUpcTemplateById(upcTemplateID);
 
     ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
-    verify(upcTemplateRepository, times(1)).findById(idCaptor.capture());
+    verify(upcTemplateRepository).findById(idCaptor.capture());
     assertEquals(upcTemplateID, idCaptor.getValue());
   }
 
@@ -638,7 +638,7 @@ class UpcTemplateServiceImplTest {
     upcTemplateService.saveUpcTemplate(upcTemplateDTO);
 
     ArgumentCaptor<UpcTemplateTemp> captor = ArgumentCaptor.forClass(UpcTemplateTemp.class);
-    verify(upcTemplateTempRepository, times(1)).saveAndFlush(captor.capture());
+    verify(upcTemplateTempRepository).saveAndFlush(captor.capture());
 
     UpcTemplateTemp captured = captor.getValue();
     assertEquals(20, captured.getUpcTemplateID());
@@ -828,7 +828,7 @@ class UpcTemplateServiceImplTest {
     assertNotNull(response);
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
     assertEquals(ErrorEnums.SUCCESS_CODE.getLabel(), response.getBody().getMessage());
-    verify(upcTemplateTempRepository, times(1)).delete(upcTemplateTemp);
+    verify(upcTemplateTempRepository).delete(upcTemplateTemp);
   }
 
   @Test
@@ -852,7 +852,7 @@ class UpcTemplateServiceImplTest {
     assertNotNull(response);
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
     assertEquals(ErrorEnums.SUCCESS_CODE.getLabel(), response.getBody().getMessage());
-    verify(upcTemplateAudRepository, times(1)).save(any(UpcTemplateAud.class));
+    verify(upcTemplateAudRepository).save(any(UpcTemplateAud.class));
   }
 
   @Test
@@ -1007,7 +1007,7 @@ class UpcTemplateServiceImplTest {
     ResponseEntity<StandardResponse<Object>> response =
             upcTemplateService.updateApprovedUpcTemplate(1, upcTemplateDTO);
 
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
   }
 
@@ -1039,7 +1039,7 @@ class UpcTemplateServiceImplTest {
     ResponseEntity<StandardResponse<Object>> response =
             upcTemplateService.updateApprovedUpcTemplate(1, upcTemplateDTO);
 
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertNull(((UpcTemplateDTO) response.getBody().getResponse()).getUpcLabel());
     assertNull(((UpcTemplateDTO) response.getBody().getResponse()).getDescription());
@@ -1131,9 +1131,9 @@ class UpcTemplateServiceImplTest {
     assertEquals(ErrorEnums.SUCCESS_CODE.getLabel(), response.getBody().getMessage());
     assertEquals(upcTemplateID, response.getBody().getResponse());
 
-    verify(upcTemplateDataTempRepository, times(1))
+    verify(upcTemplateDataTempRepository)
             .deleteByUpcTemplateTempUpcTemplateID(upcTemplateID);
-    verify(upcTemplateTempRepository, times(1)).deleteById(upcTemplateID);
+    verify(upcTemplateTempRepository).deleteById(upcTemplateID);
   }
 
   @Test
@@ -1148,9 +1148,9 @@ class UpcTemplateServiceImplTest {
     ArgumentCaptor<Integer> dataDeleteCaptor = ArgumentCaptor.forClass(Integer.class);
     ArgumentCaptor<Integer> tempDeleteCaptor = ArgumentCaptor.forClass(Integer.class);
 
-    verify(upcTemplateDataTempRepository, times(1))
+    verify(upcTemplateDataTempRepository)
             .deleteByUpcTemplateTempUpcTemplateID(dataDeleteCaptor.capture());
-    verify(upcTemplateTempRepository, times(1)).deleteById(tempDeleteCaptor.capture());
+    verify(upcTemplateTempRepository).deleteById(tempDeleteCaptor.capture());
 
     assertEquals(upcTemplateID, dataDeleteCaptor.getValue());
     assertEquals(upcTemplateID, tempDeleteCaptor.getValue());
@@ -1262,10 +1262,10 @@ class UpcTemplateServiceImplTest {
     assertNotNull(result);
     assertEquals(2, result.size());
 
-    verify(upcTemplateDataRepository, times(1)).findByUpcTemplateUpcTemplateID(1);
-    verify(upcTemplateDataRepository, times(1))
+    verify(upcTemplateDataRepository).findByUpcTemplateUpcTemplateID(1);
+    verify(upcTemplateDataRepository)
             .deleteAll(Arrays.asList(existingData1, existingData2));
-    verify(upcTemplateDataRepository, times(1)).saveAll(anyList());
-    verify(upcTemplateDataTempRepository, times(1)).deleteAll(anyList());
+    verify(upcTemplateDataRepository).saveAll(anyList());
+    verify(upcTemplateDataTempRepository).deleteAll(anyList());
   }
 }

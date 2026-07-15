@@ -25,11 +25,12 @@ import lk.sampath.casadminportalms.repository.workflowtemplate.*;
 import lk.sampath.casadminportalms.service.impl.WorkflowTemplateServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +38,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@ExtendWith(MockitoExtension.class)
 class WorkflowTemplateServiceImplTest {
 
   @Mock WorkflowTemplateRepository workflowTemplateRepository;
@@ -72,7 +74,6 @@ class WorkflowTemplateServiceImplTest {
 
   @BeforeEach
   void setup() {
-    MockitoAnnotations.openMocks(this);
 
     newWorkflowTemplateDTO =
             WorkflowTemplateDTO.builder()
@@ -151,7 +152,7 @@ class WorkflowTemplateServiceImplTest {
     when(upmGroupRepository.findAllApprovedUpmGroups()).thenReturn(mockList);
     StandardResponse<List<UpmGroupDTO>> response =
             workflowTemplateServiceImpl.getAllApprovedUPMGroups();
-    verify(upmGroupRepository, times(1)).findAllApprovedUpmGroups();
+    verify(upmGroupRepository).findAllApprovedUpmGroups();
     assertNotNull(response);
     assertEquals(
             new StandardResponse<>(
@@ -172,7 +173,7 @@ class WorkflowTemplateServiceImplTest {
     assertEquals(true, response.getSuccess());
     assertNotNull(response.getResponse());
     assertTrue(((List<UpmGroupDTO>) response.getResponse()).isEmpty());
-    verify(upmGroupRepository, times(1)).findAllApprovedUpmGroups();
+    verify(upmGroupRepository).findAllApprovedUpmGroups();
   }
 
   @Test
@@ -219,7 +220,7 @@ class WorkflowTemplateServiceImplTest {
 
     workflowTemplateServiceImpl.getAllApprovedUPMGroups();
 
-    verify(upmGroupRepository, times(1)).findAllApprovedUpmGroups();
+    verify(upmGroupRepository).findAllApprovedUpmGroups();
     verifyNoMoreInteractions(upmGroupRepository);
   }
 
@@ -245,7 +246,7 @@ class WorkflowTemplateServiceImplTest {
             workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(newWorkflowTemplateDTO);
     assertNotNull(response);
     assertEquals(true, response.getSuccess());
-    verify(workflowTemplateTempRepository, times(1)).saveAndFlush(any(WorkflowTemplateTemp.class));
+    verify(workflowTemplateTempRepository).saveAndFlush(any(WorkflowTemplateTemp.class));
 
     newWorkflowTemplateDTO.setWorkFlowTemplateId(null);
     newWorkflowTemplateDTO.setWorkFlowTemplateName("BCC");
@@ -332,7 +333,7 @@ class WorkflowTemplateServiceImplTest {
 
     workflowTemplateServiceImpl.saveOrUpdateTempWorkflowTemplate(existingWorkflowTemplateDTO);
 
-    verify(workflowTemplateTempRepository, times(1)).saveAndFlush(captor.capture());
+    verify(workflowTemplateTempRepository).saveAndFlush(captor.capture());
     assertEquals(1, captor.getValue().getWorkFlowTemplateId());
     assertEquals(MasterDataApproveStatus.PENDING, captor.getValue().getApproveStatus());
   }
@@ -410,11 +411,11 @@ class WorkflowTemplateServiceImplTest {
             workflowTemplateServiceImpl.authorizeWorkflowTemplateTemp(approveRejectRQ);
 
     assertEquals(true, response.getResponse());
-    verify(workflowTemplateRepository, times(1)).saveAndFlush(captor.capture());
+    verify(workflowTemplateRepository).saveAndFlush(captor.capture());
     assertEquals(500, captor.getValue().getWorkFlowTemplateId());
     assertEquals(MasterDataApproveStatus.APPROVED, captor.getValue().getApproveStatus());
-    verify(workflowTemplateAudRepository, times(1)).saveAndFlush(any(WorkflowTemplateAud.class));
-    verify(workflowTemplateTempRepository, times(1)).delete(workflowTemplateTemp);
+    verify(workflowTemplateAudRepository).saveAndFlush(any(WorkflowTemplateAud.class));
+    verify(workflowTemplateTempRepository).delete(workflowTemplateTemp);
   }
 
   @Test
@@ -427,7 +428,7 @@ class WorkflowTemplateServiceImplTest {
 
     assertEquals(true, response.getResponse());
     assertEquals(MasterDataApproveStatus.REJECTED, workflowTemplateTemp.getApproveStatus());
-    verify(workflowTemplateTempRepository, times(1)).saveAndFlush(workflowTemplateTemp);
+    verify(workflowTemplateTempRepository).saveAndFlush(workflowTemplateTemp);
     verify(workflowTemplateTempRepository, never()).delete(any(WorkflowTemplateTemp.class));
     verify(workflowTemplateRepository, never()).saveAndFlush(any(WorkflowTemplate.class));
   }
@@ -509,7 +510,7 @@ class WorkflowTemplateServiceImplTest {
     assertNotNull(body);
     assertEquals(1, body.getDataList().size());
     assertEquals(1, body.getDataList().get(0).getWorkFlowTemplateDataDTOList().size());
-    verify(workflowTemplateTempRepository, times(1)).findAllWorkflowTemplateTemp(pageable);
+    verify(workflowTemplateTempRepository).findAllWorkflowTemplateTemp(pageable);
   }
 
   @Test
@@ -656,8 +657,8 @@ class WorkflowTemplateServiceImplTest {
     assertEquals(1, dtoPage.getContent().get(0).getWorkFlowTemplateDataDTOList().size());
 
     // Verify repository interactions
-    verify(workflowTemplateRepository, times(1)).findAllWorkflowTemplate(pageable);
-    verify(workflowTemplateDataRepository, times(1)).findAllWorkflowTemplateData(1);
+    verify(workflowTemplateRepository).findAllWorkflowTemplate(pageable);
+    verify(workflowTemplateDataRepository).findAllWorkflowTemplateData(1);
   }
 
   @Test
@@ -756,7 +757,7 @@ class WorkflowTemplateServiceImplTest {
     Page<WorkflowTemplateDTO> dtoPage = (Page<WorkflowTemplateDTO>) response.getResponse();
     assertEquals(11, dtoPage.getTotalElements());
     assertEquals(2, dtoPage.getNumber());
-    verify(workflowTemplateRepository, times(1)).findAllWorkflowTemplate(pageable);
+    verify(workflowTemplateRepository).findAllWorkflowTemplate(pageable);
   }
 
   @Test
@@ -771,7 +772,7 @@ class WorkflowTemplateServiceImplTest {
     assertNotNull(response.getBody());
     assertEquals(true, response.getBody().getSuccess());
     assertEquals(1, response.getBody().getResponse());
-    verify(workflowTemplateTempRepository, times(1)).deleteById(1);
+    verify(workflowTemplateTempRepository).deleteById(1);
   }
 
   @Test
@@ -782,7 +783,7 @@ class WorkflowTemplateServiceImplTest {
     workflowTemplateServiceImpl.deleteWorkFlowTempById(42);
 
     ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
-    verify(workflowTemplateTempRepository, times(1)).deleteById(idCaptor.capture());
+    verify(workflowTemplateTempRepository).deleteById(idCaptor.capture());
     assertEquals(42, idCaptor.getValue());
   }
 
@@ -810,7 +811,7 @@ class WorkflowTemplateServiceImplTest {
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(workflowTemplateTempRepository, times(1)).deleteById(null);
+    verify(workflowTemplateTempRepository).deleteById(null);
   }
 
   @Test

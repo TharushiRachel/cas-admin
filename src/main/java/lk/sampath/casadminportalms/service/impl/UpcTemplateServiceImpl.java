@@ -73,7 +73,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
         log.info("START: Find All Upc Template Temp List ");
         Page<UpcTemplateTemp> upcTemplateTempList = upcTemplateTempRepository.findAll(pageable);
         log.info(" Fetched All Upc Template Temp List : {} ",upcTemplateTempList);
-        Page<UpcTemplateDTO> upcTemplateDTOList = upcTemplateTempList.map(UpcTemplateDTO::new);
+        List<UpcTemplateDTO> upcTemplateDTOList = upcTemplateTempList.map(UpcTemplateDTO::new).getContent();
         StandardResponse<List<UpcTemplateDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateDTOList);
         log.info("END: Find All Upc Template Temp List :{}", response.getResponse());
         return ResponseEntity.ok().body(response);
@@ -110,7 +110,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
         log.info("START: Find All Approved Upc Templates");
         Page<UpcTemplate> upcTemplateList = upcTemplateRepository.findAll(pageable);
 
-        Page<UpcTemplateDTO> upcTemplateDTOList = upcTemplateList.map(UpcTemplateDTO::new);
+        List<UpcTemplateDTO> upcTemplateDTOList = upcTemplateList.map(UpcTemplateDTO::new).getContent();
         log.info("Converted Upc Templates to DTOs: {}", upcTemplateDTOList);
         StandardResponse<List<UpcTemplateDTO>> response = new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), upcTemplateDTOList);
 
@@ -173,6 +173,7 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
       upcTemplateTemp.setUpcLabelBackgroundColor(upcTemplateDTO.getUpcLabelBackgroundColor());
       upcTemplateTemp.setStatus(upcTemplateDTO.getStatus());
       upcTemplateTemp.setCreatedDate(date);
+      upcTemplateTemp.setCreatedBy(upcTemplateDTO.getCreatedBy());
       upcTemplateTemp.setApproveStatus(upcTemplateDTO.getApproveStatus());
 
       if (upcTemplateDTO.getUpcTemplateDataDTOList() != null) {
@@ -271,9 +272,6 @@ public class UpcTemplateServiceImpl implements UpcTemplateService {
             .orElseThrow(
                 () -> new ApiRequestException(UPC_TEMPLATE_WITH + upcTemplateID + DOES_NOT_EXIST));
     log.info("Fetched UpcTemplateTemp to be updated: {}", upcTemplateTemp);
-    BooleanBuilder booleanBuilder = new BooleanBuilder();
-    booleanBuilder.and(
-        QUpcTemplateTemp.upcTemplateTemp.templateName.eq(upcTemplateDTO.getTemplateName()));
 
     if (upcTemplateDTO.getTemplateName() == null
         || upcTemplateDTO.getTemplateName().trim().isEmpty()) {

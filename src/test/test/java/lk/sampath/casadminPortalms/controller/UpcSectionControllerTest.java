@@ -86,7 +86,7 @@ class UpcSectionControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.response").isArray());
 
-    verify(upcSectionService, times(1)).findAllUpcSectionTempList();
+    verify(upcSectionService).findAllUpcSectionTempList();
   }
 
   @Test
@@ -104,7 +104,7 @@ class UpcSectionControllerTest {
         .andExpect(
             jsonPath("$.response.upcSectionID").value(mockId)); // Validate the specific field
 
-    verify(upcSectionService, times(1)).findUpcSectionTempByID(mockId);
+    verify(upcSectionService).findUpcSectionTempByID(mockId);
   }
 
   @Test
@@ -121,7 +121,7 @@ class UpcSectionControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.response").isArray());
 
-    verify(upcSectionService, times(1)).findAllApprovedUpcSection();
+    verify(upcSectionService).findAllApprovedUpcSection();
   }
 
   @Test
@@ -142,7 +142,7 @@ class UpcSectionControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.response.upcSectionID").value(1));
 
-    verify(upcSectionService, times(1)).saveUpcSectionTemp(Mockito.any());
+    verify(upcSectionService).saveUpcSectionTemp(Mockito.any());
   }
 
   @Test
@@ -162,7 +162,7 @@ class UpcSectionControllerTest {
                 .content(objectMapper.writeValueAsString(mockRequest)))
         .andExpect(status().isOk());
 
-    Mockito.verify(upcSectionService, times(1)).approveRejectUpcSection(Mockito.any());
+    Mockito.verify(upcSectionService).approveRejectUpcSection(Mockito.any());
   }
 
   @Test
@@ -185,7 +185,7 @@ class UpcSectionControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.response.upcSectionID").value(mockId));
 
-    Mockito.verify(upcSectionService, times(1))
+    Mockito.verify(upcSectionService)
         .updateUpcSectionTemp(Mockito.eq(mockId), Mockito.any());
   }
 
@@ -206,7 +206,7 @@ class UpcSectionControllerTest {
                 .content(objectMapper.writeValueAsString(mockRequest)))
         .andExpect(status().isOk());
 
-    Mockito.verify(upcSectionService, times(1))
+    Mockito.verify(upcSectionService)
         .deleteUpcSectionFormTemp(mockRequest.getUpcSectionID());
   }
 
@@ -225,7 +225,7 @@ class UpcSectionControllerTest {
         .andExpect(
             jsonPath("$.response.approveStatus").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(upcSectionService, times(1)).findApprovedUpcSectionByID(1);
+    verify(upcSectionService).findApprovedUpcSectionByID(1);
   }
 
   @Test
@@ -239,7 +239,7 @@ class UpcSectionControllerTest {
         .andExpect(status().isBadRequest()) // Expect HTTP 500 Internal Server Error
         .andExpect(jsonPath("$.message").value("Upc Section not found"));
 
-    verify(upcSectionService, times(1)).findApprovedUpcSectionByID(1);
+    verify(upcSectionService).findApprovedUpcSectionByID(1);
   }
 
   @Test
@@ -257,7 +257,7 @@ class UpcSectionControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("Updated"));
 
-    verify(upcSectionService, times(1)).updateApprovedUpcSection(eq(1), any(UpcSectionDTO.class));
+    verify(upcSectionService).updateApprovedUpcSection(eq(1), any(UpcSectionDTO.class));
   }
 
   @Test
@@ -273,6 +273,6 @@ class UpcSectionControllerTest {
                 .content(objectMapper.writeValueAsString(upcSection)))
         .andExpect(status().isBadRequest());
 
-    verify(upcSectionService, times(1)).updateApprovedUpcSection(eq(1), any(UpcSectionDTO.class));
+    verify(upcSectionService).updateApprovedUpcSection(eq(1), any(UpcSectionDTO.class));
   }
 }

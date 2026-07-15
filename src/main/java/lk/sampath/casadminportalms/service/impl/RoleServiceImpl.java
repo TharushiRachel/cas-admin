@@ -70,9 +70,18 @@ public class RoleServiceImpl implements RoleService {
   @Transactional(readOnly = true)
   public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories(
       Pageable pageable) throws ApiRequestException {
+    return buildPrivilegeCategoriesResponse(
+        privilegeCategoryRepository.findAll(pageable).getContent());
+  }
 
-    List<PrivilegeCategory> privilegeCategoryList =
-        privilegeCategoryRepository.findAll(pageable).getContent();
+  @Transactional(readOnly = true)
+  public ResponseEntity<StandardResponse<List<PrivilegeCategory>>> findAllPrivilegeCategories()
+      throws ApiRequestException {
+    return buildPrivilegeCategoriesResponse(privilegeCategoryRepository.findAll());
+  }
+
+  private ResponseEntity<StandardResponse<List<PrivilegeCategory>>> buildPrivilegeCategoriesResponse(
+      List<PrivilegeCategory> privilegeCategoryList) {
 
     Map<String, List<Privilege>> privilegeCategoryMap = new LinkedHashMap<>();
 
@@ -138,7 +147,17 @@ public class RoleServiceImpl implements RoleService {
   @Override
   public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllRolesTempList(Pageable pageable)
       throws ApiRequestException {
-    List<RoleTemp> roleTempList = roleTempRepository.findAll(pageable).getContent();
+    return buildRolesTempListResponse(roleTempRepository.findAll(pageable).getContent());
+  }
+
+  @Transactional(readOnly = true)
+  public ResponseEntity<StandardResponse<List<RoleDTO>>> findAllRolesTempList()
+      throws ApiRequestException {
+    return buildRolesTempListResponse(roleTempRepository.findAll());
+  }
+
+  private ResponseEntity<StandardResponse<List<RoleDTO>>> buildRolesTempListResponse(
+      List<RoleTemp> roleTempList) {
     List<RoleDTO> roleDTOList = new ArrayList<>();
 
     for (RoleTemp roleTemp : roleTempList) {
@@ -546,6 +565,18 @@ public class RoleServiceImpl implements RoleService {
       throws ApiRequestException {
     List<Privilege> privileges =
         privilegeRepository.findAll(PageRequest.of(page, size)).getContent();
+
+    StandardResponse<List<Privilege>> response =
+        new StandardResponse<>(
+            ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), privileges);
+    return ResponseEntity.ok().body(response);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public ResponseEntity<StandardResponse<List<Privilege>>> findAllPrivileges()
+      throws ApiRequestException {
+    List<Privilege> privileges = privilegeRepository.findAll();
 
     StandardResponse<List<Privilege>> response =
         new StandardResponse<>(

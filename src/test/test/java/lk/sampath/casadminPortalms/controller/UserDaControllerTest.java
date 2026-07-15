@@ -112,7 +112,7 @@ class UserDaControllerTest {
             MockMvcResultMatchers.jsonPath("$.response[0].description")
                 .value("Unit Testing Description"));
 
-    verify(userDaService, times(1)).findAllUserDaTempList();
+    verify(userDaService).findAllUserDaTempList();
   }
 
   @Test
@@ -127,7 +127,7 @@ class UserDaControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.response").isEmpty());
 
-    verify(userDaService, times(1)).findAllUserDaTempList();
+    verify(userDaService).findAllUserDaTempList();
   }
 
   @Test
@@ -140,7 +140,7 @@ class UserDaControllerTest {
         .andExpect(status().isBadRequest()) // Expect HTTP 500 Internal Server Error
         .andExpect(jsonPath("$.message").value("Error fetching userDa list"));
 
-    verify(userDaService, times(1)).findAllUserDaTempList();
+    verify(userDaService).findAllUserDaTempList();
   }
 
   /** viewUserDaTempById * */
@@ -159,7 +159,7 @@ class UserDaControllerTest {
         .andExpect(
             jsonPath("$.response.approveStatus").value(MasterDataApproveStatus.PENDING.name()));
 
-    verify(userDaService, times(1)).findUserDaTempByID(1);
+    verify(userDaService).findUserDaTempByID(1);
   }
 
   @Test
@@ -172,7 +172,7 @@ class UserDaControllerTest {
         .andExpect(status().isBadRequest()) // Expect HTTP 500 Internal Server Error
         .andExpect(jsonPath("$.message").value("UserDa not found"));
 
-    verify(userDaService, times(1)).findUserDaTempByID(1);
+    verify(userDaService).findUserDaTempByID(1);
   }
 
   /** getPagedUserDaData * */
@@ -194,7 +194,7 @@ class UserDaControllerTest {
         .andExpect(
             jsonPath("$.response[0].approveStatus").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(userDaService, times(1)).findAllApprovedUserDa();
+    verify(userDaService).findAllApprovedUserDa();
   }
 
   @Test
@@ -207,7 +207,7 @@ class UserDaControllerTest {
         .andExpect(status().isBadRequest()) // Expect HTTP 400 Internal Server Error
         .andExpect(jsonPath("$.message").value("Error retrieving documents"));
 
-    verify(userDaService, times(1)).findAllApprovedUserDa();
+    verify(userDaService).findAllApprovedUserDa();
   }
 
   /** viewUserDaById * */
@@ -226,7 +226,7 @@ class UserDaControllerTest {
         .andExpect(
             jsonPath("$.response.approveStatus").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(userDaService, times(1)).findApprovedUserDaById(1);
+    verify(userDaService).findApprovedUserDaById(1);
   }
 
   @Test
@@ -239,7 +239,7 @@ class UserDaControllerTest {
         .andExpect(status().isBadRequest()) // Expect HTTP 500 Internal Server Error
         .andExpect(jsonPath("$.message").value("UserDa not found"));
 
-    verify(userDaService, times(1)).findApprovedUserDaById(1);
+    verify(userDaService).findApprovedUserDaById(1);
   }
 
   /** saveUserDa * */
@@ -260,7 +260,7 @@ class UserDaControllerTest {
         .andExpect(jsonPath("$.response.userName").value("Unit Testing"))
         .andExpect(jsonPath("$.response.description").value("Unit Testing Description"));
 
-    verify(userDaService, times(1)).saveUserDaTemp(any(UserDaDTO.class));
+    verify(userDaService).saveUserDaTemp(any(UserDaDTO.class));
   }
 
   @Test
@@ -277,7 +277,7 @@ class UserDaControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
 
-    verify(userDaService, times(1)).saveUserDaTemp(any(UserDaDTO.class));
+    verify(userDaService).saveUserDaTemp(any(UserDaDTO.class));
   }
 
   /** approveRejectUserDa * */
@@ -296,7 +296,7 @@ class UserDaControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(userDaService, times(1)).approveRejectUserDa(any(ApproveRejectRQ.class));
+    verify(userDaService).approveRejectUserDa(any(ApproveRejectRQ.class));
   }
 
   @Test
@@ -312,7 +312,7 @@ class UserDaControllerTest {
                 .content(objectMapper.writeValueAsString(approveRejectRQ)))
         .andExpect(status().isBadRequest());
 
-    verify(userDaService, times(1)).approveRejectUserDa(any(ApproveRejectRQ.class));
+    verify(userDaService).approveRejectUserDa(any(ApproveRejectRQ.class));
   }
 
   /** updateUserDaTemp * */
@@ -332,7 +332,7 @@ class UserDaControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("Updated"));
 
-    verify(userDaService, times(1)).updateUserDaTemp(eq(1), any(UserDaDTO.class));
+    verify(userDaService).updateUserDaTemp(eq(1), any(UserDaDTO.class));
   }
 
   @Test
@@ -348,7 +348,7 @@ class UserDaControllerTest {
                 .content(objectMapper.writeValueAsString(pendingUserDaDTO)))
         .andExpect(status().isBadRequest());
 
-    verify(userDaService, times(1)).updateUserDaTemp(eq(1), any(UserDaDTO.class));
+    verify(userDaService).updateUserDaTemp(eq(1), any(UserDaDTO.class));
   }
 
   /** updateApprovedUserDa * */
@@ -368,7 +368,7 @@ class UserDaControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("Updated"));
 
-    verify(userDaService, times(1)).updateApprovedUserDa(eq(1), any(UserDaDTO.class));
+    verify(userDaService).updateApprovedUserDa(eq(1), any(UserDaDTO.class));
   }
 
   @Test
@@ -384,7 +384,7 @@ class UserDaControllerTest {
                 .content(objectMapper.writeValueAsString(approveUserDaDTO)))
         .andExpect(status().isBadRequest());
 
-    verify(userDaService, times(1)).updateApprovedUserDa(eq(1), any(UserDaDTO.class));
+    verify(userDaService).updateApprovedUserDa(eq(1), any(UserDaDTO.class));
   }
 
   /** deleteUserDaTemp * */
@@ -402,7 +402,7 @@ class UserDaControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("DELETED"));
 
-    verify(userDaService, times(1)).deleteUserDaFromTemp(1);
+    verify(userDaService).deleteUserDaFromTemp(1);
   }
 
   @Test
@@ -416,6 +416,6 @@ class UserDaControllerTest {
                 .content(objectMapper.writeValueAsString(pendingUserDaDTO)))
         .andExpect(status().isBadRequest());
 
-    verify(userDaService, times(1)).deleteUserDaFromTemp(1);
+    verify(userDaService).deleteUserDaFromTemp(1);
   }
 }

@@ -39,13 +39,15 @@ import lk.sampath.casadminportalms.service.impl.CommitteeServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@ExtendWith(MockitoExtension.class)
 class CommitteeServiceImplTest {
 
     @Mock private CommitteeTempRepository committeeTempRepository;
@@ -88,8 +90,6 @@ class CommitteeServiceImplTest {
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
-
         UserContext.setUsername("unit.test.user");
         UserContext.setDisplayName("Unit Test User");
 
@@ -193,7 +193,7 @@ class CommitteeServiceImplTest {
         assertNotNull(response.getBody());
         assertTrue(response.getBody().getSuccess());
         assertEquals(2, ((List<?>) response.getBody().getResponse()).size());
-        verify(committeeJdbc, times(1)).getAllCommittees(true);
+        verify(committeeJdbc).getAllCommittees(true);
     }
 
     @Test
@@ -206,7 +206,7 @@ class CommitteeServiceImplTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(((List<?>) response.getBody().getResponse()).isEmpty());
-        verify(committeeJdbc, times(1)).getAllCommittees(true);
+        verify(committeeJdbc).getAllCommittees(true);
     }
 
     @Test
@@ -217,7 +217,7 @@ class CommitteeServiceImplTest {
                 assertThrows(ApiRequestException.class, committeeServiceImpl::getTempCommittees);
 
         assertEquals("An error occurred while fetching pending data.", exception.getMessage());
-        verify(committeeJdbc, times(1)).getAllCommittees(true);
+        verify(committeeJdbc).getAllCommittees(true);
     }
 
     @Test
@@ -237,7 +237,7 @@ class CommitteeServiceImplTest {
 
         committeeServiceImpl.getTempCommittees();
 
-        verify(committeeJdbc, times(1)).getAllCommittees(true);
+        verify(committeeJdbc).getAllCommittees(true);
         verify(committeeJdbc, never()).getAllCommittees(false);
     }
 
@@ -256,7 +256,7 @@ class CommitteeServiceImplTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().getSuccess());
         assertEquals(5, ((CommitteeDTO) response.getBody().getResponse()).getCommitteeId());
-        verify(committeeJdbc, times(1)).getCommittee(5, true);
+        verify(committeeJdbc).getCommittee(5, true);
     }
 
     @Test
@@ -279,7 +279,7 @@ class CommitteeServiceImplTest {
                         ApiRequestException.class, () -> committeeServiceImpl.getTempCommitteeById(99));
 
         assertEquals("Committee not found.", exception.getMessage());
-        verify(committeeJdbc, times(1)).getCommittee(99, true);
+        verify(committeeJdbc).getCommittee(99, true);
     }
 
     @Test
@@ -318,7 +318,7 @@ class CommitteeServiceImplTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().getSuccess());
         assertEquals(1, ((List<?>) response.getBody().getResponse()).size());
-        verify(committeeJdbc, times(1)).getAllCommittees(false);
+        verify(committeeJdbc).getAllCommittees(false);
     }
 
     @Test
@@ -329,7 +329,7 @@ class CommitteeServiceImplTest {
                 committeeServiceImpl.getCommittees();
 
         assertTrue(((List<?>) response.getBody().getResponse()).isEmpty());
-        verify(committeeJdbc, times(1)).getAllCommittees(false);
+        verify(committeeJdbc).getAllCommittees(false);
     }
 
     @Test
@@ -349,7 +349,7 @@ class CommitteeServiceImplTest {
 
         committeeServiceImpl.getCommittees();
 
-        verify(committeeJdbc, times(1)).getAllCommittees(false);
+        verify(committeeJdbc).getAllCommittees(false);
         verify(committeeJdbc, never()).getAllCommittees(true);
     }
 
@@ -384,7 +384,7 @@ class CommitteeServiceImplTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().getSuccess());
         assertEquals(5, ((CommitteeDTO) response.getBody().getResponse()).getCommitteeId());
-        verify(committeeJdbc, times(1)).getCommittee(5, false);
+        verify(committeeJdbc).getCommittee(5, false);
     }
 
     @Test
@@ -468,7 +468,7 @@ class CommitteeServiceImplTest {
         assertEquals("Credit Committee", saved.getCommitteeName());
 
         ArgumentCaptor<CommitteeTemp> captor = ArgumentCaptor.forClass(CommitteeTemp.class);
-        verify(committeeTempRepository, times(1)).saveAndFlush(captor.capture());
+        verify(committeeTempRepository).saveAndFlush(captor.capture());
         assertEquals(committeeType, captor.getValue().getCommitteeType());
     }
 
@@ -503,7 +503,7 @@ class CommitteeServiceImplTest {
         assertTrue(response.getBody().getSuccess());
 
         ArgumentCaptor<CommitteeTemp> captor = ArgumentCaptor.forClass(CommitteeTemp.class);
-        verify(committeeTempRepository, times(1)).saveAndFlush(captor.capture());
+        verify(committeeTempRepository).saveAndFlush(captor.capture());
         assertEquals("unit.test.user", captor.getValue().getModifiedBy());
         assertNotNull(captor.getValue().getLastModifiedDate());
     }
@@ -525,10 +525,10 @@ class CommitteeServiceImplTest {
                 committeeServiceImpl.saveTempCommittee(committeeDTO);
 
         assertTrue(response.getBody().getSuccess());
-        verify(levelTempRepository, times(1)).deleteById(8);
+        verify(levelTempRepository).deleteById(8);
 
         ArgumentCaptor<CommitteeTemp> captor = ArgumentCaptor.forClass(CommitteeTemp.class);
-        verify(committeeTempRepository, times(1)).saveAndFlush(captor.capture());
+        verify(committeeTempRepository).saveAndFlush(captor.capture());
         assertTrue(captor.getValue().getCommitteeLevels().isEmpty());
     }
 
@@ -551,7 +551,7 @@ class CommitteeServiceImplTest {
                         ApiRequestException.class, () -> committeeServiceImpl.saveTempCommittee(committeeDTO));
 
         assertEquals("Committee level save has been failed.", exception.getMessage());
-        verify(committeePoolRepository, times(1)).findByUserId(99);
+        verify(committeePoolRepository).findByUserId(99);
         verify(committeeTempRepository, never()).saveAndFlush(any(CommitteeTemp.class));
     }
 
@@ -575,11 +575,11 @@ class CommitteeServiceImplTest {
                 committeeServiceImpl.saveTempCommittee(committeeDTO);
 
         assertTrue(response.getBody().getSuccess());
-        verify(levelUserTempRepository, times(1)).deleteById(77);
+        verify(levelUserTempRepository).deleteById(77);
         verify(committeePoolRepository, never()).findByUserId(any());
 
         ArgumentCaptor<CommitteeTemp> captor = ArgumentCaptor.forClass(CommitteeTemp.class);
-        verify(committeeTempRepository, times(1)).saveAndFlush(captor.capture());
+        verify(committeeTempRepository).saveAndFlush(captor.capture());
         assertEquals(1, captor.getValue().getCommitteeLevels().size());
         assertTrue(captor.getValue().getCommitteeLevels().get(0).getLevelUsers().isEmpty());
     }
@@ -602,7 +602,7 @@ class CommitteeServiceImplTest {
         assertTrue(response.getBody().getSuccess());
         CommitteeDTO result = (CommitteeDTO) response.getBody().getResponse();
         assertEquals(5, result.getCommitteeId());
-        verify(committeeService, times(1)).saveCommittee(committeeDTO);
+        verify(committeeService).saveCommittee(committeeDTO);
     }
 
     @Test
@@ -619,8 +619,8 @@ class CommitteeServiceImplTest {
 
         assertNotNull(response);
         assertTrue(response.getBody().getSuccess());
-        verify(committeeRepository, times(1)).save(committee);
-        verify(committeeAudRepository, times(1)).save(any(CommitteeHistory.class));
+        verify(committeeRepository).save(committee);
+        verify(committeeAudRepository).save(any(CommitteeHistory.class));
         assertEquals(MasterDataApproveStatus.APPROVED, committee.getApproveStatus());
         verify(committeeService, never()).saveCommittee(any());
     }
@@ -636,8 +636,8 @@ class CommitteeServiceImplTest {
 
         assertNotNull(response);
         assertTrue(response.getBody().getSuccess());
-        verify(committeeTempRepository, times(1)).save(committeeTemp);
-        verify(committeeAudRepository, times(1)).save(any(CommitteeHistory.class));
+        verify(committeeTempRepository).save(committeeTemp);
+        verify(committeeAudRepository).save(any(CommitteeHistory.class));
         assertEquals(MasterDataApproveStatus.REJECTED, committeeTemp.getApproveStatus());
         assertEquals(AppsConstants.RecordStatus.DRAFT, committeeTemp.getRecordStatus());
     }
@@ -695,9 +695,9 @@ class CommitteeServiceImplTest {
         assertNotNull(response);
         assertTrue(response.getSuccess());
         assertTrue((Boolean) response.getResponse());
-        verify(levelUserTempRepository, times(1)).deleteByCommitteeTemp(committeeTemp);
-        verify(levelTempRepository, times(1)).deleteByCommitteeTemp(committeeTemp);
-        verify(committeeTempRepository, times(1)).deleteById(5);
+        verify(levelUserTempRepository).deleteByCommitteeTemp(committeeTemp);
+        verify(levelTempRepository).deleteByCommitteeTemp(committeeTemp);
+        verify(committeeTempRepository).deleteById(5);
     }
 
     @Test
@@ -845,7 +845,7 @@ class CommitteeServiceImplTest {
         committeeServiceImpl.saveMasterCommitteeHistory(committee);
 
         ArgumentCaptor<CommitteeHistory> captor = ArgumentCaptor.forClass(CommitteeHistory.class);
-        verify(committeeAudRepository, times(1)).save(captor.capture());
+        verify(committeeAudRepository).save(captor.capture());
 
         CommitteeHistory history = captor.getValue();
         assertEquals(committee.getCommitteeId(), history.getCommitteeId());
@@ -871,7 +871,7 @@ class CommitteeServiceImplTest {
         committeeServiceImpl.saveMasterCommitteeHistory(committee);
 
         ArgumentCaptor<CommitteeHistory> captor = ArgumentCaptor.forClass(CommitteeHistory.class);
-        verify(committeeAudRepository, times(1)).save(captor.capture());
+        verify(committeeAudRepository).save(captor.capture());
         assertNull(captor.getValue().getCommitteeType());
     }
 
@@ -879,7 +879,7 @@ class CommitteeServiceImplTest {
     void saveMasterCommitteeHistory_CallsAudRepositorySaveExactlyOnce() {
         committeeServiceImpl.saveMasterCommitteeHistory(committee);
 
-        verify(committeeAudRepository, times(1)).save(any(CommitteeHistory.class));
+        verify(committeeAudRepository).save(any(CommitteeHistory.class));
         verify(committeeLevelAudRepository, never()).save(any());
         verify(levelUserAudRepository, never()).save(any());
     }
@@ -891,7 +891,7 @@ class CommitteeServiceImplTest {
         committeeServiceImpl.saveMasterCommitteeHistory(committee);
 
         ArgumentCaptor<CommitteeHistory> captor = ArgumentCaptor.forClass(CommitteeHistory.class);
-        verify(committeeAudRepository, times(1)).save(captor.capture());
+        verify(committeeAudRepository).save(captor.capture());
         assertEquals(MasterDataApproveStatus.REJECTED, captor.getValue().getApproveStatus());
     }
 
@@ -907,7 +907,7 @@ class CommitteeServiceImplTest {
         assertDoesNotThrow(() -> committeeServiceImpl.saveMasterCommitteeHistory(committee));
 
         ArgumentCaptor<CommitteeHistory> captor = ArgumentCaptor.forClass(CommitteeHistory.class);
-        verify(committeeAudRepository, times(1)).save(captor.capture());
+        verify(committeeAudRepository).save(captor.capture());
         assertNull(captor.getValue().getReviewer());
         assertNull(captor.getValue().getApprovedBy());
     }

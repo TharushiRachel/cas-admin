@@ -110,7 +110,7 @@ class UpmGroupControllerTest {
             MockMvcResultMatchers.jsonPath("$.response[0].referenceName")
                 .value("Unit Testing Reference"));
 
-    verify(upmGroupService, times(1)).findAllUpmGroupTempList();
+    verify(upmGroupService).findAllUpmGroupTempList();
   }
 
   @Test
@@ -125,7 +125,7 @@ class UpmGroupControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.response").isEmpty());
 
-    verify(upmGroupService, times(1)).findAllUpmGroupTempList();
+    verify(upmGroupService).findAllUpmGroupTempList();
   }
 
   /** viewUpmGroupTempByID * */
@@ -143,7 +143,7 @@ class UpmGroupControllerTest {
         .andExpect(
             jsonPath("$.response.approveStatus").value(MasterDataApproveStatus.PENDING.name()));
 
-    verify(upmGroupService, times(1)).findUpmGroupTempByID(1);
+    verify(upmGroupService).findUpmGroupTempByID(1);
   }
 
   @Test
@@ -156,7 +156,7 @@ class UpmGroupControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Upm Group Code not found"));
 
-    verify(upmGroupService, times(1)).findUpmGroupTempByID(1);
+    verify(upmGroupService).findUpmGroupTempByID(1);
   }
 
   /** getPagedUpmGroupData * */
@@ -176,7 +176,7 @@ class UpmGroupControllerTest {
         .andExpect(
             jsonPath("$.response[0].approveStatus").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(upmGroupService, times(1)).searchUpmGroups();
+    verify(upmGroupService).searchUpmGroups();
   }
 
   @Test
@@ -189,7 +189,7 @@ class UpmGroupControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Error retrieving document"));
 
-    verify(upmGroupService, times(1)).searchUpmGroups();
+    verify(upmGroupService).searchUpmGroups();
   }
 
   /** viewUpmGroupById * */
@@ -207,7 +207,7 @@ class UpmGroupControllerTest {
         .andExpect(
             jsonPath("$.response.approveStatus").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(upmGroupService, times(1)).findUpmGroupById(1);
+    verify(upmGroupService).findUpmGroupById(1);
   }
 
   @Test
@@ -220,7 +220,7 @@ class UpmGroupControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("UpmGroup not found"));
 
-    verify(upmGroupService, times(1)).findUpmGroupById(1);
+    verify(upmGroupService).findUpmGroupById(1);
   }
 
   /** saveUPMGroup * */
@@ -241,7 +241,7 @@ class UpmGroupControllerTest {
         .andExpect(jsonPath("$.response.groupCode").value("Unit Testing"))
         .andExpect(jsonPath("$.response.referenceName").value("Unit Testing Reference"));
 
-    verify(upmGroupService, times(1)).saveUPMGroupTemp(any(UpmGroupDTO.class));
+    verify(upmGroupService).saveUPMGroupTemp(any(UpmGroupDTO.class));
   }
 
   @Test
@@ -258,7 +258,7 @@ class UpmGroupControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
 
-    verify(upmGroupService, times(1)).saveUPMGroupTemp(any(UpmGroupDTO.class));
+    verify(upmGroupService).saveUPMGroupTemp(any(UpmGroupDTO.class));
   }
 
   /** approveRejectUpmGroup * */
@@ -277,7 +277,7 @@ class UpmGroupControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(upmGroupService, times(1)).approveRejectUpmGroup(any(ApproveRejectRQ.class));
+    verify(upmGroupService).approveRejectUpmGroup(any(ApproveRejectRQ.class));
   }
 
   @Test
@@ -293,7 +293,7 @@ class UpmGroupControllerTest {
                 .content(objectMapper.writeValueAsString(approveRejectRQ)))
         .andExpect(status().isBadRequest());
 
-    verify(upmGroupService, times(1)).approveRejectUpmGroup(any(ApproveRejectRQ.class));
+    verify(upmGroupService).approveRejectUpmGroup(any(ApproveRejectRQ.class));
   }
 
   /** updateUpmGroupTemp * */
@@ -313,7 +313,7 @@ class UpmGroupControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("Updated"));
 
-    verify(upmGroupService, times(1)).updateUpmGroupTemp(eq(1), any(UpmGroupDTO.class));
+    verify(upmGroupService).updateUpmGroupTemp(eq(1), any(UpmGroupDTO.class));
   }
 
   @Test
@@ -329,7 +329,7 @@ class UpmGroupControllerTest {
                 .content(objectMapper.writeValueAsString(pendingUpmGroup)))
         .andExpect(status().isBadRequest());
 
-    verify(upmGroupService, times(1)).updateUpmGroupTemp(eq(1), any(UpmGroupDTO.class));
+    verify(upmGroupService).updateUpmGroupTemp(eq(1), any(UpmGroupDTO.class));
   }
 
   /** updateApprovedUpmGroup * */
@@ -349,7 +349,7 @@ class UpmGroupControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("Updated"));
 
-    verify(upmGroupService, times(1)).updateApprovedUpmGroup(eq(1), any(UpmGroupDTO.class));
+    verify(upmGroupService).updateApprovedUpmGroup(eq(1), any(UpmGroupDTO.class));
   }
 
   @Test
@@ -365,7 +365,7 @@ class UpmGroupControllerTest {
                 .content(objectMapper.writeValueAsString(approvedUpmGroup)))
         .andExpect(status().isBadRequest());
 
-    verify(upmGroupService, times(1)).updateApprovedUpmGroup(eq(1), any(UpmGroupDTO.class));
+    verify(upmGroupService).updateApprovedUpmGroup(eq(1), any(UpmGroupDTO.class));
   }
 
   /** deleteUpmGroup * */
@@ -383,7 +383,7 @@ class UpmGroupControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("DELETED"));
 
-    verify(upmGroupService, times(1)).deleteUpmGroup(1);
+    verify(upmGroupService).deleteUpmGroup(1);
   }
 
   @Test
@@ -397,6 +397,6 @@ class UpmGroupControllerTest {
                 .content(objectMapper.writeValueAsString(pendingUpmGroup)))
         .andExpect(status().isBadRequest());
 
-    verify(upmGroupService, times(1)).deleteUpmGroup(1);
+    verify(upmGroupService).deleteUpmGroup(1);
   }
 }

@@ -32,6 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
@@ -279,12 +280,12 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.getAllCreditFacilityTemplatesTemp(pageable);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertTrue(response.getBody().getSuccess());
     Page<CftResponse> returnedPage = (Page<CftResponse>) response.getBody().getResponse();
     assertEquals(1, returnedPage.getTotalElements());
-    verify(creditFacilityTemplateTempRepository, times(1)).findAllTemplates(pageable);
+    verify(creditFacilityTemplateTempRepository).findAllTemplates(pageable);
   }
 
   @Test
@@ -298,11 +299,11 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.getAllCreditFacilityTemplatesTemp(pageable);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     Page<CftResponse> returnedPage = (Page<CftResponse>) response.getBody().getResponse();
     assertTrue(returnedPage.getContent().isEmpty());
-    verify(creditFacilityTemplateTempRepository, times(1)).findAllTemplates(pageable);
+    verify(creditFacilityTemplateTempRepository).findAllTemplates(pageable);
   }
 
   @Test
@@ -364,7 +365,7 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.getCreditFacilityTemplateTempByID(1);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   @Test
@@ -402,7 +403,7 @@ class CreditFacilityTemplateServiceImplTest {
 
     creditFacilityService.getCreditFacilityTemplateTempByID(1);
 
-    verify(creditFacilityTemplateTempRepository, times(1)).findById(1);
+    verify(creditFacilityTemplateTempRepository).findById(1);
   }
 
   @Test
@@ -437,7 +438,7 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.getAllCreditFacilityTemplates(pageable);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     Page<CftResponse> returnedPage = (Page<CftResponse>) response.getBody().getResponse();
     assertTrue(returnedPage.getContent().isEmpty());
   }
@@ -456,10 +457,10 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.getAllCreditFacilityTemplates(pageable);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     Page<CftResponse> returnedPage = (Page<CftResponse>) response.getBody().getResponse();
     assertEquals(1, returnedPage.getTotalElements());
-    verify(creditFacilityTemplateRepository, times(1)).findAllTemplates(pageable);
+    verify(creditFacilityTemplateRepository).findAllTemplates(pageable);
   }
 
   @Test
@@ -519,7 +520,7 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.getCreditFacilityTemplateByID(1);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   @Test
@@ -557,7 +558,7 @@ class CreditFacilityTemplateServiceImplTest {
 
     creditFacilityService.getCreditFacilityTemplateByID(1);
 
-    verify(creditFacilityTemplateRepository, times(1)).findById(1);
+    verify(creditFacilityTemplateRepository).findById(1);
   }
 
   @Test
@@ -851,13 +852,13 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.saveCreditFacilityTemplateTemp(creditFacilityTemplateDTO);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertTrue(response.getBody().getSuccess());
     CreditFacilityTemplateDTO returnedDTO =
             (CreditFacilityTemplateDTO) response.getBody().getResponse();
     assertEquals(creditFacilityTemplateDTO.getCreditFacilityName(), returnedDTO.getCreditFacilityName());
-    verify(creditFacilityTemplateTempRepository, times(1))
+    verify(creditFacilityTemplateTempRepository)
             .saveAndFlush(any(CreditFacilityTemplateTemp.class));
   }
 
@@ -932,7 +933,7 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.updateCreditFacilityTemplateTemp(1, creditFacilityTemplateDTO);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
   }
 
   @Test
@@ -1034,7 +1035,7 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.updateCreditFacilityTemplateTemp(1, creditFacilityTemplateDTO);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
 
     ArgumentCaptor<CreditFacilityTemplateTemp> captor =
             ArgumentCaptor.forClass(CreditFacilityTemplateTemp.class);
@@ -1050,7 +1051,7 @@ class CreditFacilityTemplateServiceImplTest {
     Boolean result = creditFacilityService.insertToCftVitalInfoAuditTable(null, cftVitalInfoTemp);
 
     assertTrue(result);
-    verify(cftVitalInfoAudRepo, times(1)).saveAndFlush(any());
+    verify(cftVitalInfoAudRepo).saveAndFlush(any());
   }
 
   @Test
@@ -1060,7 +1061,7 @@ class CreditFacilityTemplateServiceImplTest {
     Boolean result = creditFacilityService.insertToCftVitalInfoAuditTable(cftVitalInfo, null);
 
     assertTrue(result);
-    verify(cftVitalInfoAudRepo, times(1)).saveAndFlush(any());
+    verify(cftVitalInfoAudRepo).saveAndFlush(any());
   }
 
   @Test
@@ -1084,7 +1085,7 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.insertToCftInterestRateAuditTable(null, cftInterestRateTemp);
 
     assertTrue(result);
-    verify(cftInterestRateAudRepo, times(1)).saveAndFlush(any());
+    verify(cftInterestRateAudRepo).saveAndFlush(any());
   }
 
   @Test
@@ -1094,7 +1095,7 @@ class CreditFacilityTemplateServiceImplTest {
     Boolean result = creditFacilityService.insertToCftInterestRateAuditTable(cftInterestRate, null);
 
     assertTrue(result);
-    verify(cftInterestRateAudRepo, times(1)).saveAndFlush(any());
+    verify(cftInterestRateAudRepo).saveAndFlush(any());
   }
 
   @Test
@@ -1118,7 +1119,7 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.insertToCftSupportingDocAuditTable(null, cftSupportingDocTemp);
 
     assertTrue(result);
-    verify(cftSupportingDocAudRepo, times(1)).saveAndFlush(any());
+    verify(cftSupportingDocAudRepo).saveAndFlush(any());
   }
 
   @Test
@@ -1129,7 +1130,7 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.insertToCftSupportingDocAuditTable(cftSupportingDoc, null);
 
     assertTrue(result);
-    verify(cftSupportingDocAudRepo, times(1)).saveAndFlush(any());
+    verify(cftSupportingDocAudRepo).saveAndFlush(any());
   }
 
   @Test
@@ -1155,7 +1156,7 @@ class CreditFacilityTemplateServiceImplTest {
                     null, cftOtherFacilityInformationTemp);
 
     assertTrue(result);
-    verify(cftOtherFacilityInfoAudRepo, times(1)).saveAndFlush(any());
+    verify(cftOtherFacilityInfoAudRepo).saveAndFlush(any());
   }
 
   @Test
@@ -1168,7 +1169,7 @@ class CreditFacilityTemplateServiceImplTest {
                     cftOtherFacilityInformation, null);
 
     assertTrue(result);
-    verify(cftOtherFacilityInfoAudRepo, times(1)).saveAndFlush(any());
+    verify(cftOtherFacilityInfoAudRepo).saveAndFlush(any());
   }
 
   @Test
@@ -1194,7 +1195,7 @@ class CreditFacilityTemplateServiceImplTest {
                     null, cftCustomFacilityInfoTemp);
 
     assertTrue(result);
-    verify(cftCustomFacilityInfoAudRepo, times(1)).saveAndFlush(any());
+    verify(cftCustomFacilityInfoAudRepo).saveAndFlush(any());
   }
 
   @Test
@@ -1206,7 +1207,7 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.insertToCftCustomFacilityInfoAuditTable(cftCustomFacilityInfo, null);
 
     assertTrue(result);
-    verify(cftCustomFacilityInfoAudRepo, times(1)).saveAndFlush(any());
+    verify(cftCustomFacilityInfoAudRepo).saveAndFlush(any());
   }
 
   @Test
@@ -1269,12 +1270,12 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.authorizeCreditFacilityTemplate(approveRejectRQ);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertTrue(response.getBody().getSuccess());
-    verify(creditFacilityTemplateRepository, times(1)).save(any(CreditFacilityTemplate.class));
-    verify(creditFacilityTemplateTempRepository, times(1)).delete(creditFacilityTemplateTemp);
-    verify(creditFacilityTemplateAudRepo, times(1))
+    verify(creditFacilityTemplateRepository).save(any(CreditFacilityTemplate.class));
+    verify(creditFacilityTemplateTempRepository).delete(creditFacilityTemplateTemp);
+    verify(creditFacilityTemplateAudRepo)
             .saveAndFlush(any(CreditFacilityTemplateAud.class));
   }
 
@@ -1297,11 +1298,11 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.authorizeCreditFacilityTemplate(approveRejectRQ);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
-    verify(creditFacilityTemplateRepository, times(1)).save(creditFacilityTemplate);
-    verify(cftVitalInfoRepository, times(1))
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    verify(creditFacilityTemplateRepository).save(creditFacilityTemplate);
+    verify(cftVitalInfoRepository)
             .findAllByCreditFacilityTemplateCreditFacilityTemplateID(1);
-    verify(creditFacilityTemplateTempRepository, times(1)).delete(creditFacilityTemplateTemp);
+    verify(creditFacilityTemplateTempRepository).delete(creditFacilityTemplateTemp);
   }
 
   @Test
@@ -1322,9 +1323,9 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.authorizeCreditFacilityTemplate(approveRejectRQ);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertTrue(response.getBody().getSuccess());
-    verify(creditFacilityTemplateAudRepo, times(1))
+    verify(creditFacilityTemplateAudRepo)
             .saveAndFlush(any(CreditFacilityTemplateAud.class));
     verify(creditFacilityTemplateTempRepository, never()).delete(any());
   }
@@ -1381,7 +1382,7 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.updateCreditFacilityTemplate(1, creditFacilityTemplateDTO);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
 
     ArgumentCaptor<CreditFacilityTemplateTemp> captor =
             ArgumentCaptor.forClass(CreditFacilityTemplateTemp.class);
@@ -1475,11 +1476,11 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.deleteCreditFacilityTemplateTemp(1);
 
     assertNotNull(response);
-    assertEquals(200, response.getStatusCode());
+    assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertTrue(response.getBody().getSuccess());
     assertEquals(1, response.getBody().getResponse());
-    verify(creditFacilityTemplateTempRepository, times(1)).delete(creditFacilityTemplateTemp);
+    verify(creditFacilityTemplateTempRepository).delete(creditFacilityTemplateTemp);
   }
 
   @Test
@@ -1519,7 +1520,7 @@ class CreditFacilityTemplateServiceImplTest {
             creditFacilityService.deleteCreditFacilityTemplateTemp(100);
 
     assertEquals(100, response.getBody().getResponse());
-    verify(creditFacilityTemplateTempRepository, times(1)).delete(anotherTemp);
+    verify(creditFacilityTemplateTempRepository).delete(anotherTemp);
   }
 
   @Test
@@ -1529,6 +1530,6 @@ class CreditFacilityTemplateServiceImplTest {
 
     creditFacilityService.deleteCreditFacilityTemplateTemp(1);
 
-    verify(creditFacilityTemplateTempRepository, times(1)).findById(1);
+    verify(creditFacilityTemplateTempRepository).findById(1);
   }
 }

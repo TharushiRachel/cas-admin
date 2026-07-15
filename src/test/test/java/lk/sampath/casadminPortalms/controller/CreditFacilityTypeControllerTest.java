@@ -132,7 +132,7 @@ class CreditFacilityTypeControllerTest {
                 .content(new ObjectMapper().writeValueAsString(request)))
         .andExpect(status().isBadRequest());
 
-    verify(creditFacilityTypeService, times(1))
+    verify(creditFacilityTypeService)
         .saveCreditFacilityTypeTemp(any(CreditFacilityTypeDTO.class));
   }
 
@@ -153,7 +153,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(
             jsonPath("$.response.approveStatus").value(MasterDataApproveStatus.PENDING.name()));
 
-    verify(creditFacilityTypeService, times(1)).findCreditFacilityTypeTempByID(1);
+    verify(creditFacilityTypeService).findCreditFacilityTypeTempByID(1);
   }
 
   @Test
@@ -166,7 +166,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(status().isBadRequest()) // Expect HTTP 500 Internal Server Error
         .andExpect(jsonPath("$.message").value("Not found"));
 
-    verify(creditFacilityTypeService, times(1)).findCreditFacilityTypeTempByID(1);
+    verify(creditFacilityTypeService).findCreditFacilityTypeTempByID(1);
   }
 
   /** updateCreditFacilityTypeTemp* */
@@ -188,7 +188,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(jsonPath("$.message").value("Success"))
         .andExpect(jsonPath("$.response.creditFacilityTypeID").value(1));
 
-    verify(creditFacilityTypeService, times(1))
+    verify(creditFacilityTypeService)
         .updateCreditFacilityTempType(eq(1), any(CreditFacilityTypeDTO.class));
   }
 
@@ -205,7 +205,7 @@ class CreditFacilityTypeControllerTest {
                 .content(objectMapper.writeValueAsString(tempCreditFacilityType)))
         .andExpect(status().isBadRequest());
 
-    verify(creditFacilityTypeService, times(1))
+    verify(creditFacilityTypeService)
         .updateCreditFacilityTempType(eq(1), any(CreditFacilityTypeDTO.class));
   }
 
@@ -227,7 +227,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(
             jsonPath("$.response.approveStatus").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(creditFacilityTypeService, times(1))
+    verify(creditFacilityTypeService)
         .approveRejectCreditFacilityType(any(ApproveRejectRQ.class));
   }
 
@@ -244,7 +244,7 @@ class CreditFacilityTypeControllerTest {
                 .content(objectMapper.writeValueAsString(approveRejectRQ)))
         .andExpect(status().isBadRequest());
 
-    verify(creditFacilityTypeService, times(1))
+    verify(creditFacilityTypeService)
         .approveRejectCreditFacilityType(any(ApproveRejectRQ.class));
   }
 
@@ -270,7 +270,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(
             jsonPath("$.response[0].approveStatus").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(creditFacilityTypeService, times(1)).searchCreditFacilityTypes();
+    verify(creditFacilityTypeService).searchCreditFacilityTypes();
   }
 
   @Test
@@ -283,7 +283,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Error retrieving documents"));
 
-    verify(creditFacilityTypeService, times(1)).searchCreditFacilityTypes();
+    verify(creditFacilityTypeService).searchCreditFacilityTypes();
   }
 
   /** getCreditFacilityTypeTempList* */
@@ -307,7 +307,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(
             jsonPath("$.response[0].approveStatus").value(MasterDataApproveStatus.PENDING.name()));
 
-    verify(creditFacilityTypeService, times(1)).findAllCreditFacilityTypeTempList();
+    verify(creditFacilityTypeService).findAllCreditFacilityTypeTempList();
   }
 
   @Test
@@ -320,7 +320,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Error retrieving documents"));
 
-    verify(creditFacilityTypeService, times(1)).findAllCreditFacilityTypeTempList();
+    verify(creditFacilityTypeService).findAllCreditFacilityTypeTempList();
   }
 
   /** getCreditFacilityTypeId* */
@@ -340,7 +340,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(
             jsonPath("$.response.approveStatus").value(MasterDataApproveStatus.APPROVED.name()));
 
-    verify(creditFacilityTypeService, times(1)).findCreditFacilityTypeByID(1);
+    verify(creditFacilityTypeService).findCreditFacilityTypeByID(1);
   }
 
   @Test
@@ -353,7 +353,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Not found"));
 
-    verify(creditFacilityTypeService, times(1)).findCreditFacilityTypeByID(1);
+    verify(creditFacilityTypeService).findCreditFacilityTypeByID(1);
   }
 
   /** deleteCreditFacilityTypeTemp* */
@@ -373,7 +373,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(jsonPath("$.message").value("DELETED"))
         .andExpect(jsonPath("$.response").value(1));
 
-    verify(creditFacilityTypeService, times(1))
+    verify(creditFacilityTypeService)
         .deleteCreditFacilityTypeTemp(tempCreditFacilityType);
   }
 
@@ -390,7 +390,7 @@ class CreditFacilityTypeControllerTest {
                 .content(objectMapper.writeValueAsString(tempCreditFacilityType)))
         .andExpect(status().isBadRequest());
 
-    verify(creditFacilityTypeService, times(1))
+    verify(creditFacilityTypeService)
         .deleteCreditFacilityTypeTemp(tempCreditFacilityType);
   }
 
@@ -413,7 +413,7 @@ class CreditFacilityTypeControllerTest {
         .andExpect(jsonPath("$.message").value("Success"))
         .andExpect(jsonPath("$.response.creditFacilityTypeID").value(1));
 
-    verify(creditFacilityTypeService, times(1))
+    verify(creditFacilityTypeService)
         .updateApprovedCreditFacilityType(eq(1), any(CreditFacilityTypeDTO.class));
   }
 
@@ -430,7 +430,7 @@ class CreditFacilityTypeControllerTest {
                 .content(objectMapper.writeValueAsString(tempCreditFacilityType)))
         .andExpect(status().isBadRequest());
 
-    verify(creditFacilityTypeService, times(1))
+    verify(creditFacilityTypeService)
         .updateApprovedCreditFacilityType(eq(1), any(CreditFacilityTypeDTO.class));
   }
 }

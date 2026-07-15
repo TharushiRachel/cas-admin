@@ -21,13 +21,15 @@ import lk.sampath.casadminportalms.service.impl.CommitteeTypeServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@ExtendWith(MockitoExtension.class)
 class CommitteeTypeServiceImplTest {
 
   @Mock CommitteeTypeRepository committeeTypeRepository;
@@ -42,8 +44,6 @@ class CommitteeTypeServiceImplTest {
 
   @BeforeEach
   void setup() {
-    MockitoAnnotations.openMocks(this);
-
     UserContext.setUsername("unit.test.user");
     UserContext.setDisplayName("Unit Test User");
 
@@ -88,7 +88,7 @@ class CommitteeTypeServiceImplTest {
     assertEquals(committeeType.getCommitteeTypeId(), resultList.get(0).getCommitteeTypeId());
     assertEquals(committeeType.getCommitteeTypeName(), resultList.get(0).getCommitteeType());
 
-    verify(committeeTypeRepository, times(1)).findAll();
+    verify(committeeTypeRepository).findAll();
   }
 
   @Test
@@ -106,7 +106,7 @@ class CommitteeTypeServiceImplTest {
     List<CommitteeTypeDTO> resultList = (List<CommitteeTypeDTO>) response.getBody().getResponse();
     assertTrue(resultList.isEmpty());
 
-    verify(committeeTypeRepository, times(1)).findAll();
+    verify(committeeTypeRepository).findAll();
   }
 
   @Test
@@ -130,7 +130,7 @@ class CommitteeTypeServiceImplTest {
     assertEquals("BCC", resultList.get(0).getCommitteeType());
     assertEquals("MCC", resultList.get(1).getCommitteeType());
 
-    verify(committeeTypeRepository, times(1)).findAll();
+    verify(committeeTypeRepository).findAll();
   }
 
   @Test
@@ -146,7 +146,7 @@ class CommitteeTypeServiceImplTest {
 
     assertEquals("Failed to retrieve committee types", exception.getMessage());
 
-    verify(committeeTypeRepository, times(1)).findAll();
+    verify(committeeTypeRepository).findAll();
   }
 
   @Test
@@ -186,9 +186,9 @@ class CommitteeTypeServiceImplTest {
     assertNotNull(response.getBody());
     assertTrue(response.getBody().getSuccess());
 
-    verify(committeeTypeRepository, times(1)).findByCommitteeType("bcc");
-    verify(committeeTypeRepository, times(1)).save(any(CommitteeType.class));
-    verify(committeeTypeAudRepository, times(1)).save(any(CommitteeTypeAud.class));
+    verify(committeeTypeRepository).findByCommitteeType("bcc");
+    verify(committeeTypeRepository).save(any(CommitteeType.class));
+    verify(committeeTypeAudRepository).save(any(CommitteeTypeAud.class));
   }
 
   @Test
@@ -219,7 +219,7 @@ class CommitteeTypeServiceImplTest {
 
     committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
 
-    verify(committeeTypeRepository, times(1)).findByCommitteeType("bcc");
+    verify(committeeTypeRepository).findByCommitteeType("bcc");
   }
 
   @Test
@@ -232,7 +232,7 @@ class CommitteeTypeServiceImplTest {
     committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
 
     ArgumentCaptor<CommitteeType> captor = ArgumentCaptor.forClass(CommitteeType.class);
-    verify(committeeTypeRepository, times(1)).save(captor.capture());
+    verify(committeeTypeRepository).save(captor.capture());
     CommitteeType captured = captor.getValue();
 
     assertEquals(committeeTypeDTO.getCommitteeType(), captured.getCommitteeTypeName());
@@ -257,7 +257,7 @@ class CommitteeTypeServiceImplTest {
     committeeTypeServiceImpl.saveCommitteeType(committeeTypeDTO);
 
     ArgumentCaptor<CommitteeTypeAud> auditCaptor = ArgumentCaptor.forClass(CommitteeTypeAud.class);
-    verify(committeeTypeAudRepository, times(1)).save(auditCaptor.capture());
+    verify(committeeTypeAudRepository).save(auditCaptor.capture());
     CommitteeTypeAud capturedAudit = auditCaptor.getValue();
 
     assertEquals(5, capturedAudit.getCommitteeTypeId());
@@ -302,9 +302,9 @@ class CommitteeTypeServiceImplTest {
     assertNotNull(response.getBody());
     assertTrue(response.getBody().getSuccess());
 
-    verify(committeeTypeRepository, times(1)).findById(1);
-    verify(committeeTypeRepository, times(1)).save(any(CommitteeType.class));
-    verify(committeeTypeAudRepository, times(1)).save(any(CommitteeTypeAud.class));
+    verify(committeeTypeRepository).findById(1);
+    verify(committeeTypeRepository).save(any(CommitteeType.class));
+    verify(committeeTypeAudRepository).save(any(CommitteeTypeAud.class));
   }
 
   @Test
@@ -340,7 +340,7 @@ class CommitteeTypeServiceImplTest {
     committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
 
     ArgumentCaptor<CommitteeType> captor = ArgumentCaptor.forClass(CommitteeType.class);
-    verify(committeeTypeRepository, times(1)).save(captor.capture());
+    verify(committeeTypeRepository).save(captor.capture());
     CommitteeType captured = captor.getValue();
 
     assertEquals("Updated Name", captured.getCommitteeTypeName());
@@ -362,7 +362,7 @@ class CommitteeTypeServiceImplTest {
     committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
 
     ArgumentCaptor<CommitteeTypeAud> auditCaptor = ArgumentCaptor.forClass(CommitteeTypeAud.class);
-    verify(committeeTypeAudRepository, times(1)).save(auditCaptor.capture());
+    verify(committeeTypeAudRepository).save(auditCaptor.capture());
     CommitteeTypeAud capturedAudit = auditCaptor.getValue();
 
     assertEquals(1, capturedAudit.getCommitteeTypeId());
@@ -382,7 +382,7 @@ class CommitteeTypeServiceImplTest {
     committeeTypeServiceImpl.updateCommitteeType(committeeTypeDTO);
 
     ArgumentCaptor<CommitteeType> captor = ArgumentCaptor.forClass(CommitteeType.class);
-    verify(committeeTypeRepository, times(1)).save(captor.capture());
+    verify(committeeTypeRepository).save(captor.capture());
 
     assertEquals(AppsConstants.Status.RMV, captor.getValue().getStatus());
   }

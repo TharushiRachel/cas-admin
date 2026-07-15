@@ -64,7 +64,7 @@ class WorkflowTemplateControllerTest {
         .perform(get("/api/workflowTemplate/getAllApprovedUPMGroups"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.response").isArray());
-    verify(workflowTemplateService, times(1)).getAllApprovedUPMGroups();
+    verify(workflowTemplateService).getAllApprovedUPMGroups();
   }
 
   @Test
@@ -80,7 +80,7 @@ class WorkflowTemplateControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(workflowTemplateDTO)))
         .andExpect(status().isOk());
-    verify(workflowTemplateService, times(1)).saveOrUpdateTempWorkflowTemplate(workflowTemplateDTO);
+    verify(workflowTemplateService).saveOrUpdateTempWorkflowTemplate(workflowTemplateDTO);
   }
 
   @Test
@@ -100,7 +100,7 @@ class WorkflowTemplateControllerTest {
                 .param("pageNo", "0")
                 .param("pageSize", "5"))
         .andExpect(status().isOk());
-    verify(workflowTemplateService, times(1)).getTempWorkflowTemplate(pageNo, pageSize);
+    verify(workflowTemplateService).getTempWorkflowTemplate(pageNo, pageSize);
   }
 
   @Test
@@ -116,7 +116,7 @@ class WorkflowTemplateControllerTest {
                 .param("pageNo", "0")
                 .param("pageSize", "5"))
         .andExpect(status().isOk());
-    verify(workflowTemplateService, times(1)).getWorkflowTemplate(pageNo, pageSize);
+    verify(workflowTemplateService).getWorkflowTemplate(pageNo, pageSize);
   }
 
   @Test
@@ -135,6 +135,6 @@ class WorkflowTemplateControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(approveRejectRQ)))
         .andExpect(status().isOk());
-    verify(workflowTemplateService, times(1)).authorizeWorkflowTemplateTemp(approveRejectRQ);
+    verify(workflowTemplateService).authorizeWorkflowTemplateTemp(approveRejectRQ);
   }
 }

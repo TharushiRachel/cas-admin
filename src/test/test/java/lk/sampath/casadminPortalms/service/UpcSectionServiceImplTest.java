@@ -22,7 +22,9 @@ import lk.sampath.casadminportalms.repository.upcsection.UpcSectionTempRepositor
 import lk.sampath.casadminportalms.service.impl.UpcSectionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +32,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@ExtendWith(MockitoExtension.class)
 class UpcSectionServiceImplTest {
 
   @Mock private UpcSectionTempRepository upcSectionTempRepository;
@@ -52,7 +55,6 @@ class UpcSectionServiceImplTest {
 
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
 
     pageable = PageRequest.of(0, 10);
 
@@ -147,7 +149,7 @@ class UpcSectionServiceImplTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(ErrorEnums.SUCCESS_CODE.getStatus(), response.getBody().getSuccess());
-    verify(upcSectionTempRepository, times(1)).findAll(customPageable);
+    verify(upcSectionTempRepository).findAll(customPageable);
   }
 
   /** Test cases for findUpcSectionTempByID() * */
@@ -222,7 +224,7 @@ class UpcSectionServiceImplTest {
 
     upcSectionService.findUpcSectionTempByID(upcSectionID);
 
-    verify(upcSectionTempRepository, times(1)).findById(upcSectionID);
+    verify(upcSectionTempRepository).findById(upcSectionID);
   }
 
   /** Test cases for findAllApprovedUpcSection() * */
@@ -316,7 +318,7 @@ class UpcSectionServiceImplTest {
 
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(upcSectionRepository, times(1)).findAll(customPageable);
+    verify(upcSectionRepository).findAll(customPageable);
   }
 
   /** Test cases for findApprovedUpcSectionByID() * */
@@ -391,7 +393,7 @@ class UpcSectionServiceImplTest {
 
     upcSectionService.findApprovedUpcSectionByID(upcSectionID);
 
-    verify(upcSectionRepository, times(1)).findById(upcSectionID);
+    verify(upcSectionRepository).findById(upcSectionID);
   }
 
   /** Test cases for saveUpcSectionTemp() * */
@@ -494,7 +496,7 @@ class UpcSectionServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
 
     ArgumentCaptor<UpcSectionTemp> captor = ArgumentCaptor.forClass(UpcSectionTemp.class);
-    verify(upcSectionTempRepository, times(1)).saveAndFlush(captor.capture());
+    verify(upcSectionTempRepository).saveAndFlush(captor.capture());
 
     UpcSectionTemp captured = captor.getValue();
     assertEquals(5, captured.getUpcSectionID());
@@ -737,7 +739,7 @@ class UpcSectionServiceImplTest {
     upcSectionService.updateApprovedUpcSection(upcSectionID, upcSectionDTO);
 
     ArgumentCaptor<UpcSectionTemp> captor = ArgumentCaptor.forClass(UpcSectionTemp.class);
-    verify(upcSectionTempRepository, times(1)).saveAndFlush(captor.capture());
+    verify(upcSectionTempRepository).saveAndFlush(captor.capture());
 
     UpcSectionTemp captured = captor.getValue();
     assertEquals(upcSectionID, captured.getUpcSectionID());
@@ -894,7 +896,7 @@ class UpcSectionServiceImplTest {
     upcSectionService.updateUpcSectionTemp(upcSectionID, upcSectionDTO);
 
     ArgumentCaptor<UpcSectionTemp> captor = ArgumentCaptor.forClass(UpcSectionTemp.class);
-    verify(upcSectionTempRepository, times(1)).saveAndFlush(captor.capture());
+    verify(upcSectionTempRepository).saveAndFlush(captor.capture());
 
     UpcSectionTemp captured = captor.getValue();
     assertEquals("Updated Section", captured.getUpcSectionName());
@@ -960,7 +962,7 @@ class UpcSectionServiceImplTest {
 
     upcSectionService.deleteUpcSectionFormTemp(upcSectionID);
 
-    verify(upcSectionTempRepository, times(1)).deleteById(upcSectionID);
+    verify(upcSectionTempRepository).deleteById(upcSectionID);
   }
 
   @Test
@@ -992,8 +994,8 @@ class UpcSectionServiceImplTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(upcSectionTempRepository, times(1)).delete(upcSectionTemp);
-    verify(upcSectionRepository, times(1)).saveAndFlush(any(UpcSection.class));
+    verify(upcSectionTempRepository).delete(upcSectionTemp);
+    verify(upcSectionRepository).saveAndFlush(any(UpcSection.class));
   }
 
   @Test
@@ -1012,8 +1014,8 @@ class UpcSectionServiceImplTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    verify(upcSectionTempRepository, times(1)).delete(upcSectionTemp);
-    verify(upcSectionRepository, times(1)).saveAndFlush(upcSection);
+    verify(upcSectionTempRepository).delete(upcSectionTemp);
+    verify(upcSectionRepository).saveAndFlush(upcSection);
   }
 
   @Test
@@ -1038,11 +1040,11 @@ class UpcSectionServiceImplTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
 
-    verify(upcSectionTempRepository, times(1)).findById(approveRejectRQ.getApproveRejectDataID());
-    verify(upcSectionAudRepository, times(1)).save(any(UpcSectionAud.class));
+    verify(upcSectionTempRepository).findById(approveRejectRQ.getApproveRejectDataID());
+    verify(upcSectionAudRepository).save(any(UpcSectionAud.class));
 
     ArgumentCaptor<UpcSectionAud> auditCaptor = ArgumentCaptor.forClass(UpcSectionAud.class);
-    verify(upcSectionAudRepository, times(1)).save(auditCaptor.capture());
+    verify(upcSectionAudRepository).save(auditCaptor.capture());
 
     UpcSectionAud capturedAudit = auditCaptor.getValue();
 
@@ -1104,7 +1106,7 @@ class UpcSectionServiceImplTest {
 
     upcSectionService.approvedActiveList();
 
-    verify(upcSectionRepository, times(1))
+    verify(upcSectionRepository)
             .findByStatusAndApproveStatus(Status.ACT, MasterDataApproveStatus.APPROVED);
   }
 

@@ -27,13 +27,15 @@ import lk.sampath.casadminportalms.service.impl.DeviationServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@ExtendWith(MockitoExtension.class)
 class DeviationServiceImplTest {
 
     @Mock private DeviationTypeRepository deviationTypeRepository;
@@ -60,8 +62,6 @@ class DeviationServiceImplTest {
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
-
         UserContext.setUsername("testUser");
 
         deviationType = new DeviationType();
@@ -127,7 +127,7 @@ class DeviationServiceImplTest {
         assertEquals("Documentation Deviation", saved.getDeviationType());
 
         verify(deviationTypeRepository, never()).findById(any());
-        verify(deviationTypeRepository, times(1)).save(any(DeviationType.class));
+        verify(deviationTypeRepository).save(any(DeviationType.class));
     }
 
     @Test
@@ -140,7 +140,7 @@ class DeviationServiceImplTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(deviationTypeRepository, never()).findById(any());
-        verify(deviationTypeRepository, times(1)).save(any(DeviationType.class));
+        verify(deviationTypeRepository).save(any(DeviationType.class));
     }
 
     @Test
@@ -157,9 +157,9 @@ class DeviationServiceImplTest {
         assertEquals("Updated Deviation Type", saved.getDeviationType());
 
         ArgumentCaptor<DeviationType> captor = ArgumentCaptor.forClass(DeviationType.class);
-        verify(deviationTypeRepository, times(1)).save(captor.capture());
+        verify(deviationTypeRepository).save(captor.capture());
         assertNotNull(captor.getValue().getLastModifiedDate());
-        verify(deviationTypeRepository, times(1)).findById(1);
+        verify(deviationTypeRepository).findById(1);
     }
 
     @Test
@@ -218,7 +218,7 @@ class DeviationServiceImplTest {
         List<DeviationTypeDTO> list = (List<DeviationTypeDTO>) response.getBody().getResponse();
         assertEquals(1, list.size());
         assertEquals(deviationType.getDeviationType(), list.get(0).getDeviationType());
-        verify(deviationTypeRepository, times(1)).findAll();
+        verify(deviationTypeRepository).findAll();
     }
 
     @Test
@@ -233,7 +233,7 @@ class DeviationServiceImplTest {
         List<DeviationTypeDTO> list = (List<DeviationTypeDTO>) response.getBody().getResponse();
         assertNotNull(list);
         assertTrue(list.isEmpty());
-        verify(deviationTypeRepository, times(1)).findAll();
+        verify(deviationTypeRepository).findAll();
     }
 
     @Test
@@ -268,7 +268,7 @@ class DeviationServiceImplTest {
 
         deviationService.getAllDeviationTypes();
 
-        verify(deviationTypeRepository, times(1)).findAll();
+        verify(deviationTypeRepository).findAll();
         verifyNoMoreInteractions(deviationTypeRepository);
     }
 
@@ -284,7 +284,7 @@ class DeviationServiceImplTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         DeviationTypeDTO dto = (DeviationTypeDTO) response.getBody().getResponse();
         assertEquals(deviationType.getDeviationType(), dto.getDeviationType());
-        verify(deviationTypeRepository, times(1)).findById(1);
+        verify(deviationTypeRepository).findById(1);
     }
 
     @Test
@@ -304,7 +304,7 @@ class DeviationServiceImplTest {
 
         deviationService.getDeviationTypeById(1);
 
-        verify(deviationTypeRepository, times(1)).findById(1);
+        verify(deviationTypeRepository).findById(1);
     }
 
     @Test
@@ -345,8 +345,8 @@ class DeviationServiceImplTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         DeviationDTO saved = (DeviationDTO) response.getBody().getResponse();
         assertEquals(10, saved.getDeviationId());
-        verify(deviationTempRepository, times(1)).getCurrentSequenceValue();
-        verify(deviationTempRepository, times(1)).save(any(TempDeviation.class));
+        verify(deviationTempRepository).getCurrentSequenceValue();
+        verify(deviationTempRepository).save(any(TempDeviation.class));
     }
 
     @Test
@@ -358,7 +358,7 @@ class DeviationServiceImplTest {
                 deviationService.saveOrUpdateDeviation(deviationDTO);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(deviationTempRepository, times(1)).getCurrentSequenceValue();
+        verify(deviationTempRepository).getCurrentSequenceValue();
         verify(deviationTempRepository, never()).findById(any());
     }
 
@@ -376,7 +376,7 @@ class DeviationServiceImplTest {
         assertEquals("Updated description", saved.getDescription());
 
         ArgumentCaptor<TempDeviation> captor = ArgumentCaptor.forClass(TempDeviation.class);
-        verify(deviationTempRepository, times(1)).save(captor.capture());
+        verify(deviationTempRepository).save(captor.capture());
         assertNotNull(captor.getValue().getLastModifiedDate());
         verify(deviationTempRepository, never()).getCurrentSequenceValue();
     }
@@ -480,9 +480,9 @@ class DeviationServiceImplTest {
         assertFalse(dto.isTempRecord());
 
         ArgumentCaptor<Deviation> captor = ArgumentCaptor.forClass(Deviation.class);
-        verify(deviationRepository, times(1)).save(captor.capture());
+        verify(deviationRepository).save(captor.capture());
         assertEquals(1, captor.getValue().getDeviationId());
-        verify(deviationTempRepository, times(1)).delete(tempDeviation);
+        verify(deviationTempRepository).delete(tempDeviation);
     }
 
     @Test
@@ -497,8 +497,8 @@ class DeviationServiceImplTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(deviationRepository, times(1)).save(deviation);
-        verify(deviationTempRepository, times(1)).delete(tempDeviation);
+        verify(deviationRepository).save(deviation);
+        verify(deviationTempRepository).delete(tempDeviation);
     }
 
     @Test
@@ -514,7 +514,7 @@ class DeviationServiceImplTest {
         DeviationDTO dto = (DeviationDTO) response.getBody().getResponse();
         assertTrue(dto.isTempRecord());
 
-        verify(deviationAudRepository, times(1)).save(any(DeviationAud.class));
+        verify(deviationAudRepository).save(any(DeviationAud.class));
         verify(deviationRepository, never()).save(any(Deviation.class));
         verify(deviationTempRepository, never()).delete(any(TempDeviation.class));
     }
@@ -542,7 +542,7 @@ class DeviationServiceImplTest {
         deviationService.approveOrRejectDeviation(approveRejectRQ);
 
         ArgumentCaptor<DeviationAud> captor = ArgumentCaptor.forClass(DeviationAud.class);
-        verify(deviationAudRepository, times(1)).save(captor.capture());
+        verify(deviationAudRepository).save(captor.capture());
         DeviationAud audit = captor.getValue();
         assertEquals(tempDeviation.getDeviationId(), audit.getDeviationId());
         assertEquals(tempDeviation.getDeviationType(), audit.getDeviationType());
@@ -560,7 +560,7 @@ class DeviationServiceImplTest {
         deviationService.approveOrRejectDeviation(approveRejectRQ);
 
         ArgumentCaptor<TempDeviation> captor = ArgumentCaptor.forClass(TempDeviation.class);
-        verify(deviationTempRepository, times(1)).save(captor.capture());
+        verify(deviationTempRepository).save(captor.capture());
         assertEquals("testUser", captor.getValue().getApprovedBy());
         assertNotNull(captor.getValue().getApprovedDate());
         assertEquals(MasterDataApproveStatus.APPROVED, captor.getValue().getApproveStatus());
@@ -581,7 +581,7 @@ class DeviationServiceImplTest {
         DeviationDTO dto = (DeviationDTO) response.getBody().getResponse();
         assertTrue(dto.isTempRecord());
         assertEquals(deviationDTO.getDescription(), dto.getDescription());
-        verify(deviationTempRepository, times(1)).saveAndFlush(any(TempDeviation.class));
+        verify(deviationTempRepository).saveAndFlush(any(TempDeviation.class));
     }
 
     @Test
@@ -638,8 +638,8 @@ class DeviationServiceImplTest {
 
         deviationService.updateApprovedDiversion(deviationDTO);
 
-        verify(deviationRepository, times(1)).findById(1);
-        verify(deviationTempRepository, times(1)).saveAndFlush(any(TempDeviation.class));
+        verify(deviationRepository).findById(1);
+        verify(deviationTempRepository).saveAndFlush(any(TempDeviation.class));
     }
 
     /** getAllDeviationTempList * */
@@ -654,7 +654,7 @@ class DeviationServiceImplTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         List<DeviationDTO> list = (List<DeviationDTO>) response.getBody().getResponse();
         assertEquals(1, list.size());
-        verify(deviationTempRepository, times(1)).findAll();
+        verify(deviationTempRepository).findAll();
     }
 
     @Test
@@ -701,7 +701,7 @@ class DeviationServiceImplTest {
 
         deviationService.getAllDeviationTempList();
 
-        verify(deviationTempRepository, times(1)).findAll();
+        verify(deviationTempRepository).findAll();
     }
 
     /** getDeviationTempById * */
@@ -736,7 +736,7 @@ class DeviationServiceImplTest {
 
         deviationService.getDeviationTempById(1);
 
-        verify(deviationTempRepository, times(1)).findById(1);
+        verify(deviationTempRepository).findById(1);
     }
 
     @Test
@@ -776,7 +776,7 @@ class DeviationServiceImplTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         List<DeviationDTO> list = (List<DeviationDTO>) response.getBody().getResponse();
         assertEquals(1, list.size());
-        verify(deviationRepository, times(1)).findAll();
+        verify(deviationRepository).findAll();
     }
 
     @Test
@@ -823,7 +823,7 @@ class DeviationServiceImplTest {
 
         deviationService.getAllDeviationMasterList();
 
-        verify(deviationRepository, times(1)).findAll();
+        verify(deviationRepository).findAll();
     }
 
     /** getDeviationMasterById * */
@@ -858,7 +858,7 @@ class DeviationServiceImplTest {
 
         deviationService.getDeviationMasterById(1);
 
-        verify(deviationRepository, times(1)).findById(1);
+        verify(deviationRepository).findById(1);
     }
 
     @Test

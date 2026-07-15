@@ -20,10 +20,11 @@ import lk.sampath.casadminportalms.repository.creditfacilitytype.CreditFacilityT
 import lk.sampath.casadminportalms.service.impl.CreditFacilityTypeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,6 +37,7 @@ import org.springframework.scheduling.TaskScheduler;
 /**
  * @author yomesh
  */
+@ExtendWith(MockitoExtension.class)
 class CreditFacilityTypeServiceImplTest {
 
   @Mock private CreditFacilityTypeTempRepository creditFacilityTypeTempRepository;
@@ -62,7 +64,6 @@ class CreditFacilityTypeServiceImplTest {
 
   @BeforeEach
   void setup() {
-    MockitoAnnotations.openMocks(this);
 
     tempCreditFacilityTypeDTO = new CreditFacilityTypeDTO();
     tempCreditFacilityTypeDTO.setCreditFacilityTypeID(1);
@@ -259,7 +260,7 @@ class CreditFacilityTypeServiceImplTest {
     assertEquals(creditFacilityTypeTemp.getApproveStatus(), responseDto.getApproveStatus());
     assertEquals(creditFacilityTypeTemp.getStatus(), responseDto.getStatus());
 
-    verify(creditFacilityTypeTempRepository, times(1)).findById(30);
+    verify(creditFacilityTypeTempRepository).findById(30);
   }
 
   @Test
@@ -545,11 +546,11 @@ class CreditFacilityTypeServiceImplTest {
     CreditFacilityTypeDTO resDTO = (CreditFacilityTypeDTO) (response.getBody().getResponse());
     assertEquals("Loan", resDTO.getFacilityTypeName());
 
-    verify(creditFacilityTypeAudRepository, times(1)).save(any(CreditFacilityTypeAud.class));
+    verify(creditFacilityTypeAudRepository).save(any(CreditFacilityTypeAud.class));
 
     ArgumentCaptor<CreditFacilityTypeAud> auditCaptor =
             ArgumentCaptor.forClass(CreditFacilityTypeAud.class);
-    verify(creditFacilityTypeAudRepository, times(1)).save(auditCaptor.capture());
+    verify(creditFacilityTypeAudRepository).save(auditCaptor.capture());
 
     CreditFacilityTypeAud capturedAudit = auditCaptor.getValue();
 
@@ -882,7 +883,7 @@ class CreditFacilityTypeServiceImplTest {
 
     creditFacilityTypeService.searchCreditFacilityTypes(pageable);
 
-    verify(creditFacilityTypeRepository, times(1)).findAll(pageable);
+    verify(creditFacilityTypeRepository).findAll(pageable);
   }
 
   @Test
@@ -965,8 +966,8 @@ class CreditFacilityTypeServiceImplTest {
 
     creditFacilityTypeService.findCreditFacilityTypeByID(30);
 
-    verify(creditFacilityTypeRepository, times(1)).findById(30);
-    verify(modelMapper, times(1)).map(creditFacilityType, CreditFacilityTypeDTO.class);
+    verify(creditFacilityTypeRepository).findById(30);
+    verify(modelMapper).map(creditFacilityType, CreditFacilityTypeDTO.class);
   }
 
   @Test
@@ -1061,7 +1062,7 @@ class CreditFacilityTypeServiceImplTest {
 
     creditFacilityTypeService.findAllCreditFacilityTypeTempList(pageable);
 
-    verify(creditFacilityTypeTempRepository, times(1)).findAll(pageable);
+    verify(creditFacilityTypeTempRepository).findAll(pageable);
   }
 
   @Test
@@ -1106,7 +1107,7 @@ class CreditFacilityTypeServiceImplTest {
     Integer responseDTO = (Integer) response.getBody().getResponse();
     assertEquals(1, responseDTO);
 
-    verify(creditFacilityTypeTempRepository, times(1)).deleteById(1);
+    verify(creditFacilityTypeTempRepository).deleteById(1);
   }
 
   @Test
@@ -1163,7 +1164,7 @@ class CreditFacilityTypeServiceImplTest {
     Integer responseId = (Integer) Objects.requireNonNull(response.getBody()).getResponse();
     assertEquals(77, responseId);
 
-    verify(creditFacilityTypeTempRepository, times(1)).deleteById(77);
+    verify(creditFacilityTypeTempRepository).deleteById(77);
     verify(creditFacilityTypeTempRepository, never()).deleteById(1);
   }
 
