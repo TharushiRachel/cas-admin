@@ -720,10 +720,8 @@ public class DaDesignationServiceImpl implements DaDesignationService {
                 .orElseThrow(() -> new ApiRequestException(
                         "DA Designation with id " + designationId + " does not exist"));
 
-        designation.setStatus(Status.INA);
-        designation.setModifiedBy(UserContext.getUsername());
-        designation.setModifiedDate(new Date());
-        designation = daDesignationMasterRepository.saveAndFlush(designation);
+        // DA_DESIGNATION (master) is never modified by delete; only pending DA_LIMITS_TEMP can be removed.
+        daLimitTempRepository.deleteByDesignationId(designationId);
 
         StandardResponse<DADesignationListDTO> response = new StandardResponse<>(
                 ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), new DADesignationListDTO(designation));
