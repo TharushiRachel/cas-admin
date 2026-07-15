@@ -51,7 +51,7 @@ public class DaDesignationController {
     }
 
     @GetMapping("/table/{designationId}")
-    public ResponseEntity<StandardResponse<DATableApprovalResponse>> getDaTableById(
+    public ResponseEntity<StandardResponse<DATableHeaderDTO>> getDaTableById(
             @PathVariable Integer designationId) throws ApiRequestException {
         return daDesignationService.getDaTableById(designationId);
     }

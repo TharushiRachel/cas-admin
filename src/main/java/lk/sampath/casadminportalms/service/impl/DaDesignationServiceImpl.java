@@ -678,7 +678,7 @@ public class DaDesignationServiceImpl implements DaDesignationService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<StandardResponse<DATableApprovalResponse>> getDaTableById(Integer designationId)
+    public ResponseEntity<StandardResponse<DATableHeaderDTO>> getDaTableById(Integer designationId)
             throws ApiRequestException {
         log.info("START : DaDesignationServiceImpl | getDaTableById | designationId={}", designationId);
 
@@ -686,21 +686,33 @@ public class DaDesignationServiceImpl implements DaDesignationService {
             throw new ApiRequestException("designationId cannot be null");
         }
 
-        DADesignationData designation = daDesignationMasterRepository.findById(designationId)
+        daDesignationMasterRepository.findById(designationId)
                 .orElseThrow(() -> new ApiRequestException(
                         "DA Designation with id " + designationId + " does not exist"));
 
-        List<DADesignationData> designations = Collections.singletonList(designation);
+        DATableHeaderDTO headers = buildHeaderResponse();
+        Map<Integer, DATableHeadingResponse> committeeLeaves = indexLeafHeaders(headers.getCommitteeTableHeaders());
+        Map<Integer, DATableHeadingResponse> individualLeaves = indexLeafHeaders(headers.getIndividualTableHeaders());
 
-        DATableApprovalResponse approvalResponse = new DATableApprovalResponse();
-        approvalResponse.setApproved(buildTableData(designations, true, this::loadApprovedValues));
-        approvalResponse.setPending(buildTableData(designations, true, this::loadPendingValues));
-        populateDesignationLists(approvalResponse, designations);
+        String committeeFlag = AppsConstants.YesNo.Y.name();
+        String individualFlag = AppsConstants.YesNo.N.name();
 
-        StandardResponse<DATableApprovalResponse> response =
-                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), approvalResponse);
+        putDesignationValuesOnHeaders(committeeLeaves, designationId, loadValuesPreferApproved(designationId, committeeFlag));
+        putDesignationValuesOnHeaders(individualLeaves, designationId, loadValuesPreferApproved(designationId, individualFlag));
+
+        StandardResponse<DATableHeaderDTO> response =
+                new StandardResponse<>(ErrorEnums.SUCCESS_CODE.getStatus(), ErrorEnums.SUCCESS_CODE.getLabel(), headers);
         log.info("END : getDaTableById | designationId={}", designationId);
         return ResponseEntity.ok(response);
+    }
+
+    /** DA_LIMITS (approved) values if present for this designation/table; otherwise DA_LIMITS_TEMP (pending) values. */
+    private Map<Integer, Double> loadValuesPreferApproved(Integer designationId, String isCommittee) {
+        Map<Integer, Double> approvedValues = loadApprovedValues(designationId, isCommittee);
+        if (!approvedValues.isEmpty()) {
+            return approvedValues;
+        }
+        return loadPendingValues(designationId, isCommittee);
     }
 
     /**
